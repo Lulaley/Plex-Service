@@ -1,12 +1,12 @@
 from flask import Flask
-from routes import auth
+from routes import login
 from static import Controleur
 # Importez d'autres Blueprints ici
 
 app = Flask(__name__)
 
 # Enregistrez les Blueprints
-app.register_blueprint(auth)
+app.register_blueprint(login)
 # Enregistrez d'autres Blueprints ici
 
 @app.route('/')
