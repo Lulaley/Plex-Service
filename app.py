@@ -1,5 +1,5 @@
 from flask import Flask
-from routes import login
+from routes import RouteLogin as login
 from static import Controleur
 # Importez d'autres Blueprints ici
 
