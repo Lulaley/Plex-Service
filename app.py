@@ -5,7 +5,7 @@
 #sys.path.append(chemin_static)
 
 from flask import Flask
-from routes.RouteLogin import login
+from .routes.RouteLogin import login
 # Importez d'autres Blueprints ici
 
 app = Flask(__name__)
