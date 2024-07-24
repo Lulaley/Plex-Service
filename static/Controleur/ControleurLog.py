@@ -1,4 +1,4 @@
-from Controleur.ControleurConf import get_config
+from .ControleurConf import get_config
 import logging
 
 def write_log(message):
