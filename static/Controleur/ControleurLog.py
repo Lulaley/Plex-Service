@@ -1,10 +1,10 @@
-from .ControleurConf import get_config
+from .ControleurConf import ControleurConf
 import logging
 
 def write_log(message):
     # Get the configuration
-    log_file_path = get_config('log', 'file')
-    log_level = get_config('log', 'level')
+    log_file_path = ControleurConf.get_config('log', 'file')
+    log_level = ControleurConf.get_config('log', 'level')
 
     # Perform the log writing logic here
     try:
