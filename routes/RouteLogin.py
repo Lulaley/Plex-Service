@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from ControleurLdap import ControleurLdap
+from static.Controleur.ControleurLdap import ControleurLdap
 
 login = Blueprint('auth', __name__)
 
