@@ -1,5 +1,5 @@
 import ldap
-from ControleurConf import ControleurConf
+from .ControleurConf import ControleurConf
 
 class ControleurLdap:
     def __init__(self):
