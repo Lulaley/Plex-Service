@@ -8,8 +8,8 @@
     <style>
         body {
             background-color: #ff8c00; /* Orange sombre */
-            color: white;
-            font-family: Arial, sans-serif;
+            color: #e5a00d; /* Couleur similaire à celle utilisée sur plex.com */
+            font-family: Arial, sans-serif; /* Arial comme alternative */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -17,13 +17,13 @@
             margin: 0;
         }
          
-        img {
-            height: 50%;
-            width: 50%;
+        .plex-logo {
+            font-size: 4em; /* Ajustez la taille selon vos besoins */
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <img src="{{ url_for('static', filename='images/plex_bg.png') }}" alt="Plex Service">
+    <div class="plex-logo">PLEX</div>
 </body>
 </html>
