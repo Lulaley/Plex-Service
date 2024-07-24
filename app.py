@@ -1,3 +1,9 @@
+#import os
+#import sys
+#chemin_actuel = os.path.dirname(__file__)
+#chemin_static = os.path.join(chemin_actuel, '../static')
+#sys.path.append(chemin_static)
+
 from flask import Flask
 from routes.RouteLogin import login
 # Importez d'autres Blueprints ici
