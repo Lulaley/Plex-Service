@@ -1,5 +1,5 @@
 from flask import Blueprint, request, render_template, redirect, url_for
-from .models import Post  # Importation d'un modèle hypothétique Post
+from models import Post  # Importation d'un modèle hypothétique Post
 
 posts = Blueprint('posts', __name__)
 
