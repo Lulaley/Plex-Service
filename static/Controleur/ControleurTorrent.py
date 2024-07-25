@@ -1,23 +1,22 @@
-import libtorrent as lt
+import pybittorrent as lt
 import time
 import requests
 from Controleur.ControleurLog import write_log
 
 def download_torrent(torrent_file_path, save_path):
     ses = lt.session()
-    info = lt.torrent_info(torrent_file_path)
-    h = ses.add_torrent({'ti': info, 'save_path': save_path})
+    h = ses.add_torrent(torrent_file_path, save_path)
 
-    write_log('Téléchargement en cours : {}'.format(info.name()))
+    write_log('Téléchargement en cours : {}'.format(h.name()))
     while not h.is_seed():
         s = h.status()
         write_log('%.2f%% complet (téléchargement : %.1f kB/s, envoi : %.1f kB/s, pairs : %d) %s' % (
             s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000,
             s.num_peers, s.state))
-        send_download_info(info.name(), s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000, s.num_peers, s.state)
+        send_download_info(h.name(), s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000, s.num_peers, s.state)
         time.sleep(1)
 
-    write_log('{} terminé'.format(info.name()))
+    write_log('{} terminé'.format(h.name()))
 
     ses.remove_torrent(h)  # Stop seeding the torrent
 
