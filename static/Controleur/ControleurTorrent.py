@@ -1,6 +1,6 @@
 import time
 import requests
-from Controleur.ControleurLog import write_log
+from ControleurLog import write_log
 from pyBitTorrent import BTLT
 
 def download_torrent(torrent_file_path, save_path):
