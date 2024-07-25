@@ -1,7 +1,7 @@
 import time
 import requests
 from .ControleurLog import write_log
-from pyBitTorrent import BTLT
+import pybittorrent as BTLT
 
 def download_torrent(torrent_file_path, save_path):
     ses = BTLT.Session()
