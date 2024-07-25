@@ -1,10 +1,10 @@
-import pybittorrent as lt
 import time
 import requests
 from Controleur.ControleurLog import write_log
+from pyBitTorrent import BTLT
 
 def download_torrent(torrent_file_path, save_path):
-    ses = lt.session()
+    ses = BTLT.Session()
     h = ses.add_torrent(torrent_file_path, save_path)
 
     write_log('Téléchargement en cours : {}'.format(h.name()))
