@@ -31,7 +31,6 @@
 
         #login-form {
             display: none; /* Formulaire caché par défaut */
-            background-color: #444; /* Fond du formulaire */
             padding: 20px;
             border-radius: 5px;
             padding: 10px;
@@ -43,6 +42,11 @@
             padding: 10px;
             border: none;
             border-radius: 5px;
+        }
+
+        .submit-container {
+            display: flex;
+            justify-content: center;
         }
 
         input[type="submit"] {
@@ -63,7 +67,9 @@
         <form action="/login" method="post">
             <input type="text" name="username" placeholder="Nom d'utilisateur" required>
             <input type="password" name="password" placeholder="Mot de passe" required>
-            <input type="submit" value="Se connecter">
+            <div class="submit-container">
+                <input type="submit" value="Se connecter">
+            </div>
         </form>
     </div>
 
