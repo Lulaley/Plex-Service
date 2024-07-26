@@ -1,7 +1,16 @@
-dn: dc=fr
-objectClass: top
-objectClass: dcObject
-objectClass: country
-dc: fr
-c: fr
-description: France
+dn: olcDatabase={2}mdb,cn=config
+changetype: add
+objectClass: olcDatabaseConfig
+objectClass: olcMdbConfig
+olcDatabase: {2}mdb
+olcDbDirectory: /usr/local/var/base-fr
+olcSuffix: dc=fr
+olcRootDN: cn=admin,dc=fr
+olcRootPW: admin
+olcDbIndex: objectClass eq
+olcDbIndex: cn eq
+olcDbIndex: uid eq
+olcDbIndex: uidNumber eq
+olcDbIndex: gidNumber eq
+olcDbIndex: memberUid eq
+olcDbIndex: uniqueMember eq
