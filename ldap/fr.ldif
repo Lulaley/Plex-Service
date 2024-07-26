@@ -2,6 +2,6 @@ dn: dc=fr
 objectClass: top
 objectClass: dcObject
 objectClass: country
-cd: fr
+dc: fr
 c: fr
 description: France
