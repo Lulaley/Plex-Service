@@ -1,0 +1,7 @@
+dn: dc=fr
+objectClass: top
+objectClass: dcObject
+objectClass: country
+cd: fr
+c: fr
+description: France
