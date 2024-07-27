@@ -1,0 +1,48 @@
+apt-get install build-essential libssl-dev zlib1g-dev libwrap0-dev libltdl-dev groff groff-base libevent-dev libsasl2-dev libsystemd-dev
+mkdir /opt/src/
+/usr/sbin/groupadd ldap
+/usr/sbin/useradd -r -d /ldap -s /usr/sbin/nologin -g ldap ldap
+usermod -a -G ssl-cert ldap
+
+normalent je l'ai deja fait ça verifie au cas ou et si tu a quelque chose dans /ldap/base-fr tu suppr tout
+mkdir -p /ldap/base-fr
+chown -R ldap:ldap /ldap*
+
+
+mv /ton/chemin/du/tgz/openldap-2.6.8.tgz /opt/src/
+cd /opt/src/
+tar xzf openldap-2.6.8.tgz
+chown -R root:root /opt/src/openldap-2.6.8*
+cd /opt/src/openldap-2.6.8/
+export CFLAGS="-O2"
+./configure --prefix=/opt/openldap-2.6.8 --disable-ipv6 --enable-debug --enable-syslog --enable-slapd --enable-cleartext --enable-crypt --enable-wrappers --enable-backends=no --enable-overlays --with-tls --enable-mdb
+make depend
+make
+make install
+find /opt/openldap-2.6.8 -type d -exec chmod 755 {} \;
+
+prend le fichier slapd.service
+
+chown root:root /etc/systemd/system/slapd.service
+chmod 644 /etc/systemd/system/slapd.service
+systemctl daemon-reload
+systemctl enable slapd
+
+pose le fichier slapd.conf dans /opt/openldap-2.6.8/etc/openldap (il y est en a déjà un normalent donc modifi le)
+
+pour le mot de passe tu fait
+/opt/openldap-2.6.8/sbin/slappasswd -s ton_mot_de_passe
+ça va te sortir un {SSHA} que tu va devoir mettre dans le fichier slapd.conf a root_pw ça sera le mdp de ton compte de modfication
+
+chown -R ldap:root /opt/openldap-2.6.8*
+chmod 600 /opt/openldap-2.6.8/etc/openldap/*.conf
+chmod 644 /opt/openldap-2.6.8/etc/openldap/ldap.conf
+chmod 444 /opt/openldap-2.6.8/etc/openldap/schema/*
+
+créé le fichier si il faut
+ln -sfn /opt/openldap-2.6.8/etc/openldap/slapd.conf /etc/ldap/ldap.conf
+
+/opt/openldap-2.6.8/bin/ldapadd -x -D "cn=root,dc=chimae-world,dc=fr" -W -f fr.ldif
+il va te demande le mdp du compte root non crypte
+
+systemctl start slapd
