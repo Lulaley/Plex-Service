@@ -7,35 +7,35 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/plex-icon.png') }}">
     <style>
         body {
-            background-color: #313B45; /* Fond plus sombre pour contraster avec le texte blanc */
-            color: white; /* Texte blanc */
-            font-family: Arial, sans-serif; /* Arial comme alternative à Helvetica Neue */
+            background-color: #313B45;
+            color: white;
+            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            flex-direction: column; /* Pour empiler les éléments verticalement */
+            flex-direction: column;
         }
 
         .plex-logo {
-            margin-bottom: 20px; /* Espace entre le logo et le formulaire */
+            margin-bottom: 20px;
             display: flex;
             justify-content: center;
-            transition: transform 0.5s ease-in-out; /* Animation de montée du logo */
+            transition: transform 0.5s ease-in-out;
         }
 
         .plex-logo img {
-            width: 25%; /* Taille du logo */
-            cursor: pointer; /* Curseur de la souris en forme de main */
+            width: 25%;
+            cursor: pointer;
         }
 
         #login-form {
-            display: none; /* Formulaire caché par défaut */
+            display: none;
             padding: 20px;
             border-radius: 5px;
             padding: 10px;
-            opacity: 0; /* Initialement invisible */
+            opacity: 0;
         }
 
         input[type="text"], input[type="password"] {
@@ -44,15 +44,15 @@
             padding: 10px;
             border: none;
             border-radius: 5px;
-            opacity: 0; /* Initialement invisible */
-            transition: opacity 0.5s ease-in-out; /* Animation de l'apparition */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
         }
 
         .submit-container {
             display: flex;
             justify-content: center;
-            opacity: 0; /* Initialement invisible */
-            transition: opacity 0.5s ease-in-out; /* Animation de l'apparition */
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
         }
 
         input[type="submit"] {
@@ -62,6 +62,19 @@
             padding: 10px;
             border-radius: 5px;
             cursor: pointer;
+        }
+
+        /* Media queries pour rendre le formulaire responsive */
+        @media only screen and (max-width: 600px) {
+            .plex-logo img {
+                width: 50%;
+            }
+        }
+
+        @media only screen and (max-width: 400px) {
+            .plex-logo img {
+                width: 75%;
+            }
         }
     </style>
 </head>
@@ -87,22 +100,20 @@
             const inputs = form.querySelectorAll('input');
             const submitContainer = form.querySelector('.submit-container');
 
-            // Faire monter le logo
             logo.style.transform = 'translateY(-50px)';
 
-            // Afficher le formulaire avec une animation
             form.style.display = 'block';
             setTimeout(() => {
                 form.style.opacity = 1;
                 inputs.forEach((input, index) => {
                     setTimeout(() => {
                         input.style.opacity = 1;
-                    }, index * 500); // Délai pour chaque champ
+                    }, index * 500);
                 });
                 setTimeout(() => {
                     submitContainer.style.opacity = 1;
-                }, inputs.length * 500); // Délai pour le bouton de soumission
-            }, 500); // Délai pour l'affichage du formulaire
+                }, inputs.length * 500);
+            }, 500);
         }
     </script>
 </body>
