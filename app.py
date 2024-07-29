@@ -21,10 +21,12 @@ app.secret_key = conf.get_config('APP', 'secret_key')
 @app.route('/')
 def index():
     return render_template('index.html')
-
-login(app)
 register(app)
-logout(app)
+
+@app.route('/home')
+def home():
+    login(app)
+    return render_template('home.html')
 
 if __name__ == '__main__':
     app.run(debug=True, port=conf.get_config('APP', 'port'), host='0.0.0.0')
