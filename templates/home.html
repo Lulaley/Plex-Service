@@ -62,7 +62,15 @@
             aspect-ratio: 1;
             display:grid;
             -webkit-mask: conic-gradient(from 15deg,#0000,#000);
+        }
+        .dot1-container {
             animation: l26 1s infinite steps(12);
+        }
+        a.dot2-container {
+            animation: l27 1s infinite steps(12);
+        }
+         .dot3-container {
+            animation: l28 1s infinite steps(12);
         }
         .dot1-container,
         .dot1-container:before,
@@ -109,6 +117,12 @@
 
         @keyframes l26 {
             100% {transform:rotate(1turn)}
+        }
+        @keyframes l27 {
+            100% {transform:rotate(5turn)}
+        }
+        @keyframes l28 {
+            100% {transform:rotate(10turn)}
         }
     </style>
 </head>
