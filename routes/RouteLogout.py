@@ -7,4 +7,4 @@ def logout(app):
         session.pop('username', None)
         # Rediriger vers la page d'accueil
         app.index()
-        return redirect(url_for('index'))
+        #return redirect(url_for('index'))
