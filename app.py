@@ -11,8 +11,12 @@ from routes.RouteLogin import login
 from routes.RouteRegister import register
 from routes.RouteLogout import logout
 
-app = Flask(__name__)
+# Importation des controleurs
+from static.Controleur.ControleurConf import ControleurConf
 
+app = Flask(__name__)
+conf = ControleurConf()
+app.secret_key = conf.get_config('APP', 'secret_key')
 
 @app.route('/')
 def hello_world():
@@ -23,4 +27,4 @@ register(app)
 logout(app)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001, host='0.0.0.0')
+    app.run(debug=True, port=conf.get_config('APP', 'port'), host='0.0.0.0')
