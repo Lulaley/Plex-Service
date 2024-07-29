@@ -105,36 +105,55 @@
             </div>
         </form>
     </div>
+
     <script>
         function showButtons() {
             const logo = document.querySelector('.plex-logo');
             const buttons = document.getElementById('buttons');
-            const loginForm = document.getElementById('login-form');
 
             logo.style.transform = 'translateY(-50px)';
             buttons.style.display = 'block';
-            loginForm.style.display = 'block';
-
             setTimeout(() => {
                 buttons.style.opacity = 1;
-                loginForm.style.opacity = 1;
             }, 500);
         }
 
         function showLoginForm() {
-            const loginForm = document.getElementById('login-form');
-            const createForm = document.getElementById('create-form');
+            const form = document.getElementById('login-form');
+            const inputs = form.querySelectorAll('input');
+            const submitContainer = form.querySelector('.submit-container');
 
-            loginForm.style.display = 'block';
-            loginForm.style.opacity = 1;
+            form.style.display = 'block';
+            setTimeout(() => {
+                form.style.opacity = 1;
+                inputs.forEach((input, index) => {
+                    setTimeout(() => {
+                        input.style.opacity = 1;
+                    }, index * 500);
+                });
+                setTimeout(() => {
+                    submitContainer.style.opacity = 1;
+                }, inputs.length * 250);
+            }, 500);
         }
 
         function showCreateForm() {
-            const loginForm = document.getElementById('login-form');
-            const createForm = document.getElementById('create-form');
+            const form = document.getElementById('create-form');
+            const inputs = form.querySelectorAll('input');
+            const submitContainer = form.querySelector('.submit-container');
 
-            createForm.style.display = 'block';
-            createForm.style.opacity = 1;
+            form.style.display = 'block';
+            setTimeout(() => {
+                form.style.opacity = 1;
+                inputs.forEach((input, index) => {
+                    setTimeout(() => {
+                        input.style.opacity = 1;
+                    }, index * 500);
+                });
+                setTimeout(() => {
+                    submitContainer.style.opacity = 1;
+                }, inputs.length * 250);
+            }, 500);
         }
     </script>
 </body>
