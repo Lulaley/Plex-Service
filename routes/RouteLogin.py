@@ -4,7 +4,7 @@ from static.Controleur.ControleurConf import ControleurConf
 
 
 def login(app):
-    @app.route('/', methods=['GET', 'POST'])
+    @app.route('/home', methods=['GET', 'POST'])
     def inner_login():
         if request.method == 'POST':
             username = request.form['username']

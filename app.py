@@ -20,6 +20,7 @@ app.secret_key = conf.get_config('APP', 'secret_key')
 
 @app.route('/')
 def index():
+    logout(app)
     return render_template('index.html')
 register(app)
 
