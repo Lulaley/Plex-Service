@@ -1,4 +1,4 @@
-from flask import redirect, url_for, session
+from flask import session, render_template
 
 def logout(app):
     @app.route('/logout')
@@ -6,4 +6,4 @@ def logout(app):
         # Supprimer les informations de session de l'utilisateur
         session.pop('username', None)
         # Rediriger vers la page d'accueil
-        return redirect(url_for('/'))
+        return render_template('index.html')

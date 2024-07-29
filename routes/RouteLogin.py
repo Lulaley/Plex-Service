@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash , session
+from flask import render_template, request, flash , session
 from static.Controleur.ControleurLdap import ControleurLdap
 from static.Controleur.ControleurConf import ControleurConf
 
@@ -26,4 +26,4 @@ def login(app):
                 flash('Échec de la connexion. Veuillez vérifier vos identifiants et réessayer.')
             ds.disconnect()
         # Rendu du formulaire de connexion
-        return render_template('login.html')
+        return render_template('index.html')
