@@ -80,27 +80,67 @@
 </head>
 <body>
     <div class="plex-logo">
-        <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="showLoginForm()">
+        <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="showButtons()">
     </div>
-    <div id="login-form">
+    <div id="buttons" style="display: none;">
+        <button onclick="showLoginForm()">Connexion</button>
+        <button onclick="showCreateForm()">Créer</button>
+    </div>
+    <div id="login-form" style="display: none;">
         <form action="/index" method="post">
             <input type="text" name="username" placeholder="Nom d'utilisateur" required>
             <input type="password" name="password" placeholder="Mot de passe" required>
             <div class="submit-container">
                 <input type="submit" value="Se connecter">
+            </div>
+        </form>
+    </div>
+    <div id="create-form" style="display: none;">
+        <form action="/create" method="post">
+            <input type="text" name="username" placeholder="Nom d'utilisateur" required>
+            <input type="password" name="password" placeholder="Mot de passe" required>
+            <input type="password" name="confirm_password" placeholder="Confirmer le mot de passe" required>
+            <div class="submit-container">
                 <input type="submit" value="Créer un compte">
             </div>
         </form>
     </div>
 
     <script>
-        function showLoginForm() {
+        function showButtons() {
             const logo = document.querySelector('.plex-logo');
+            const buttons = document.getElementById('buttons');
+
+            logo.style.transform = 'translateY(-50px)';
+            buttons.style.display = 'block';
+            setTimeout(() => {
+                buttons.style.opacity = 1;
+            }, 500);
+        }
+
+        function showLoginForm() {
             const form = document.getElementById('login-form');
             const inputs = form.querySelectorAll('input');
             const submitContainer = form.querySelector('.submit-container');
 
-            logo.style.transform = 'translateY(-50px)';
+            form.style.display = 'block';
+            setTimeout(() => {
+                form.style.opacity = 1;
+                inputs.forEach((input, index) => {
+                    setTimeout(() => {
+                        input.style.opacity = 1;
+                    }, index * 500);
+                });
+                setTimeout(() => {
+                    submitContainer.style.opacity = 1;
+                }, inputs.length * 250);
+            }, 500);
+        }
+
+        function showCreateForm() {
+            const form = document.getElementById('create-form');
+            const inputs = form.querySelectorAll('input');
+            const submitContainer = form.querySelector('.submit-container');
 
             form.style.display = 'block';
             setTimeout(() => {
