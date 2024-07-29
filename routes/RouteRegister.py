@@ -1,5 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash
 from static.Controleur.ControleurLdap import ControleurLdap
+from static.Controleur.ControleurConf import ControleurConf
 
 def register(app):
     @app.route('/register', methods=['GET', 'POST'])
@@ -9,8 +10,11 @@ def register(app):
             password = request.form['password']
             email = request.form['email']
 
+            conf = ControleurConf.__init__()
+            base_dn = conf.get_config('ldap', 'base_dn')
             # Construire le DN et les attributs de l'utilisateur
-            dn = f"uid={username},ou=users,dc=blaze-world,dc=fr"
+
+            dn = f"uid={username},dmdName=users,{base_dn}"
             attributes = [
                 ('objectClass', [b'inetOrgPerson']),
                 ('uid', [username.encode('utf-8')]),
@@ -21,7 +25,8 @@ def register(app):
             ]
 
             # Créer une instance de ControleurLdap et ajouter l'utilisateur
-            ds=ControleurLdap.__init__()
+            ds = ControleurLdap.__init__()
+            ds.bind_as_root()
             ds.add_entry(dn, attributes)
             ds.disconnect()
 

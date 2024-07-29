@@ -1,5 +1,6 @@
 from flask import render_template, request, redirect, url_for, flash
 from static.Controleur.ControleurLdap import ControleurLdap
+from static.Controleur.ControleurConf import ControleurConf
 
 
 def login(app):
@@ -8,9 +9,14 @@ def login(app):
         if request.method == 'POST':
             username = request.form['username']
             password = request.form['password']
-            con = ControleurLdap.__init__()
+
+            conf = ControleurConf.__init__()
+            base_dn = conf.get_config('ldap', 'base_dn')
+            # Créer une instance de ControleurLdap et tenter de se connecter
+            ds = ControleurLdap.__init__()
             # Utilisation de authenticate_user pour vérifier les identifiants
-            if con.authenticate_user(username, password):
+            filter = f"(uid={username},dmdName=users,{base_dn})"
+            if ds.authenticate_user(filter, password):
                 # Redirection vers la page d'accueil en cas de succès
                 return redirect(url_for('home'))
             else:
