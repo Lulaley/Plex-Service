@@ -119,13 +119,13 @@
         }
 
         function showLoginForm() {
-            const form = document.getElementById('login-form');
-            const inputs = form.querySelectorAll('input');
-            const submitContainer = form.querySelector('.submit-container');
+            const loginForm = document.getElementById('login-form');
+            const inputs = loginForm.querySelectorAll('input');
+            const submitContainer = loginForm.querySelector('.submit-container');
 
-            form.style.display = 'block';
+            loginForm.style.display = 'block';
             setTimeout(() => {
-                form.style.opacity = 1;
+                loginForm.style.opacity = 1;
                 inputs.forEach((input, index) => {
                     setTimeout(() => {
                         input.style.opacity = 1;
@@ -138,13 +138,13 @@
         }
 
         function showCreateForm() {
-            const form = document.getElementById('create-form');
-            const inputs = form.querySelectorAll('input');
-            const submitContainer = form.querySelector('.submit-container');
+            const createForm = document.getElementById('create-form');
+            const inputs = createForm.querySelectorAll('input');
+            const submitContainer = createForm.querySelector('.submit-container');
 
-            form.style.display = 'block';
+            createForm.style.display = 'block';
             setTimeout(() => {
-                form.style.opacity = 1;
+                createForm.style.opacity = 1;
                 inputs.forEach((input, index) => {
                     setTimeout(() => {
                         input.style.opacity = 1;
