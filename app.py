@@ -9,6 +9,7 @@ from flask import Flask, render_template
 # Importation des routes
 from routes.RouteLogin import login
 from routes.RouteRegister import register
+from routes.RouteLogout import logout
 
 app = Flask(__name__)
 
@@ -19,6 +20,7 @@ def hello_world():
 
 login(app)
 register(app)
+logout(app)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001, host='0.0.0.0')

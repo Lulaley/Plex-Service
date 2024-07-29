@@ -25,7 +25,7 @@ def download_torrent(torrent_file_path, save_path):
     client.remove_torrent(torrent)
 
 def send_download_info(name, progress, download_rate, upload_rate, num_peers, state):
-    url = 'http://localhost:5000/download_info'
+    url = 'http://localhost:5001/download_info'
     data = {
         'name': name,
         'progress': progress,
