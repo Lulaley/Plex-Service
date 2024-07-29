@@ -30,7 +30,7 @@
             cursor: pointer;
         }
 
-        #login-form, #register-form, #tabs-form {
+        #login-form {
             display: none;
             padding: 20px;
             border-radius: 5px;
@@ -48,14 +48,14 @@
             transition: opacity 0.5s ease-in-out;
         }
 
-        .submit-container-login, .submit-container-register {
+        .submit-container {
             display: flex;
             justify-content: center;
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
         }
 
-        input[type="submit"], button {
+        input[type="submit"] {
             background-color: #ff9900;
             color: white;
             border: none;
@@ -82,29 +82,13 @@
     <div class="plex-logo">
         <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="showLoginForm()">
     </div>
-
-    <div id="tabs-form">
-        <button id="btn-form-login" type="submit" value="Connexion">
-        <button id="btn-form-register" type="submit" value="Création">
-    </div>
-
     <div id="login-form">
-        <form id="form-login" action="/index" method="post">
+        <form action="/index" method="post">
             <input type="text" name="username" placeholder="Nom d'utilisateur" required>
             <input type="password" name="password" placeholder="Mot de passe" required>
-            <div class="submit-container-login">
-                <input id="login" type="submit" value="Se connecter">
-            </div>
-        </form>
-    </div>
-
-    <div id="register-form">
-        <form id="form-register" action="/index" method="post">
-            <input type="text" name="username" placeholder="Nom d'utilisateur" required>
-            <input type="password" name="password" placeholder="Mot de passe" required>
-            <input type="password" name="password" placeholder="Mot de passe" required>
-            <div class="submit-container-register">
-                <input id="register" type="submit" value="Créer mon compte">
+            <div class="submit-container">
+                <input type="submit" value="Se connecter">
+                <input type="submit" value="Créer un compte">
             </div>
         </form>
     </div>
@@ -112,29 +96,23 @@
     <script>
         function showLoginForm() {
             const logo = document.querySelector('.plex-logo');
-
-            const tabsForm = document.getElementById('tabs-form');
-
-            const loginForm = document.getElementById('login-form');
-            const inputsLogin = loginForm.getElementById('login');
-            const submitContainerLogin = loginForm.querySelector('.submit-container-login');
-
-            const registerForm = document.getElementById('register-form');
-            const inputsRegister = registerForm.getElementById('register');
-            const submitContainerRegister = registerForm.querySelector('.submit-container-register');
+            const form = document.getElementById('login-form');
+            const inputs = form.querySelectorAll('input');
+            const submitContainer = form.querySelector('.submit-container');
 
             logo.style.transform = 'translateY(-50px)';
 
-            tabsForm.style.display = 'block';
-            loginForm.style.display = 'block';
+            form.style.display = 'block';
             setTimeout(() => {
-                loginForm.style.opacity = 1;
+                form.style.opacity = 1;
+                inputs.forEach((input, index) => {
+                    setTimeout(() => {
+                        input.style.opacity = 1;
+                    }, index * 500);
+                });
                 setTimeout(() => {
-                    inputsLogin.style.opacity = 1;
-                }, 500);
-                setTimeout(() => {
-                    submitContainerLogin.style.opacity = 1;
-                }, 250);
+                    submitContainer.style.opacity = 1;
+                }, inputs.length * 250);
             }, 500);
         }
     </script>
