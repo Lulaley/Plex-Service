@@ -83,8 +83,8 @@
         <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="showButtons()">
     </div>
     <div id="buttons" style="display: none;">
-        <button onclick="showLoginForm()">Connexion</button>
-        <button onclick="showCreateForm()">Créer</button>
+        <button id="connexion" onclick="showLoginForm()">Connexion</button>
+        <button id="creer" onclick="showCreateForm()">Créer</button>
     </div>
     <div id="login-form" style="display: none;">
         <form action="/index" method="post">
@@ -118,14 +118,20 @@
         }
 
         function showLoginForm() {
+            const btnLogin = document.getElementById('connexion');
+            const btnRegister = document.getElementById('creer');
+            btnRegister.style.backgroundColor = '#ff9900';
+            btnLogin.style.backgroundColor = '#ffb84d';
+
             const createForm = document.getElementById('create-form');
             createForm.style.display = 'none';
             createForm.style.opacity = 0;
+
             const loginForm = document.getElementById('login-form');
             const inputs = loginForm.querySelectorAll('input');
             const submitContainer = loginForm.querySelector('.submit-container');
-
             loginForm.style.display = 'block';
+
             setTimeout(() => {
                 loginForm.style.opacity = 1;
                 inputs.forEach((input, index) => {
@@ -140,14 +146,21 @@
         }
 
         function showCreateForm() {
+            const btnLogin = document.getElementById('connexion');
+            const btnRegister = document.getElementById('creer');
+
+            btnRegister.style.backgroundColor = '#ffb84d';
+            btnLogin.style.backgroundColor = '#ff9900';
+
             const loginForm = document.getElementById('login-form');
             loginForm.style.display = 'none';
             loginForm.style.opacity = 0;
+
             const createForm = document.getElementById('create-form');
             const inputs = createForm.querySelectorAll('input');
             const submitContainer = createForm.querySelector('.submit-container');
-
             createForm.style.display = 'block';
+
             setTimeout(() => {
                 createForm.style.opacity = 1;
                 inputs.forEach((input, index) => {
