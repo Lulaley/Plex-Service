@@ -58,45 +58,46 @@
     <style>
         .animation-container {
             position: relative;
-            width: 100%;
+            width: 200px;
             height: 200px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
+            margin: auto;
         }
-
+    
         .dot {
             width: 20px;
             height: 20px;
             background-color: red;
             border-radius: 50%;
             position: absolute;
-            animation: move 2s infinite;
+            top: 50%;
+            left: 50%;
+            transform-origin: -80px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            animation: rotate 2s linear infinite;
         }
-
+    
         .dot:nth-child(1) {
             animation-delay: 0s;
         }
-
+    
         .dot:nth-child(2) {
             animation-delay: 0.5s;
         }
-
+    
         .dot:nth-child(3) {
             animation-delay: 1s;
         }
-
-        @keyframes move {
+    
+        @keyframes rotate {
             0% {
-                transform: translateX(0);
+                transform: rotate(0deg) translateX(80px);
                 opacity: 1;
             }
             50% {
-                transform: translateX(100px);
                 opacity: 0.5;
             }
             100% {
-                transform: translateX(200px);
+                transform: rotate(360deg) translateX(80px);
                 opacity: 0;
             }
         }
