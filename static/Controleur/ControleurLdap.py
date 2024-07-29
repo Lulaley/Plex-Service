@@ -32,15 +32,10 @@ class ControleurLdap:
 
     def authenticate_user(self, username, password):
         try:
-            user_dn = self.search_user(username)
-            if user_dn:
-                password_sha = hashlib.sha1(password.encode()).hexdigest()
-                self.conn.bind(user_dn, password)
-                print("Authentification réussie")
-                return True
-            else:
-                print("Utilisateur non trouvé")
-                return False
+            password_sha = hashlib.sha1(password.encode()).hexdigest()
+            self.conn.bind(username, password)
+            print("Authentification réussie")
+            return True
         except ldap.LDAPError as e:
             print("Erreur d'authentification:", e)
             return False
