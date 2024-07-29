@@ -119,6 +119,9 @@
         }
 
         function showLoginForm() {
+            const createForm = document.getElementById('create-form');
+            createForm.style.display = 'none';
+            createForm.style.opacity = 0;
             const loginForm = document.getElementById('login-form');
             const inputs = loginForm.querySelectorAll('input');
             const submitContainer = loginForm.querySelector('.submit-container');
@@ -138,6 +141,9 @@
         }
 
         function showCreateForm() {
+            const loginForm = document.getElementById('create-form');
+            loginForm.style.display = 'none';
+            loginForm.style.opacity = 0;
             const createForm = document.getElementById('create-form');
             const inputs = createForm.querySelectorAll('input');
             const submitContainer = createForm.querySelector('.submit-container');
