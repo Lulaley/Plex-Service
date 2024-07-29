@@ -30,6 +30,12 @@
             cursor: pointer;
         }
 
+        .tabs {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
         #login-form {
             display: none;
             padding: 20px;
@@ -143,6 +149,7 @@
     
             // Afficher le formulaire de connexion
             setTimeout(() => {
+                tabs.style.display = 'block'
                 loginForm.style.display = 'block';
                 setTimeout(() => {
                     loginForm.style.opacity = 1;
