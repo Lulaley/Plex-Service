@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plex Service - Home</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/plex-icon.png') }}">
+    <style>
+        body {
+            background-color: #313B45; /* Fond plus sombre pour contraster avec le texte blanc */
+            color: white; /* Texte blanc */
+            font-family: Arial, sans-serif; /* Arial comme alternative à Helvetica Neue */
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #2C3E50;
+            padding: 10px 20px;
+        }
+
+        .navbar img {
+            width: 50px; /* Taille du logo */
+            cursor: pointer; /* Curseur de la souris en forme de main */
+        }
+
+        .navbar .menu {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar .menu button {
+            background-color: #ff9900;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-left: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .navbar .menu .username {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo">
+        <div class="menu">
+            <button>Recherche</button>
+            <button>Demandes</button>
+            <span class="username">{{ username }}</span>
+            <button>Déconnexion</button>
+        </div>
+    </div>
+</body>
+</html>
