@@ -1,4 +1,4 @@
-from flask import render_template, request, flash , session
+from flask import render_template, request, flash , session, redirect, url_for
 from static.Controleur.ControleurLdap import ControleurLdap
 from static.Controleur.ControleurConf import ControleurConf
 
@@ -17,13 +17,22 @@ def login(app):
             # Utilisation de authenticate_user pour vérifier les identifiants
             filter = f"(uid={username},dmdName=users,{base_dn})"
             if ds.authenticate_user(filter, password):
-                # Rendu de la page d'accueil en cas de succès
+                # Déconnexion de l'instance LDAP
                 ds.disconnect()
+                # Initialiser la variable de session
                 session['username'] = username
-                return render_template('home.html', username=session['username'])
+                # Rediriger vers la page d'accueil
+                return redirect(url_for('home'))
             else:
                 # Affichage d'un message d'erreur en cas d'échec
                 flash('Échec de la connexion. Veuillez vérifier vos identifiants et réessayer.')
             ds.disconnect()
         # Rendu du formulaire de connexion
         return render_template('index.html')
+
+    @app.route('/home')
+    def home():
+        if 'username' in session:
+            return render_template('home.html', username=session['username'])
+        else:
+            return redirect(url_for('inner_login'))
