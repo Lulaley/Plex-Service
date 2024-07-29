@@ -30,7 +30,7 @@
             cursor: pointer;
         }
 
-        .tabs {
+        #tabs {
             display: none;
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
@@ -107,7 +107,7 @@
     <div class="plex-logo">
         <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="showLoginForm()">
     </div>
-    <div class="tabs">
+    <div id="tabs">
         <input type="button" value="Connexion" onclick="showForm('login')">
         <input type="button" value="Création de compte" onclick="showForm('register')">
     </div>
@@ -135,7 +135,7 @@
         function showLoginForm() {
             const logo = document.querySelector('.plex-logo');
             const loginForm = document.getElementById('login-form');
-            const tabs = document.querySelector('.tabs');
+            const tabs = document.getElementById('tabs');
             const inputs = loginForm.querySelectorAll('input');
             const submitContainer = loginForm.querySelector('.submit-container');
     
@@ -156,13 +156,13 @@
                     inputs.forEach((input, index) => {
                         setTimeout(() => {
                             input.style.opacity = 1;
-                        }, index * 500);
+                        }, 5);
                     });
                     setTimeout(() => {
                         submitContainer.style.opacity = 1;
-                    }, inputs.length * 250);
-                }, 500);
-            }, 1000);
+                    }, 2);
+                }, 5);
+            }, 10);
         }
     
         function showForm(formType) {
