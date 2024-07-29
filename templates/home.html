@@ -51,10 +51,14 @@
     <div class="navbar">
         <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo">
         <div class="menu">
-            <button>Recherche</button>
-            <button>Demandes</button>
-            <span class="username">{{ username }}</span>
-            <button>Déconnexion</button>
+            <div class="left-buttons">
+                <button>Recherche</button>
+                <button>Demandes</button>
+            </div>
+            <div class="right-buttons">
+                <span class="username">{{ username }}</span>
+                <button>Déconnexion</button>
+            </div>
         </div>
     </div>
 </body>
