@@ -82,12 +82,25 @@
     <div class="plex-logo">
         <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="showLoginForm()">
     </div>
+    <div class="tabs">
+        <button onclick="showForm('login')">Connexion</button>
+        <button onclick="showForm('register')">Création de compte</button>
+    </div>
     <div id="login-form">
-        <form action="/index" method="post">
+        <form action="/login" method="post">
             <input type="text" name="username" placeholder="Nom d'utilisateur" required>
             <input type="password" name="password" placeholder="Mot de passe" required>
             <div class="submit-container">
                 <input type="submit" value="Se connecter">
+            </div>
+        </form>
+    </div>
+    <div id="register-form">
+        <form action="/register" method="post">
+            <input type="text" name="username" placeholder="Nom d'utilisateur" required>
+            <input type="password" name="password" placeholder="Mot de passe" required>
+            <input type="password" name="confirm_password" placeholder="Confirmer le mot de passe" required>
+            <div class="submit-container">
                 <input type="submit" value="Créer un compte">
             </div>
         </form>
@@ -112,7 +125,7 @@
                 });
                 setTimeout(() => {
                     submitContainer.style.opacity = 1;
-                }, inputs.length * 500);
+                }, inputs.length * 250);
             }, 500);
         }
     </script>
