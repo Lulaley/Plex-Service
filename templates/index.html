@@ -83,8 +83,8 @@
         <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="showLoginForm()">
     </div>
     <div class="tabs">
-        <button onclick="showForm('login')">Connexion</button>
-        <button onclick="showForm('register')">Création de compte</button>
+        <input type="button" value="Connexion" onclick="showForm('login')">
+        <input type="button" value="Création de compte" onclick="showForm('register')">
     </div>
     <div id="login-form">
         <form action="/login" method="post">
@@ -109,7 +109,8 @@
     <script>
         function showLoginForm() {
             const logo = document.querySelector('.plex-logo');
-            const form = document.getElementById('login-form');
+            const loginForm = document.getElementById('login-form');
+            const registerForm= document.getElementById('register-form');
             const inputs = form.querySelectorAll('input');
             const submitContainer = form.querySelector('.submit-container');
 
@@ -127,6 +128,27 @@
                     submitContainer.style.opacity = 1;
                 }, inputs.length * 250);
             }, 500);
+        }
+
+        function showForm(formType) {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+
+            if (formType === 'login') {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+                setTimeout(() => {
+                    loginForm.style.opacity = 1;
+                    registerForm.style.opacity = 0;
+                }, 10);
+            } else if (formType === 'register') {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+                setTimeout(() => {
+                    loginForm.style.opacity = 0;
+                    registerForm.style.opacity = 1;
+                }, 10);
+            }
         }
     </script>
 </body>
