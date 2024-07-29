@@ -3,7 +3,7 @@ import configparser
 class ControleurConf:
     def __init__(self):
         self.config = configparser.ConfigParser()
-        self.config.read('config.ini')
+        self.config.read('./Conf/config.ini')
 
     def get_config(self, section, key):
         try:
