@@ -1,7 +1,7 @@
 import configparser
 
 class ControleurConf:
-    def __init__(self):
+    def __init__():
         self.config = configparser.ConfigParser()
         self.config.read('config.ini')
 
