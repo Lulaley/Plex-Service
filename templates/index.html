@@ -30,21 +30,7 @@
             cursor: pointer;
         }
 
-        #tabs {
-            display: none;
-            opacity: 0;
-            transition: opacity 0.5s ease-in-out;
-        }
-
         #login-form {
-            display: none;
-            padding: 20px;
-            border-radius: 5px;
-            padding: 10px;
-            opacity: 0;
-        }
-
-        #register-form {
             display: none;
             padding: 20px;
             border-radius: 5px;
@@ -70,17 +56,6 @@
         }
 
         input[type="submit"] {
-            display: none;
-            background-color: #ff9900;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        input[type="button"] {
-            display: none;
             background-color: #ff9900;
             color: white;
             border: none;
@@ -101,110 +76,44 @@
                 width: 75%;
             }
         }
-
-        #tabs {
-            display: none;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        #login-form {
-            display: none;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        #login-form input {
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
-
-        .submit-container {
-            opacity: 0;
-            transition: opacity 0.5s ease;
-        }
     </style>
 </head>
 <body>
     <div class="plex-logo">
         <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="showLoginForm()">
     </div>
-    <div id="tabs">
-        <input type="button" value="Connexion" onclick="showForm('login')">
-        <input type="button" value="Création de compte" onclick="showForm('register')">
-    </div>
     <div id="login-form">
-        <form action="/login" method="post">
+        <form action="/index" method="post">
             <input type="text" name="username" placeholder="Nom d'utilisateur" required>
             <input type="password" name="password" placeholder="Mot de passe" required>
             <div class="submit-container">
                 <input type="submit" value="Se connecter">
-            </div>
-        </form>
-    </div>
-    <div id="register-form">
-        <form action="/register" method="post">
-            <input type="text" name="username" placeholder="Nom d'utilisateur" required>
-            <input type="password" name="password" placeholder="Mot de passe" required>
-            <input type="password" name="confirm_password" placeholder="Confirmer le mot de passe" required>
-            <div class="submit-container">
                 <input type="submit" value="Créer un compte">
             </div>
         </form>
     </div>
-    
+
     <script>
         function showLoginForm() {
             const logo = document.querySelector('.plex-logo');
-            const loginForm = document.getElementById('login-form');
-            const tabs = document.getElementById('tabs');
-            const inputs = loginForm.querySelectorAll('input');
-            const submitContainer = loginForm.querySelector('.submit-container');
-    
+            const form = document.getElementById('login-form');
+            const inputs = form.querySelectorAll('input');
+            const submitContainer = form.querySelector('.submit-container');
+
             logo.style.transform = 'translateY(-50px)';
-    
-            // Afficher les inputs de type submit
-            tabs.style.display = 'block';
+
+            form.style.display = 'block';
             setTimeout(() => {
-                tabs.style.opacity = 1;
-            }, 500);
-    
-            // Afficher le formulaire de connexion
-            setTimeout(() => {
-                loginForm.style.display = 'block';
-                setTimeout(() => {
-                    loginForm.style.opacity = 1;
-                    inputs.forEach((input, index) => {
-                        setTimeout(() => {
-                            input.style.opacity = 1;
-                        }, index * 500);
-                    });
+                form.style.opacity = 1;
+                inputs.forEach((input, index) => {
                     setTimeout(() => {
-                        submitContainer.style.opacity = 1;
-                    }, inputs.length * 500);
-                }, 500);
-            }, 1000);
-        }
-    
-        function showForm(formType) {
-            const loginForm = document.getElementById('login-form');
-            const registerForm = document.getElementById('register-form');
-    
-            if (formType === 'login') {
-                loginForm.style.display = 'block';
-                registerForm.style.display = 'none';
+                        input.style.opacity = 1;
+                    }, index * 500);
+                });
                 setTimeout(() => {
-                    loginForm.style.opacity = 1;
-                    registerForm.style.opacity = 0;
-                }, 10);
-            } else if (formType === 'register') {
-                loginForm.style.display = 'none';
-                registerForm.style.display = 'block';
-                setTimeout(() => {
-                    loginForm.style.opacity = 0;
-                    registerForm.style.opacity = 1;
-                }, 10);
-            }
+                    submitContainer.style.opacity = 1;
+                }, inputs.length * 250);
+            }, 500);
         }
     </script>
 </body>
