@@ -82,13 +82,29 @@
     <div class="plex-logo">
         <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="showLoginForm()">
     </div>
+
+    <div id="tabs-form">
+        <button id="btn-form-login" type="submit" value="Connexion">
+        <button id="btn-form-register" type="submit" value="Création">
+    </div>
+
     <div id="login-form">
-        <form action="/index" method="post">
+        <form id="form-login" action="/index" method="post">
             <input type="text" name="username" placeholder="Nom d'utilisateur" required>
             <input type="password" name="password" placeholder="Mot de passe" required>
-            <div class="submit-container">
-                <input type="submit" value="Se connecter">
-                <input type="submit" value="Créer un compte">
+            <div class="submit-container-login">
+                <input id="login" type="submit" value="Se connecter">
+            </div>
+        </form>
+    </div>
+
+    <div id="register-form">
+        <form id="form-register" action="/index" method="post">
+            <input type="text" name="username" placeholder="Nom d'utilisateur" required>
+            <input type="password" name="password" placeholder="Mot de passe" required>
+            <input type="password" name="password" placeholder="Mot de passe" required>
+            <div class="submit-container-register">
+                <input id="register" type="submit" value="Créer mon compte">
             </div>
         </form>
     </div>
@@ -96,23 +112,26 @@
     <script>
         function showLoginForm() {
             const logo = document.querySelector('.plex-logo');
-            const form = document.getElementById('login-form');
-            const inputs = form.querySelectorAll('input');
-            const submitContainer = form.querySelector('.submit-container');
+
+            const loginForm = document.getElementById('login-form');
+            const inputsLogin = form.getElementById('login');
+            const submitContainerLogin = form.querySelector('.submit-container-login');
+
+            const registerForm = document.getElementById('register-form');
+            const inputsRegister = form.getElementById('register');
+            const submitContainerRegister = form.querySelector('.submit-container-register');
 
             logo.style.transform = 'translateY(-50px)';
 
-            form.style.display = 'block';
+            loginFormform.style.display = 'block';
             setTimeout(() => {
-                form.style.opacity = 1;
-                inputs.forEach((input, index) => {
-                    setTimeout(() => {
-                        input.style.opacity = 1;
-                    }, index * 500);
-                });
+                loginForm.style.opacity = 1;
                 setTimeout(() => {
-                    submitContainer.style.opacity = 1;
-                }, inputs.length * 250);
+                    inputsLogin.style.opacity = 1;
+                }, 500);
+                setTimeout(() => {
+                    submitContainerLogin.style.opacity = 1;
+                }, 250);
             }, 500);
         }
     </script>
