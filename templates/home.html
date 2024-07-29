@@ -84,18 +84,6 @@
             stroke: blue;
         }
 
-        .spinner-red {
-            animation-delay: 0s;
-        }
-
-        .spinner-green {
-            animation-delay: 0.5s;
-        }
-
-        .spinner-blue {
-            animation-delay: 1s;
-        }
-
         .spinner40 {
             width: 40px;
             height: 40px;
@@ -110,7 +98,18 @@
             animation: rotateSpinner 3s linear infinite;
         }
 
+        .spinner-red {
+            animation-delay: 0s;
+        }
 
+        .spinner-green {
+            animation-delay: 5s;
+        }
+
+        .spinner-blue {
+            animation-delay: 10s;
+        }
+        
         @keyframes spinner {
             0% {
                 stroke-dashoffset: 26.4/*calc(0.66 * 40)*/;
