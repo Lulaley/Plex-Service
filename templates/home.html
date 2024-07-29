@@ -65,9 +65,9 @@
 
         .loadingContainer {
             position: relative;
-            width: 40px;
-            height: 40px;
-        }
+            width: 80px; /* Adjusted for new size */
+            height: 80px; /* Adjusted for new size */
+        }s
 
         .loadingAnimation {
             position: absolute;
@@ -101,12 +101,12 @@
         }
 
         .spinner40 {
-            width: 40px;
-            height: 40px;
+            width: 80px; /* Increased size */
+            height: 80px; /* Increased size */
             x: 0px;
             y: 0px;
             display: block;
-            transform-origin: calc(0.5px * 40) calc(0.5px * 40) 0;
+            transform-origin: calc(0.5 * 80px) calc(0.5 * 80px); /* Adjusted for new size */
             -webkit-animation: rotateSpinner 2s linear infinite;
             -moz-animation: rotateSpinner 3s linear infinite;
             -ms-animation: rotateSpinner 3s linear infinite;
