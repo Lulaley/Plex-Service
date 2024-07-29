@@ -56,54 +56,63 @@
         }
     </style>
     <style>
-        .spinner {
-            display: inline-block;
-            position: relative;
-            width: 80px;
-            height: 80px;
+        .loadingAnimation {
+    margin: 24px auto;
+}
+
+    circle {
+        fill: transparent;
+        stroke: #FFCC00;
+        stroke-linecap: round;
+        stroke-dasharray: calc(3.14px * 40);
+        stroke-dashoffset: 40;
+        -webkit-animation: spinner 2s linear infinite;
+        -moz-animation: spinner 3s linear infinite;
+        -ms-animation: spinner 3s linear infinite;
+        -o-animation: spinner 3s linear infinite;
+        animation: spinner 3s linear infinite;
+    }
+
+.spinner40 {
+   width: 40px;
+    height: 40px;
+    x: 0px;
+    y: 0px;
+    display: block;
+    transform-origin: calc(0.5px * 40) calc(0.5px * 40) 0;
+    -webkit-animation: rotateSpinner 2s linear infinite;
+    -moz-animation: rotateSpinner 3s linear infinite;
+    -ms-animation: rotateSpinner 3s linear infinite;
+    -o-animation: rotateSpinner 3s linear infinite;
+    animation: rotateSpinner 3s linear infinite;
+
+
+}
+
+
+    @keyframes spinner {
+        0% {
+            stroke-dashoffset: 26.4/*calc(0.66 * 40)*/;
         }
-        .spinner div {
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            background: purple;
-            border-radius: 50%;
-            animation: spinner 1.2s linear infinite;
+        50% {
+            stroke-dashoffset: 124.6/*calc(3.14 * 40)*/;
         }
-        .spinner div:nth-child(1) {
-            top: 8px;
-            left: 50%;
-            margin-left: -8px;
-            animation-delay: -0.45s;
+        100% {
+            stroke-dashoffset: 0.66; /*calc(0.66);*/
         }
-        .spinner div:nth-child(2) {
-            top: 50%;
-            left: 8px;
-            margin-top: -8px;
-            animation-delay: -0.3s;
+    }
+
+    @keyframes rotateSpinner {
+        0% {
+            transform: rotate(0deg);
         }
-        .spinner div:nth-child(3) {
-            top: 50%;
-            left: 50%;
-            margin-top: -8px;
-            margin-left: -8px;
-            animation-delay: -0.15s;
+        50% {
+            transform: rotate(720deg);
         }
-        .spinner div:nth-child(4) {
-            top: 50%;
-            right: 8px;
-            margin-top: -8px;
-            animation-delay: 0s;
+        100% {
+            transform: rotate(1080deg);
         }
-        @keyframes spinner {
-            0% {
-                transform: scale(0);
-            }
-            100% {
-                transform: scale(1);
-                opacity: 0;
-            }
-        }
+    }
     </style>
 </head>
 <body>
@@ -121,11 +130,10 @@
         </div>
     </div>
 
-    <div class="spinner">
-        <div></div>
-        <div></div>
-        <div></div>
-        <div></div>
+    <div class="loadingAnimation">
+        <svg class="spinner40">
+            <circle cx="20" cy="20" r="18" stroke-width="3" fill="none" ></circle>
+        </svg>
     </div>
 </body>
 </html>
