@@ -4,13 +4,13 @@ from .ControleurConf import ControleurConf
 class ControleurLdap:
     def __init__(self):
         self.config = ControleurConf()
-        self.server = self.config.get_config('ldap', 'server')
+        self.server = self.config.get_config('LDAP', 'server')
         self.conn = ldap.initialize(self.server)
 
     def bind_as_root(self):
         try:
-            root_dn = self.config.get_config('ldap', 'root_dn')
-            root_password = self.config.get_config('ldap', 'root_password')
+            root_dn = self.config.get_config('LDAP', 'root_dn')
+            root_password = self.config.get_config('LDAP', 'root_password')
             self.conn.simple_bind_s(root_dn, root_password)
             print("Connexion en tant que root réussie")
         except ldap.LDAPError as e:
@@ -32,7 +32,7 @@ class ControleurLdap:
 
     def search_user(self, username):
         try:
-            search_base = self.config.get_config('ldap', 'search_base')
+            search_base = self.config.get_config('LDAP', 'base_dn')
             search_filter = f"(uid={username})"
             result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter)
             if result:

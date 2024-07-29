@@ -11,7 +11,7 @@ def login(app):
             password = request.form['password']
 
             conf = ControleurConf()
-            base_dn = conf.get_config('ldap', 'base_dn')
+            base_dn = conf.get_config('LDAP', 'base_dn')
             # Créer une instance de ControleurLdap et tenter de se connecter
             ds = ControleurLdap()
             # Utilisation de authenticate_user pour vérifier les identifiants

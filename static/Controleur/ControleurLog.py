@@ -4,8 +4,8 @@ import logging
 def write_log(message):
     # Get the configuration
     conf = ControleurConf()
-    log_file_path = conf.get_config('log', 'file')
-    log_level = conf.get_config('log', 'level')
+    log_file_path = conf.get_config('LOG', 'file')
+    log_level = conf.get_config('LOG', 'level')
 
     # Perform the log writing logic here
     try:
