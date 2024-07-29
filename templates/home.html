@@ -26,6 +26,7 @@
 
         .navbar .menu {
             display: flex;
+            justify-content: space-between;
             align-items: center;
         }
 
@@ -47,8 +48,8 @@
 <body>
     <div class="navbar">
         <div class="menu">
-            <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo">
             <div class="left-buttons">
+                <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo">
                 <button>Recherche</button>
                 <button>Demandes</button>
             </div>
