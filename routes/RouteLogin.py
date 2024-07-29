@@ -10,7 +10,7 @@ def login(app):
             username = request.form['username']
             password = request.form['password']
 
-            conf = ControleurConf.__init__()
+            conf = ControleurConf.__init__(app)
             base_dn = conf.get_config('ldap', 'base_dn')
             # Créer une instance de ControleurLdap et tenter de se connecter
             ds = ControleurLdap.__init__()
