@@ -56,7 +56,16 @@
         }
     </style>
     <style>
+        .loadingContainer {
+            position: relative;
+            width: 40px;
+            height: 40px;
+        }
+
         .loadingAnimation {
+            position: absolute;
+            top: 0;
+            left: 0;
             margin: 24px auto;
         }
 
@@ -150,20 +159,22 @@
         </div>
     </div>
 
-    <div class="loadingAnimation">
-        <svg class="spinner40 spinner-red">
-            <circle cx="20" cy="20" r="18" stroke-width="3" fill="none"></circle>
-        </svg>
-    </div>
-    <div class="loadingAnimation">
-        <svg class="spinner40 spinner-green">
-            <circle cx="20" cy="20" r="18" stroke-width="3" fill="none"></circle>
-        </svg>
-    </div>
-    <div class="loadingAnimation">
-        <svg class="spinner40 spinner-blue">
-            <circle cx="20" cy="20" r="18" stroke-width="3" fill="none"></circle>
-        </svg>
+    <div class="loadingContainer">
+        <div class="loadingAnimation">
+            <svg class="spinner40 spinner-red">
+                <circle cx="20" cy="20" r="18" stroke-width="3" fill="none"></circle>
+            </svg>
+        </div>
+        <div class="loadingAnimation">
+            <svg class="spinner40 spinner-green">
+                <circle cx="20" cy="20" r="18" stroke-width="3" fill="none"></circle>
+            </svg>
+        </div>
+        <div class="loadingAnimation">
+            <svg class="spinner40 spinner-blue">
+                <circle cx="20" cy="20" r="18" stroke-width="3" fill="none"></circle>
+            </svg>
+        </div>
     </div>
 </body>
 </html>
