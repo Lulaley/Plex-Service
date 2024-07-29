@@ -20,9 +20,7 @@ def login(app):
                 # Rendu de la page d'accueil en cas de succès
                 ds.disconnect()
                 session['username'] = username
-                @app.route('/home')
-                def home():
-                    return render_template('home.html', username=session['username'])
+                return render_template('home.html', username=session['username'])
             else:
                 # Affichage d'un message d'erreur en cas d'échec
                 flash('Échec de la connexion. Veuillez vérifier vos identifiants et réessayer.')
