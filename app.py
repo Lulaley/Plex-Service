@@ -17,7 +17,7 @@ app = Flask(__name__)
 conf = ControleurConf()
 app.secret_key = conf.get_config('APP', 'secret_key')
 
-@app.route('/')
+@app.route('/index')
 def index():
     return render_template('index.html')
 
