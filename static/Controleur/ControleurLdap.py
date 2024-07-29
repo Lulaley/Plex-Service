@@ -16,7 +16,7 @@ class ControleurLdap:
             root_dn = self.config.get_config('LDAP', 'root_dn')
             root_password = self.config.get_config('LDAP', 'root_password')
             password_ssha = self.convert_to_ssha(root_password)
-            self.conn.bind(root_dn, password_ssha)
+            self.conn.bind(root_dn, root_password)
             print("Connexion en tant que root réussie")
         except ldap.LDAPError as e:
             print("Erreur de connexion en tant que root:", e)
@@ -35,7 +35,7 @@ class ControleurLdap:
             user_dn = self.search_user(username)
             if user_dn:
                 password_sha = hashlib.sha1(password.encode()).hexdigest()
-                self.conn.bind(user_dn, password_sha)
+                self.conn.bind(user_dn, password)
                 print("Authentification réussie")
                 return True
             else:
