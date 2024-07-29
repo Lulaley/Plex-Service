@@ -72,7 +72,6 @@
             top: 50%;
             left: 50%;
             transform-origin: -80px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             animation: rotate 2s linear infinite;
         }
     
@@ -93,8 +92,14 @@
                 transform: rotate(0deg) translateX(80px);
                 opacity: 1;
             }
+            25% {
+                opacity: 0.25;
+            }
             50% {
                 opacity: 0.5;
+            }
+            75% {
+                opacity: 0.75;
             }
             100% {
                 transform: rotate(360deg) translateX(80px);
