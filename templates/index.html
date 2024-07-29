@@ -110,29 +110,40 @@
         function showLoginForm() {
             const logo = document.querySelector('.plex-logo');
             const loginForm = document.getElementById('login-form');
-            const inputs = form.querySelectorAll('input');
-            const submitContainer = form.querySelector('.submit-container');
-
+            const registerForm = document.getElementById('register-form');
+            const tabs = document.querySelector('.tabs');
+            const inputs = loginForm.querySelectorAll('input');
+            const submitContainer = loginForm.querySelector('.submit-container');
+    
             logo.style.transform = 'translateY(-50px)';
-
-            form.style.display = 'block';
+    
+            // Afficher les inputs de type submit
+            tabs.style.display = 'block';
             setTimeout(() => {
-                form.style.opacity = 1;
-                inputs.forEach((input, index) => {
-                    setTimeout(() => {
-                        input.style.opacity = 1;
-                    }, index * 500);
-                });
-                setTimeout(() => {
-                    submitContainer.style.opacity = 1;
-                }, inputs.length * 250);
+                tabs.style.opacity = 1;
             }, 500);
+    
+            // Afficher le formulaire de connexion
+            setTimeout(() => {
+                loginForm.style.display = 'block';
+                setTimeout(() => {
+                    loginForm.style.opacity = 1;
+                    inputs.forEach((input, index) => {
+                        setTimeout(() => {
+                            input.style.opacity = 1;
+                        }, index * 500);
+                    });
+                    setTimeout(() => {
+                        submitContainer.style.opacity = 1;
+                    }, inputs.length * 250);
+                }, 500);
+            }, 1000);
         }
-
+    
         function showForm(formType) {
             const loginForm = document.getElementById('login-form');
             const registerForm = document.getElementById('register-form');
-
+    
             if (formType === 'login') {
                 loginForm.style.display = 'block';
                 registerForm.style.display = 'none';
