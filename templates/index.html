@@ -73,6 +73,16 @@
             cursor: pointer;
         }
 
+        input[type="button"] {
+            display: none;
+            background-color: #ff9900;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
         /* Media queries pour rendre le formulaire responsive */
         @media only screen and (max-width: 600px) {
             .plex-logo img {
@@ -92,8 +102,8 @@
         <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="showLoginForm()">
     </div>
     <div class="tabs">
-        <input type="submit" value="Connexion" onclick="showForm('login')">
-        <input type="submit" value="Création de compte" onclick="showForm('register')">
+        <input type="button" value="Connexion" onclick="showForm('login')">
+        <input type="button" value="Création de compte" onclick="showForm('register')">
     </div>
     <div id="login-form">
         <form action="/login" method="post">
@@ -119,7 +129,6 @@
         function showLoginForm() {
             const logo = document.querySelector('.plex-logo');
             const loginForm = document.getElementById('login-form');
-            const registerForm = document.getElementById('register-form');
             const tabs = document.querySelector('.tabs');
             const inputs = loginForm.querySelectorAll('input');
             const submitContainer = loginForm.querySelector('.submit-container');
