@@ -1,9 +1,12 @@
 import configparser
+import os
 
 class ControleurConf:
     def __init__(self):
         self.config = configparser.ConfigParser()
-        self.config.read('./Conf/config.ini')
+        # Construire le chemin relatif vers le fichier de configuration
+        config_path = os.path.join(os.path.dirname(__file__), '..', 'Conf', 'config.ini')
+        self.config.read(config_path)
 
     def get_config(self, section, key):
         try:
