@@ -6,4 +6,4 @@ def logout(app):
         # Supprimer les informations de session de l'utilisateur
         session.pop('username', None)
         # Rediriger vers la page d'accueil
-        return redirect(url_for('index'))
+        return redirect(url_for('root'))
