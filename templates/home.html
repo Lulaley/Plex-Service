@@ -57,62 +57,71 @@
     </style>
     <style>
         .loadingAnimation {
-    margin: 24px auto;
-}
-
-    circle {
-        fill: transparent;
-        stroke: #FFCC00;
-        stroke-linecap: round;
-        stroke-dasharray: calc(3.14px * 40);
-        stroke-dashoffset: 40;
-        -webkit-animation: spinner 2s linear infinite;
-        -moz-animation: spinner 3s linear infinite;
-        -ms-animation: spinner 3s linear infinite;
-        -o-animation: spinner 3s linear infinite;
-        animation: spinner 3s linear infinite;
-    }
-
-.spinner40 {
-   width: 40px;
-    height: 40px;
-    x: 0px;
-    y: 0px;
-    display: block;
-    transform-origin: calc(0.5px * 40) calc(0.5px * 40) 0;
-    -webkit-animation: rotateSpinner 2s linear infinite;
-    -moz-animation: rotateSpinner 3s linear infinite;
-    -ms-animation: rotateSpinner 3s linear infinite;
-    -o-animation: rotateSpinner 3s linear infinite;
-    animation: rotateSpinner 3s linear infinite;
-
-
-}
-
-
-    @keyframes spinner {
-        0% {
-            stroke-dashoffset: 26.4/*calc(0.66 * 40)*/;
+            margin: 24px auto;
         }
-        50% {
-            stroke-dashoffset: 124.6/*calc(3.14 * 40)*/;
-        }
-        100% {
-            stroke-dashoffset: 0.66; /*calc(0.66);*/
-        }
-    }
 
-    @keyframes rotateSpinner {
-        0% {
-            transform: rotate(0deg);
+        circle {
+            fill: transparent;
+            stroke-linecap: round;
+            stroke-dasharray: calc(3.14px * 40);
+            stroke-dashoffset: 40;
+            -webkit-animation: spinner 2s linear infinite;
+            -moz-animation: spinner 3s linear infinite;
+            -ms-animation: spinner 3s linear infinite;
+            -o-animation: spinner 3s linear infinite;
+            animation: spinner 3s linear infinite;
         }
-        50% {
-            transform: rotate(720deg);
+
+        .spinner-red circle {
+            stroke: red;
         }
-        100% {
-            transform: rotate(1080deg);
+
+        .spinner-green circle {
+            stroke: green;
         }
-    }
+
+        .spinner-blue circle {
+            stroke: blue;
+        }
+
+        .spinner40 {
+            width: 40px;
+            height: 40px;
+            x: 0px;
+            y: 0px;
+            display: block;
+            transform-origin: calc(0.5px * 40) calc(0.5px * 40) 0;
+            -webkit-animation: rotateSpinner 2s linear infinite;
+            -moz-animation: rotateSpinner 3s linear infinite;
+            -ms-animation: rotateSpinner 3s linear infinite;
+            -o-animation: rotateSpinner 3s linear infinite;
+            animation: rotateSpinner 3s linear infinite;
+        }
+
+
+        @keyframes spinner {
+            0% {
+                stroke-dashoffset: 26.4/*calc(0.66 * 40)*/;
+            }
+            50% {
+                stroke-dashoffset: 124.6/*calc(3.14 * 40)*/;
+            }
+            100% {
+                stroke-dashoffset: 0.66; /*calc(0.66);*/
+            }
+        }
+
+        @keyframes rotateSpinner {
+            0% {
+                transform: rotate(0deg);
+            }
+            50% {
+                transform: rotate(720deg);
+            }
+            100% {
+                transform: rotate(1080deg);
+            }
+        }
     </style>
 </head>
 <body>
@@ -131,8 +140,18 @@
     </div>
 
     <div class="loadingAnimation">
-        <svg class="spinner40">
-            <circle cx="20" cy="20" r="18" stroke-width="3" fill="none" ></circle>
+        <svg class="spinner40 spinner-red">
+            <circle cx="20" cy="20" r="18" stroke-width="3" fill="none"></circle>
+        </svg>
+    </div>
+    <div class="loadingAnimation">
+        <svg class="spinner40 spinner-green">
+            <circle cx="20" cy="20" r="18" stroke-width="3" fill="none"></circle>
+        </svg>
+    </div>
+    <div class="loadingAnimation">
+        <svg class="spinner40 spinner-blue">
+            <circle cx="20" cy="20" r="18" stroke-width="3" fill="none"></circle>
         </svg>
     </div>
 </body>
