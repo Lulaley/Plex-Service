@@ -10,10 +10,10 @@ def login(app):
             username = request.form['username']
             password = request.form['password']
 
-            conf = ControleurConf.__init__(app)
+            conf = ControleurConf()
             base_dn = conf.get_config('ldap', 'base_dn')
             # Créer une instance de ControleurLdap et tenter de se connecter
-            ds = ControleurLdap.__init__()
+            ds = ControleurLdap()
             # Utilisation de authenticate_user pour vérifier les identifiants
             filter = f"(uid={username},dmdName=users,{base_dn})"
             if ds.authenticate_user(filter, password):

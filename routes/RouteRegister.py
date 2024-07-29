@@ -10,7 +10,7 @@ def register(app):
             password = request.form['password']
             email = request.form['email']
 
-            conf = ControleurConf.__init__()
+            conf = ControleurConf()
             base_dn = conf.get_config('ldap', 'base_dn')
             # Construire le DN et les attributs de l'utilisateur
 
@@ -25,7 +25,7 @@ def register(app):
             ]
 
             # Créer une instance de ControleurLdap et ajouter l'utilisateur
-            ds = ControleurLdap.__init__()
+            ds = ControleurLdap()
             ds.bind_as_root()
             ds.add_entry(dn, attributes)
             ds.disconnect()
