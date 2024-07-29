@@ -116,17 +116,17 @@
             const tabsForm = document.getElementById('tabs-form');
 
             const loginForm = document.getElementById('login-form');
-            const inputsLogin = form.getElementById('login');
-            const submitContainerLogin = form.querySelector('.submit-container-login');
+            const inputsLogin = loginForm.getElementById('login');
+            const submitContainerLogin = loginForm.querySelector('.submit-container-login');
 
             const registerForm = document.getElementById('register-form');
-            const inputsRegister = form.getElementById('register');
-            const submitContainerRegister = form.querySelector('.submit-container-register');
+            const inputsRegister = registerForm.getElementById('register');
+            const submitContainerRegister = registerForm.querySelector('.submit-container-register');
 
             logo.style.transform = 'translateY(-50px)';
 
             tabsForm.style.display = 'block';
-            loginFormform.style.display = 'block';
+            loginForm.style.display = 'block';
             setTimeout(() => {
                 loginForm.style.opacity = 1;
                 setTimeout(() => {
