@@ -29,10 +29,3 @@ def login(app):
             ds.disconnect()
         # Rendu du formulaire de connexion
         return render_template('index.html')
-
-    @app.route('/home')
-    def home():
-        if 'username' in session:
-            return render_template('home.html', username=session['username'])
-        else:
-            return redirect(url_for('inner_login'))
