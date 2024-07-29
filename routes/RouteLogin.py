@@ -17,10 +17,10 @@ def login(app):
             # Utilisation de authenticate_user pour vérifier les identifiants
             filter = f"(uid={username},dmdName=users,{base_dn})"
             if ds.authenticate_user(filter, password):
-                # Redirection vers la page d'accueil en cas de succès
-                return redirect(url_for('home'))
+                # Rendu de la page d'accueil en cas de succès
+                return render_template('home.html')
             else:
                 # Affichage d'un message d'erreur en cas d'échec
                 flash('Échec de la connexion. Veuillez vérifier vos identifiants et réessayer.')
         # Rendu du formulaire de connexion
-        return render_template('home.html')
+        return render_template('login.html')
