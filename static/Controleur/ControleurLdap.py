@@ -1,7 +1,4 @@
 import ldap
-import hashlib
-import os
-import base64
 from .ControleurConf import ControleurConf
 
 class ControleurLdap:
@@ -15,24 +12,13 @@ class ControleurLdap:
         try:
             root_dn = self.config.get_config('LDAP', 'root_dn')
             root_password = self.config.get_config('LDAP', 'root_password')
-            password_ssha = self.convert_to_ssha(root_password)
             self.conn.bind(root_dn, root_password)
             print("Connexion en tant que root réussie")
         except ldap.LDAPError as e:
             print("Erreur de connexion en tant que root:", e)
 
-    def convert_to_ssha(self, password):
-        salt = os.urandom(4)
-        password_bytes = password.encode('utf-8')
-        sha = hashlib.sha1(password_bytes)
-        sha.update(salt)
-        digest = sha.digest()
-        password_ssha = base64.b64encode(digest + salt).decode('utf-8')
-        return "{SSHA}" + password_ssha
-
     def authenticate_user(self, username, password):
         try:
-            password_sha = hashlib.sha1(password.encode()).hexdigest()
             self.conn.bind(username, password)
             print("Authentification réussie")
             return True
