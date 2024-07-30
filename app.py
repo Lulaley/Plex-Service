@@ -38,4 +38,4 @@ register(app)
 logout(app)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=conf.get_config('APP', 'port'), host='0.0.0.0')
+    app.run(debug=True, port=conf.get_config('APP', 'port'), host='0.0.0.0', ssl_context=('cert.pem', 'key.pem'))
