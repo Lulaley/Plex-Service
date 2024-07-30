@@ -3,7 +3,7 @@ from static.Controleur.ControleurLdap import ControleurLdap
 from static.Controleur.ControleurConf import ControleurConf
 
 def register(app):
-    @app.route('/register', methods=['GET', 'POST'])
+    @app.route('/index', methods=['GET', 'POST'])
     def inner_register():
         if request.method == 'POST':
             username = request.form['username']
