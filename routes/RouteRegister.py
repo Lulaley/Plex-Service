@@ -17,6 +17,7 @@ def register(app):
             sha256 = hashlib.sha256()
             sha256.update(password.encode('utf-8'))
             hashed_password = base64.b64encode(sha256.digest()).decode('utf-8')
+            ldap_password = f"{{SHA}}{hashed_password}"
 
             conf = ControleurConf()
             base_dn = conf.get_config('LDAP', 'base_dn')
@@ -28,7 +29,7 @@ def register(app):
                 ('uid', [username.encode('utf-8')]),
                 ('sn', [username.encode('utf-8')]),  # Nom de famille
                 ('cn', [username.encode('utf-8')]),  # Nom complet
-                ('userPassword', [hashed_password.encode('utf-8')]),
+                ('userPassword', [ldap_password.encode('utf-8')]),
                 ('mail', [email.encode('utf-8')])
             ]
 
