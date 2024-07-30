@@ -15,8 +15,7 @@ def login(app):
             # Créer une instance de ControleurLdap et tenter de se connecter
             ds = ControleurLdap()
             # Utilisation de authenticate_user pour vérifier les identifiants
-            filter = f"(uid={username},dmdName=users,{base_dn})"
-            if ds.authenticate_user(filter, password):
+            if ds.authenticate_user(username, password):
                 # Initialiser la variable de session
                 session['username'] = username
                 # Rediriger vers la page d'accueil
