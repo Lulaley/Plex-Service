@@ -13,19 +13,23 @@ def register(app):
             password = request.form['password']
             email = request.form['email']
 
+            # Hacher le mot de passe avec SHA-1
+            sha1 = hashlib.sha1()
+            sha1.update(password.encode('utf-8'))
+            hashed_password = base64.b64encode(sha1.digest()).decode('utf-8')
+            ldap_password = f"{{SHA}}{hashed_password}"
+
             conf = ControleurConf()
             base_dn = conf.get_config('LDAP', 'base_dn')
             # Construire le DN et les attributs de l'utilisateur
 
             dn = f"uid={username},dmdName=users,{base_dn}"
             attributes = [
-                ('objectClass', [b'inetOrgPerson']),
-                ('objectClass', [b'organizationalPerson']),
-                ('objectClass', [b'person']),
+                ('objectClass', [b'inetOrgPerson', b'organizationalPerson', b'person']),
                 ('uid', [username.encode('utf-8')]),
                 ('sn', [username.encode('utf-8')]),  # Nom de famille
                 ('cn', [username.encode('utf-8')]),  # Nom complet
-                ('userPassword', [password.encode('utf-8')]),
+                ('userPassword', [ldap_password.encode('utf-8')]),
                 ('mail', [email.encode('utf-8')])
             ]
 
