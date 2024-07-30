@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, session
 from static.Controleur.ControleurLdap import ControleurLdap
 from static.Controleur.ControleurConf import ControleurConf
 
@@ -29,7 +29,7 @@ def register(app):
             ds.bind_as_root()
             ds.add_entry(dn, attributes)
             ds.disconnect()
-
-            return redirect('/')
+            session['username'] = username
+            return redirect(url_for('home'))
 
         return render_template('register.html')
