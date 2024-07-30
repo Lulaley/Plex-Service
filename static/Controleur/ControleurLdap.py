@@ -107,6 +107,7 @@ class ControleurLdap:
 
     def entry_exists(self, dn):
         try:
+            write_log(f"Vérification de l'existence de l'entrée: {dn}")
             self.connection.search(dn, '(objectClass=*)')
             return len(self.connection.entries) > 0
         except Exception as e:
