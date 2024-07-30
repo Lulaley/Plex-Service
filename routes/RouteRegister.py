@@ -34,7 +34,12 @@ def register(app):
                 ds = ControleurLdap()
                 try:
                     ds.bind_as_root()
-                    ds.add_entry(dn, attributes)
+                    if (ds.add_entry(dn, attributes)):
+                        write_log(f"Utilisateur ajouté: {username}")
+                        flash('Utilisateur ajouté avec succès.')
+                    else:
+                        write_log(f"Erreur lors de l'ajout de l'utilisateur: {username}")
+                        flash('Erreur lors de l\'ajout de l\'utilisateur. Veuillez réessayer.')
                     ds.disconnect()
                     break
                 except Exception as e:

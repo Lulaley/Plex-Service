@@ -49,17 +49,23 @@ class ControleurLdap:
             result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter)
             if result:
                 write_log("Utilisateur trouvé")
-                return result[0][0]
+                return True
             else:
                 write_log("Utilisateur non trouvé")
-                return None
+                return False
         except ldap.LDAPError as e:
             write_log("Erreur lors de la recherche de l'utilisateur: " + str(e))
+            return False
 
     def add_entry(self, dn, attributes):
         try:
-            self.conn.add_s(dn, attributes)
-            write_log("Entrée " + dn + " ajoutée avec succès")
+            result = self.conn.add_s(dn, attributes)
+            if result:
+                write_log("Entrée " + dn + " ajoutée avec succès")
+                return result[0][0]
+            else:
+                write_log("Erreur lors de l'ajout de l'entrée: " + dn)
+                return None
         except ldap.LDAPError as e:
             write_log("Erreur lors de l'ajout de l'entrée: " + str(e))
 
