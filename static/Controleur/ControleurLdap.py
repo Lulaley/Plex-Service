@@ -23,7 +23,7 @@ class ControleurLdap:
             self.bind_as_root()
             search_base = self.config.get_config('LDAP', 'base_dn')
             search_filter = f"(uid={username})"
-            result = self.conn.search_s(search_base, ldap.SCOPE_BASE, search_filter)
+            result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter)
 
             if not result:
                 write_log("Utilisateur non trouvé: " + username)
@@ -46,7 +46,7 @@ class ControleurLdap:
             self.conn.bind_as_root()
             search_base = self.config.get_config('LDAP', 'base_dn')
             search_filter = f"(uid={username})"
-            result = self.conn.search_s(search_base, ldap.SCOPE_BASE, search_filter)
+            result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter)
             if result:
                 write_log("Utilisateur trouvé")
                 return result[0][0]
@@ -82,7 +82,7 @@ class ControleurLdap:
     def search_entry(self, search_base, search_filter):
         try:
             self.conn.bind_as_root()
-            result = self.conn.search_s(search_base, ldap.SCOPE_BASE, search_filter)
+            result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter)
             if result:
                 write_log("Entrée trouvée")
                 return result
