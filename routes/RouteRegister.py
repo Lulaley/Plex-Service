@@ -2,8 +2,6 @@ from flask import render_template, request, redirect, url_for, flash, session
 from static.Controleur.ControleurLdap import ControleurLdap
 from static.Controleur.ControleurConf import ControleurConf
 from static.Controleur.ControleurLog import write_log
-import hashlib
-import base64
 
 def register(app):
     @app.route('/register', methods=['GET', 'POST'])
@@ -12,12 +10,6 @@ def register(app):
             username = request.form['username']
             password = request.form['password']
             email = request.form['email']
-
-            # Hacher le mot de passe avec SHA-1
-            sha1 = hashlib.sha1()
-            sha1.update(password.encode('utf-8'))
-            hashed_password = base64.b64encode(sha1.digest()).decode('utf-8')
-            ldap_password = f"{{SHA}}{hashed_password}"
 
             conf = ControleurConf()
             base_dn = conf.get_config('LDAP', 'base_dn')
@@ -29,7 +21,7 @@ def register(app):
                 ('uid', [username.encode('utf-8')]),
                 ('sn', [username.encode('utf-8')]),  # Nom de famille
                 ('cn', [username.encode('utf-8')]),  # Nom complet
-                ('userPassword', [ldap_password.encode('utf-8')]),
+                ('userPassword', [password.encode('utf-8')]),  # Mot de passe en clair
                 ('mail', [email.encode('utf-8')])
             ]
 
@@ -39,7 +31,7 @@ def register(app):
                 ds = ControleurLdap()
                 try:
                     ds.bind_as_root()
-                    if (ds.add_entry(dn, attributes)):
+                    if ds.add_entry(dn, attributes):
                         write_log(f"Utilisateur ajouté: {username}")
                         flash('Utilisateur ajouté avec succès.')
                         userAdd = True
@@ -57,6 +49,6 @@ def register(app):
                 session['username'] = username
                 return redirect(url_for('home'))
             else:
-                return render_template('index.html')
+                return render_template('register.html')
 
         return render_template('register.html')
