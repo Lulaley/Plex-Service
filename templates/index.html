@@ -108,6 +108,29 @@
     </div>
 
     <script>
+        document.getElementById('register-form').addEventListener('submit', function(event) {
+            // Récupérer les valeurs des champs
+            var email = document.querySelector('input[name="email"]').value;
+            var password = document.querySelector('input[name="password"]').value;
+            var confirmPassword = document.querySelector('input[name="confirm_password"]').value;
+
+            // Expression régulière pour valider le format de l'email
+            var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+
+            // Vérifier si l'email est au bon format
+            if (!emailPattern.test(email)) {
+                alert("Veuillez entrer une adresse email valide.");
+                event.preventDefault(); // Empêcher l'envoi du formulaire
+                return;
+            }
+
+            // Vérifier si les mots de passe sont identiques
+            if (password !== confirmPassword) {
+                alert("Les mots de passe ne correspondent pas.");
+                event.preventDefault(); // Empêcher l'envoi du formulaire
+                return;
+            }
+        });
         function showButtons() {
             const logo = document.querySelector('.plex-logo');
             const buttons = document.getElementById('buttons');
