@@ -22,6 +22,9 @@ class ControleurLdap:
             self.conn.bind(username, password)
             write_log("Authentification réussie de l'utilisateur: " + username)
             return True
+        except ldap.INVALID_CREDENTIALS:
+            write_log("Les informations d'identification sont incorrectes.")
+            return False
         except ldap.LDAPError as e:
             write_log("Erreur d'authentification: " + str(e))
             return False
