@@ -13,6 +13,12 @@ def register(app):
             password = request.form['password']
             email = request.form['email']
 
+            # Hacher le mot de passe avec SHA-1
+            sha1 = hashlib.sha1()
+            sha1.update(password.encode('utf-8'))
+            hashed_password = base64.b64encode(sha1.digest()).decode('utf-8')
+            ldap_password = f"{{SHA}}{hashed_password}"
+
             conf = ControleurConf()
             base_dn = conf.get_config('LDAP', 'base_dn')
             # Construire le DN et les attributs de l'utilisateur
@@ -23,38 +29,34 @@ def register(app):
                 ('uid', [username.encode('utf-8')]),
                 ('sn', [username.encode('utf-8')]),  # Nom de famille
                 ('cn', [username.encode('utf-8')]),  # Nom complet
-                ('userPassword', [password.encode('utf-8')]),
+                ('userPassword', [ldap_password.encode('utf-8')]),
                 ('mail', [email.encode('utf-8')])
             ]
 
             # Créer une instance de ControleurLdap et ajouter l'utilisateur
             userAdd = False
-            ds = ControleurLdap()
-            try:
-                ds.bind_as_root()
-                # Vérifier si l'utilisateur existe déjà
-                if ds.entry_exists(dn):
-                    write_log(f"Utilisateur existe déjà: {username}")
-                    flash('Utilisateur existe déjà. Veuillez choisir un autre nom d\'utilisateur.')
-                else:
-                    if ds.add_entry(dn, attributes):
+            while True:
+                ds = ControleurLdap()
+                try:
+                    ds.bind_as_root()
+                    if (ds.add_entry(dn, attributes)):
                         write_log(f"Utilisateur ajouté: {username}")
                         flash('Utilisateur ajouté avec succès.')
                         userAdd = True
                     else:
                         write_log(f"Erreur lors de l'ajout de l'utilisateur: {username}")
                         flash('Erreur lors de l\'ajout de l\'utilisateur. Veuillez réessayer.')
-                ds.disconnect()
-            except Exception as e:
-                write_log(f"Erreur lors de l'ajout de l'utilisateur: {str(e)}")
-                flash('Erreur lors de l\'ajout de l\'utilisateur. Veuillez réessayer.')
-                ds.disconnect()
-                return render_template('register.html')
-            
+                    ds.disconnect()
+                    break
+                except Exception as e:
+                    write_log(f"Erreur lors de l'ajout de l'utilisateur: {str(e)}")
+                    flash('Erreur lors de l\'ajout de l\'utilisateur. Veuillez réessayer.')
+                    ds.disconnect()
+                    return render_template('register.html')
             if userAdd:
                 session['username'] = username
                 return redirect(url_for('home'))
             else:
-                return render_template('register.html')
+                return render_template('index.html')
 
         return render_template('register.html')
