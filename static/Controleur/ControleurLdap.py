@@ -12,7 +12,7 @@ class ControleurLdap:
         try:
             root_dn = self.config.get_config('LDAP', 'root_dn')
             root_password = self.config.get_config('LDAP', 'root_password')
-            self.conn.bind(root_dn, root_password)
+            self.conn.bind_s(root_dn, root_password)
             write_log("Connexion en tant que root réussie")
         except ldap.LDAPError as e:
             write_log("Erreur de connexion en tant que root: " + str(e))
@@ -31,7 +31,7 @@ class ControleurLdap:
 
             # Si l'utilisateur existe, tenter de l'authentifier
             user_dn = result[0][0]
-            self.conn.bind(user_dn, password)
+            self.conn.bind_s(user_dn, password)
             write_log("Authentification réussie de l'utilisateur: " + username)
             return True
         except ldap.INVALID_CREDENTIALS:
@@ -46,7 +46,7 @@ class ControleurLdap:
             self.conn.bind_as_root()
             search_base = self.config.get_config('LDAP', 'base_dn')
             search_filter = f"(uid={username})"
-            result = self.conn.search(search_base, ldap.SCOPE_SUBTREE, search_filter)
+            result = self.conn.search_s(search_base, ldap.SCOPE_BASE, search_filter)
             if result:
                 write_log("Utilisateur trouvé")
                 return result[0][0]
@@ -58,7 +58,7 @@ class ControleurLdap:
 
     def add_entry(self, dn, attributes):
         try:
-            self.conn.add(dn, attributes)
+            self.conn.add_s(dn, attributes)
             write_log("Entrée " + dn + " ajoutée avec succès")
         except ldap.LDAPError as e:
             write_log("Erreur lors de l'ajout de l'entrée: " + str(e))
@@ -66,7 +66,7 @@ class ControleurLdap:
     def delete_entry(self, dn):
         try:
             self.conn.bind_as_root()
-            self.conn.delete(dn)
+            self.conn.delete_s(dn)
             write_log("Entrée supprimée avec succès")
         except ldap.LDAPError as e:
             write_log("Erreur lors de la suppression de l'entrée: " + str(e))
@@ -74,7 +74,7 @@ class ControleurLdap:
     def modify_entry(self, dn, mod_list):
         try:
             self.conn.bind_as_root()
-            self.conn.modify(dn, mod_list)
+            self.conn.modify_s(dn, mod_list)
             write_log("Entrée modifiée avec succès")
         except ldap.LDAPError as e:
             write_log("Erreur lors de la modification de l'entrée: " + str(e))
@@ -82,7 +82,7 @@ class ControleurLdap:
     def search_entry(self, search_base, search_filter):
         try:
             self.conn.bind_as_root()
-            result = self.conn.search(search_base, ldap.SCOPE_SUBTREE, search_filter)
+            result = self.conn.search_s(search_base, ldap.SCOPE_BASE, search_filter)
             if result:
                 write_log("Entrée trouvée")
                 return result
