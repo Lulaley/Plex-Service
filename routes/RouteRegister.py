@@ -2,11 +2,6 @@ from flask import render_template, request, redirect, url_for, flash, session
 from static.Controleur.ControleurLdap import ControleurLdap
 from static.Controleur.ControleurConf import ControleurConf
 from static.Controleur.ControleurLog import write_log
-import hashlib
-
-def encode_password_sha(password):
-    sha = hashlib.sha1(password.encode('utf-8')).digest()
-    return '{SHA}' + sha.hex()
 
 def register(app):
     @app.route('/register', methods=['GET', 'POST'])
@@ -26,7 +21,7 @@ def register(app):
                 ('uid', [username.encode('utf-8')]),
                 ('sn', [username.encode('utf-8')]),  # Nom de famille
                 ('cn', [username.encode('utf-8')]),  # Nom complet
-                ('userPassword', [encode_password_sha(password).encode('utf-8')]),  # Mot de passe en clair
+                ('userPassword', [password.encode('utf-8')]),  # Mot de passe en clair
                 ('mail', [email.encode('utf-8')])
             ]
 
