@@ -12,7 +12,7 @@ def register(app):
             email = request.form['email']
 
             conf = ControleurConf()
-            base_dn = conf.get_config('ldap', 'base_dn')
+            base_dn = conf.get_config('LDAP', 'base_dn')
             # Construire le DN et les attributs de l'utilisateur
 
             dn = f"uid={username},dmdName=users,{base_dn}"
