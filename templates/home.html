@@ -188,9 +188,71 @@
             }
         }
     </style>
+    <style>
+        body {
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .center-logo {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            animation: moveLogo 3s forwards;
+        }
+
+        .blur-background {
+            filter: blur(10px);
+            animation: unblurBackground 3s forwards;
+        }
+
+        .fade-in {
+            opacity: 0;
+            animation: fadeInElements 3s forwards;
+        }
+
+        @keyframes moveLogo {
+            0% {
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+            100% {
+                top: 10px; /* Adjust this value to the final position of the logo */
+                left: 10px; /* Adjust this value to the final position of the logo */
+                transform: translate(0, 0);
+            }
+        }
+
+        @keyframes unblurBackground {
+            0% {
+                filter: blur(10px);
+            }
+            100% {
+                filter: blur(0);
+            }
+        }
+
+        @keyframes fadeInElements {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+    </style>
 </head>
-<body style="overflow: hidden;">
-    <div class="navbar">
+<body>
+    <div class="center-logo">
+        <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo">
+    </div>
+
+    <div class="navbar blur-background fade-in">
         <div class="hamburger" onclick="toggleMenu()">☰</div>
         <div class="menu">
             <div class="left-buttons">
@@ -205,7 +267,7 @@
         </div>
     </div>
 
-    <div class="center-container">
+    <div class="center-container blur-background fade-in">
         <div class="text-info">
             <p>Bienvenue sur le service de demandes d'accès à des films ou séries pour le Plex de {owner-plex}.</p>
             <p> - Vous pouvez rechercher des films ou séries et demander l'accès à ceux-ci.</p>
@@ -235,6 +297,14 @@
             var menu = document.querySelector('.menu');
             menu.classList.toggle('active');
         }
+        
+        window.onload = function() {
+            document.querySelector('.center-logo').classList.add('moveLogo');
+            document.querySelector('.navbar').classList.add('unblurBackground');
+            document.querySelector('.center-container').classList.add('unblurBackground');
+            document.querySelector('.navbar').classList.add('fadeInElements');
+            document.querySelector('.center-container').classList.add('fadeInElements');
+        };
     </script>
 </body>
 </html>
