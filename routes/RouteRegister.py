@@ -27,15 +27,13 @@ def register(app):
 
             # Créer une instance de ControleurLdap et ajouter l'utilisateur
             userAdd = False
-            while True:
-                ds = ControleurLdap()
-                ds.bind_as_root()
-                if ds.add_entry(dn, attributes):
-                    write_log(f"Utilisateur ajouté: {username}")
-                    userAdd = True
-                    break
-                else:
-                    write_log(f"Erreur lors de l'ajout de l'utilisateur1: {username}")
+            ds = ControleurLdap()
+            ds.bind_as_root()
+            if ds.add_entry(dn, attributes):
+                write_log(f"Utilisateur ajouté: {username}")
+                userAdd = True
+            else:
+                write_log(f"Erreur lors de l'ajout de l'utilisateur1: {username}")
             ds.disconnect()
             if userAdd:
                 session['username'] = username
