@@ -35,20 +35,20 @@ def register(app):
                         write_log(f"Utilisateur ajouté: {username}")
                         flash('Utilisateur ajouté avec succès.')
                         userAdd = True
+                        break
                     else:
-                        write_log(f"Erreur lors de l'ajout de l'utilisateur: {username}")
+                        write_log(f"Erreur lors de l'ajout de l'utilisateur1: {username}")
                         flash('Erreur lors de l\'ajout de l\'utilisateur. Veuillez réessayer.')
                     ds.disconnect()
-                    break
                 except Exception as e:
-                    write_log(f"Erreur lors de l'ajout de l'utilisateur: {str(e)}")
+                    write_log(f"Erreur lors de l'ajout de l'utilisateur2: {str(e)}")
                     flash('Erreur lors de l\'ajout de l\'utilisateur. Veuillez réessayer.')
                     ds.disconnect()
-                    return render_template('register.html')
+                    return redirect(url_for('index'))
             if userAdd:
                 session['username'] = username
                 return redirect(url_for('home'))
             else:
-                return render_template('register.html')
+                return redirect(url_for('index'))
 
-        return render_template('register.html')
+        return redirect(url_for('index'))
