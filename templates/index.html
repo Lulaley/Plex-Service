@@ -158,13 +158,15 @@
             const logo = document.querySelector('.plex-logo');
             const buttons = document.getElementById('buttons');
 
-            buttons.style.display = 'block';
-            setTimeout(() => {
-                buttons.style.opacity = 1;
-            }, 500);
-            setTimeout(() => {
-                showLoginForm();
-            }, 50);
+            hideForms(() => {
+                buttons.style.display = 'block';
+                setTimeout(() => {
+                    buttons.style.opacity = 1;
+                }, 500);
+                setTimeout(() => {
+                    showLoginForm();
+                }, 50);
+            });
         }
 
         function showLoginForm() {
