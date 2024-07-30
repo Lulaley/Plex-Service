@@ -224,7 +224,7 @@
             100% {
                 top: 10px; /* Adjust this value to the final position of the logo */
                 left: 10px; /* Adjust this value to the final position of the logo */
-                transform: translate(0, 0) scale(0.1); /* Adjust scale to match the navbar logo size */
+                transform: translate(-43%, -45%) scale(0.1); /* Adjust scale to match the navbar logo size */
             }
         }
 
@@ -308,6 +308,7 @@
             setTimeout(function() {
                 document.querySelector('.navbar').classList.remove('blur-background');
                 document.querySelector('.center-container').classList.remove('blur-background');
+                document.querySelector('.center-logo').style.display = 'none'; // Hide the logo after animation
             }, 3000); // Match the duration of the animation
         };
     </script>
