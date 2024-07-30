@@ -2,6 +2,8 @@ from flask import render_template, request, redirect, url_for, flash, session
 from static.Controleur.ControleurLdap import ControleurLdap
 from static.Controleur.ControleurConf import ControleurConf
 from static.Controleur.ControleurLog import write_log
+import hashlib
+import base64
 
 def register(app):
     @app.route('/register', methods=['GET', 'POST'])
@@ -10,6 +12,11 @@ def register(app):
             username = request.form['username']
             password = request.form['password']
             email = request.form['email']
+
+            # Hacher le mot de passe avec SHA-256
+            sha256 = hashlib.sha256()
+            sha256.update(password.encode('utf-8'))
+            hashed_password = base64.b64encode(sha256.digest()).decode('utf-8')
 
             conf = ControleurConf()
             base_dn = conf.get_config('LDAP', 'base_dn')
@@ -21,7 +28,7 @@ def register(app):
                 ('uid', [username.encode('utf-8')]),
                 ('sn', [username.encode('utf-8')]),  # Nom de famille
                 ('cn', [username.encode('utf-8')]),  # Nom complet
-                ('userPassword', [password.encode('utf-8')]),
+                ('userPassword', [hashed_password.encode('utf-8')]),
                 ('mail', [email.encode('utf-8')])
             ]
 
