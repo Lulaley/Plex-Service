@@ -26,7 +26,6 @@ def register(app):
 
             # Créer une instance de ControleurLdap et ajouter l'utilisateur
             ds = ControleurLdap()
-            ds.bind_as_root()
             ds.add_entry(dn, attributes)
             ds.disconnect()
             session['username'] = username
