@@ -148,21 +148,23 @@
                     }, 500); // Duration of the fade-out animation
                 }
             });
+
+            if (!forms.some(form => form.style.display === 'block') && callback) {
+                callback();
+            }
         }
 
         function showButtons() {
             const logo = document.querySelector('.plex-logo');
             const buttons = document.getElementById('buttons');
 
-            hideForms(() => {
-                buttons.style.display = 'block';
-                setTimeout(() => {
-                    buttons.style.opacity = 1;
-                }, 500);
-                setTimeout(() => {
-                    showLoginForm();
-                }, 50);
-            });
+            buttons.style.display = 'block';
+            setTimeout(() => {
+                buttons.style.opacity = 1;
+            }, 500);
+            setTimeout(() => {
+                showLoginForm();
+            }, 50);
         }
 
         function showLoginForm() {
@@ -221,7 +223,7 @@
                 }, inputs.length * 250);
             }, 500);
         }
-
+        
         document.querySelector('.plex-logo').addEventListener('click', showButtons);
     </script>
 </body>
