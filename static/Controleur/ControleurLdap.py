@@ -23,7 +23,7 @@ class ControleurLdap:
             self.bind_as_root()
             search_base = self.config.get_config('LDAP', 'base_dn')
             search_filter = f"(uid={username})"
-            result = self.conn.search_s(search_base, search_filter)
+            result = self.conn.search_s(search_base, ldap.SCOPE_BASE, search_filter)
 
             if not result:
                 write_log("Utilisateur non trouvé: " + username)
