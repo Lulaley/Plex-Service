@@ -26,6 +26,8 @@ def register(app):
             dn = f"uid={username},dmdName=users,{base_dn}"
             attributes = [
                 ('objectClass', [b'inetOrgPerson']),
+                ('objectClass', [b'organizationalPerson']),
+                ('objectClass', [b'person']),
                 ('uid', [username.encode('utf-8')]),
                 ('sn', [username.encode('utf-8')]),  # Nom de famille
                 ('cn', [username.encode('utf-8')]),  # Nom complet
