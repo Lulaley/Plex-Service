@@ -32,7 +32,6 @@ def register(app):
                 ds.bind_as_root()
                 if ds.add_entry(dn, attributes):
                     write_log(f"Utilisateur ajouté: {username}")
-                    flash('Utilisateur ajouté avec succès.')
                     userAdd = True
                     break
                 else:
