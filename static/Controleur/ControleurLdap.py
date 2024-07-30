@@ -62,7 +62,7 @@ class ControleurLdap:
             result = self.conn.add_s(dn, attributes)
             if result:
                 write_log("Entrée " + dn + " ajoutée avec succès")
-                return result[0][0]
+                return True
             else:
                 write_log("Erreur lors de l'ajout de l'entrée: " + dn)
                 return None
@@ -74,16 +74,20 @@ class ControleurLdap:
             self.conn.bind_as_root()
             self.conn.delete_s(dn)
             write_log("Entrée supprimée avec succès")
+            return True
         except ldap.LDAPError as e:
             write_log("Erreur lors de la suppression de l'entrée: " + str(e))
+            return False
 
     def modify_entry(self, dn, mod_list):
         try:
             self.conn.bind_as_root()
             self.conn.modify_s(dn, mod_list)
             write_log("Entrée modifiée avec succès")
+            return True
         except ldap.LDAPError as e:
             write_log("Erreur lors de la modification de l'entrée: " + str(e))
+            return False
 
     def search_entry(self, search_base, search_filter):
         try:
@@ -108,7 +112,7 @@ class ControleurLdap:
     def entry_exists(self, dn):
         try:
             write_log(f"Vérification de l'existence de l'entrée: {dn}")
-            self.connection.search(dn, '(objectClass=*)')
+            self.connection.search_s(dn, '(objectClass=*)')
             return len(self.connection.entries) > 0
         except Exception as e:
             write_log(f"Erreur lors de la vérification de l'existence de l'entrée: {str(e)}")
