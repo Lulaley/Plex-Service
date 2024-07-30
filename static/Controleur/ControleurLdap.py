@@ -19,14 +19,26 @@ class ControleurLdap:
 
     def authenticate_user(self, username, password):
         try:
-            self.conn.bind(username, password)
+            # Rechercher l'utilisateur dans la base LDAP
+            self.bind_as_root()
+            search_base = self.config.get_config('LDAP', 'base_dn')
+            search_filter = f"(uid={username})"
+            result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter)
+
+            if not result:
+                write_log("Utilisateur non trouvé: " + username)
+                return False
+
+            # Si l'utilisateur existe, tenter de l'authentifier
+            user_dn = result[0][0]
+            self.conn.bind(user_dn, password)
             write_log("Authentification réussie de l'utilisateur: " + username)
             return True
         except ldap.INVALID_CREDENTIALS:
-            write_log("Les informations d'identification sont incorrectes.")
+            write_log("Les informations d'identification sont incorrectes pour l'utilisateur: " + username)
             return False
         except ldap.LDAPError as e:
-            write_log("Erreur d'authentification: " + str(e))
+            write_log("Erreur d'authentification pour l'utilisateur: " + username + " - " + str(e))
             return False
 
     def search_user(self, username):
