@@ -17,8 +17,6 @@ def login(app):
             # Utilisation de authenticate_user pour vérifier les identifiants
             filter = f"(uid={username},dmdName=users,{base_dn})"
             if ds.authenticate_user(filter, password):
-                # Déconnexion de l'instance LDAP
-                ds.disconnect()
                 # Initialiser la variable de session
                 session['username'] = username
                 # Rediriger vers la page d'accueil
