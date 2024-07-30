@@ -219,12 +219,12 @@
             0% {
                 top: 50%;
                 left: 50%;
-                transform: translate(-50%, -50%);
+                transform: translate(-50%, -50%) scale(1);
             }
             100% {
                 top: 10px; /* Adjust this value to the final position of the logo */
                 left: 10px; /* Adjust this value to the final position of the logo */
-                transform: translate(0, 0);
+                transform: translate(0, 0) scale(0.1); /* Adjust scale to match the navbar logo size */
             }
         }
 
@@ -297,13 +297,18 @@
             var menu = document.querySelector('.menu');
             menu.classList.toggle('active');
         }
-        
+
         window.onload = function() {
             document.querySelector('.center-logo').classList.add('moveLogo');
             document.querySelector('.navbar').classList.add('unblurBackground');
             document.querySelector('.center-container').classList.add('unblurBackground');
             document.querySelector('.navbar').classList.add('fadeInElements');
             document.querySelector('.center-container').classList.add('fadeInElements');
+
+            setTimeout(function() {
+                document.querySelector('.navbar').classList.remove('blur-background');
+                document.querySelector('.center-container').classList.remove('blur-background');
+            }, 3000); // Match the duration of the animation
         };
     </script>
 </body>
