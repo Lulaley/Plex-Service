@@ -163,9 +163,9 @@
 
             if (formsVisible) {
                 hideForms(() => {
-                    buttons.style.display = 'block';
+                    buttons.style.display = 'none';
                     setTimeout(() => {
-                        buttons.style.opacity = 1;
+                        buttons.style.opacity = 0;
                     }, 500);
                 });
             } else {
