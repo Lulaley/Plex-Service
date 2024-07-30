@@ -20,7 +20,7 @@ class ControleurLdap:
     def authenticate_user(self, username, password):
         try:
             self.conn.bind(username, password)
-            write_log("Authentification réussie")
+            write_log("Authentification réussie de l'utilisateur: " + username)
             return True
         except ldap.LDAPError as e:
             write_log("Erreur d'authentification: " + str(e))
@@ -45,7 +45,7 @@ class ControleurLdap:
         try:
             self.conn.bind_as_root()
             self.conn.add(dn, attributes)
-            write_log("Entrée ajoutée avec succès")
+            write_log("Entrée " + dn + " ajoutée avec succès")
         except ldap.LDAPError as e:
             write_log("Erreur lors de l'ajout de l'entrée: " + str(e))
 
