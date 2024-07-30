@@ -43,7 +43,6 @@ class ControleurLdap:
 
     def add_entry(self, dn, attributes):
         try:
-            self.conn.bind_as_root()
             self.conn.add(dn, attributes)
             write_log("Entrée " + dn + " ajoutée avec succès")
         except ldap.LDAPError as e:

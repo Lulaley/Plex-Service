@@ -29,6 +29,7 @@ def register(app):
             while True:
                 ds = ControleurLdap()
                 try:
+                    ds.bind_as_root()
                     ds.add_entry(dn, attributes)
                     ds.disconnect()
                     break
