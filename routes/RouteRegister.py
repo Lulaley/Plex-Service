@@ -36,7 +36,6 @@ def register(app):
                     break
                 else:
                     write_log(f"Erreur lors de l'ajout de l'utilisateur1: {username}")
-                    flash('Erreur lors de l\'ajout de l\'utilisateur. Veuillez réessayer.')
             ds.disconnect()
             if userAdd:
                 session['username'] = username
