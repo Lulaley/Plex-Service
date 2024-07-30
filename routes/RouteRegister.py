@@ -29,22 +29,16 @@ def register(app):
             userAdd = False
             while True:
                 ds = ControleurLdap()
-                try:
-                    ds.bind_as_root()
-                    if ds.add_entry(dn, attributes):
-                        write_log(f"Utilisateur ajouté: {username}")
-                        flash('Utilisateur ajouté avec succès.')
-                        userAdd = True
-                        break
-                    else:
-                        write_log(f"Erreur lors de l'ajout de l'utilisateur1: {username}")
-                        flash('Erreur lors de l\'ajout de l\'utilisateur. Veuillez réessayer.')
-                    ds.disconnect()
-                except Exception as e:
-                    write_log(f"Erreur lors de l'ajout de l'utilisateur2: {str(e)}")
+                ds.bind_as_root()
+                if ds.add_entry(dn, attributes):
+                    write_log(f"Utilisateur ajouté: {username}")
+                    flash('Utilisateur ajouté avec succès.')
+                    userAdd = True
+                    break
+                else:
+                    write_log(f"Erreur lors de l'ajout de l'utilisateur1: {username}")
                     flash('Erreur lors de l\'ajout de l\'utilisateur. Veuillez réessayer.')
-                    ds.disconnect()
-                    return redirect(url_for('index'))
+            ds.disconnect()
             if userAdd:
                 session['username'] = username
                 return redirect(url_for('home'))
