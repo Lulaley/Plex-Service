@@ -133,10 +133,12 @@
         }); */
 
         function hideForms(callback) {
+            const buttons = document.getElementById('buttons');
             const createForm = document.getElementById('create-form');
             const loginForm = document.getElementById('login-form');
             const forms = [createForm, loginForm];
 
+            buttons.style.display = 'none';
             forms.forEach(form => {
                 if (form.style.display === 'block') {
                     form.style.opacity = 0;
@@ -223,7 +225,7 @@
                 }, inputs.length * 250);
             }, 500);
         }
-        
+
         document.querySelector('.plex-logo').addEventListener('click', showButtons);
     </script>
 </body>
