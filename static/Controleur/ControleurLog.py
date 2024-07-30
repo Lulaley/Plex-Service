@@ -1,5 +1,6 @@
-from .ControleurConf import ControleurConf
 import logging
+import inspect
+from .ControleurConf import ControleurConf
 
 def write_log(message):
     # Get the configuration
@@ -16,6 +17,9 @@ def write_log(message):
         'CRITICAL': logging.CRITICAL
     }
 
+    # Get the name of the calling function
+    caller_function = inspect.stack()[1].function
+
     # Perform the log writing logic here
     try:
         # Ensure the log level is valid
@@ -23,7 +27,7 @@ def write_log(message):
             raise ValueError(f"Invalid log level: {log_level}")
 
         # Create a logger
-        logger = logging.getLogger('ControleurLog')
+        logger = logging.getLogger(caller_function)
         logger.setLevel(log_levels[log_level])
 
         # Create file handler
@@ -37,7 +41,8 @@ def write_log(message):
         # Add the handler to the logger
         logger.addHandler(fh)
 
-        # Log the message
-        logger.info(message)
+        # Log the message with the caller function
+        logger.log(log_levels[log_level], f"{message}")
+
     except Exception as e:
-        print(f"Error occurred while writing log: {str(e)}")
+        print(f"Failed to write log: {e}")
