@@ -35,28 +35,32 @@ def register(app):
 
             # Créer une instance de ControleurLdap et ajouter l'utilisateur
             userAdd = False
-            while True:
-                ds = ControleurLdap()
-                try:
-                    ds.bind_as_root()
-                    if (ds.add_entry(dn, attributes)):
+            ds = ControleurLdap()
+            try:
+                ds.bind_as_root()
+                # Vérifier si l'utilisateur existe déjà
+                if ds.entry_exists(dn):
+                    write_log(f"Utilisateur existe déjà: {username}")
+                    flash('Utilisateur existe déjà. Veuillez choisir un autre nom d\'utilisateur.')
+                else:
+                    if ds.add_entry(dn, attributes):
                         write_log(f"Utilisateur ajouté: {username}")
                         flash('Utilisateur ajouté avec succès.')
                         userAdd = True
                     else:
                         write_log(f"Erreur lors de l'ajout de l'utilisateur: {username}")
                         flash('Erreur lors de l\'ajout de l\'utilisateur. Veuillez réessayer.')
-                    ds.disconnect()
-                    break
-                except Exception as e:
-                    write_log(f"Erreur lors de l'ajout de l'utilisateur: {str(e)}")
-                    flash('Erreur lors de l\'ajout de l\'utilisateur. Veuillez réessayer.')
-                    ds.disconnect()
-                    return render_template('register.html')
+                ds.disconnect()
+            except Exception as e:
+                write_log(f"Erreur lors de l'ajout de l'utilisateur: {str(e)}")
+                flash('Erreur lors de l\'ajout de l\'utilisateur. Veuillez réessayer.')
+                ds.disconnect()
+                return render_template('register.html')
+            
             if userAdd:
                 session['username'] = username
                 return redirect(url_for('home'))
             else:
-                return render_template('index.html')
+                return render_template('register.html')
 
         return render_template('register.html')
