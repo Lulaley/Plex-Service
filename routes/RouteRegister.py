@@ -8,7 +8,7 @@ def register(app):
     def inner_register():
         if request.method == 'POST':
             username = request.form['username']
-            password = request.form['createPassword']
+            password = request.form['creatPassword']
             email = request.form['email']
 
             conf = ControleurConf()
