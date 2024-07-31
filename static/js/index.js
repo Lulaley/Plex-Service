@@ -224,23 +224,25 @@ document.addEventListener('DOMContentLoaded', function() {
         let allValid = true;
         inputs.forEach(input => {
             const tooltip = document.getElementById(`${input.id}-tooltip`);
-            console.log('tooltip : ',tooltip);
-            if (!input.checkValidity()) {
-                if (currentTooltip) {
-                    currentTooltip.style.visibility = 'hidden';
-                    currentTooltip.style.opacity = '0';
+            if (tooltip !== null) {
+                console.log('tooltip : ',tooltip);
+                if (!input.checkValidity()) {
+                    if (currentTooltip) {
+                        currentTooltip.style.visibility = 'hidden';
+                        currentTooltip.style.opacity = '0';
+                    }
+                    tooltip.style.visibility = 'visible';
+                    tooltip.style.opacity = '1';
+                    input.classList.add('error');
+                    currentTooltip = tooltip;
+                    allValid = false;
+                } else {
+                    tooltip.style.visibility = 'hidden';
+                    tooltip.style.opacity = '0';
+                    input.classList.remove('error');
                 }
-                tooltip.style.visibility = 'visible';
-                tooltip.style.opacity = '1';
-                input.classList.add('error');
-                currentTooltip = tooltip;
-                allValid = false;
-            } else {
-                tooltip.style.visibility = 'hidden';
-                tooltip.style.opacity = '0';
-                input.classList.remove('error');
+                console.log(input.id, input.checkValidity());
             }
-            console.log(input.id, input.checkValidity());
         });
         submitBtn.style.display = allValid ? 'block' : 'none';
     }
