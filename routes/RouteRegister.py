@@ -13,9 +13,11 @@ def register(app):
 
             conf = ControleurConf()
             base_dn = conf.get_config('LDAP', 'base_dn')
+            ds = ControleurLdap()
             # Vérifier si le compte existe déjà
             if ds.search_user(username):
                 write_log(f"Ce nom d'utilisateur existe déjà")
+                ds.disconnect()
                 return redirect(url_for('index'))
             # Construire le DN et les attributs de l'utilisateur
 
@@ -31,8 +33,6 @@ def register(app):
 
             # Créer une instance de ControleurLdap et ajouter l'utilisateur
             userAdd = False
-            ds = ControleurLdap()
-            ds.bind_as_root()
             if ds.add_entry(dn, attributes):
                 write_log(f"Utilisateur ajouté: {username}")
                 userAdd = True
