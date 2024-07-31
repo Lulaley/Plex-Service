@@ -214,53 +214,51 @@ function showCreateForm() {
 
 document.querySelector('.plex-logo').addEventListener('click', showButtons);
 
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('#create-form form');
-    const submitBtn = document.getElementById('submit-btn');
-    const inputs = form.querySelectorAll('input');
-    let currentTooltip = null;
+const form = document.querySelector('#create-form form');
+const submitBtn = document.getElementById('submit-btn');
+const inputs = form.querySelectorAll('input');
+let currentTooltip = null;
 
-    function validateForm() {
-        let allValid = true;
-        inputs.forEach(input => {
-            const tooltip = document.getElementById(`${input.id}-tooltip`);
-            if (!input.checkValidity()) {
-                if (currentTooltip) {
-                    currentTooltip.style.visibility = 'hidden';
-                    currentTooltip.style.opacity = '0';
-                }
-                tooltip.style.visibility = 'visible';
-                tooltip.style.opacity = '1';
-                input.classList.add('error');
-                currentTooltip = tooltip;
-                allValid = false;
-            } else {
-                tooltip.style.visibility = 'hidden';
-                tooltip.style.opacity = '0';
-                input.classList.remove('error');
-            }
-        });
-        submitBtn.style.display = allValid ? 'block' : 'none';
-    }
-
+function validateForm() {
+    let allValid = true;
     inputs.forEach(input => {
-        input.addEventListener('input', validateForm);
-        input.addEventListener('focus', () => {
+        const tooltip = document.getElementById(`${input.id}-tooltip`);
+        if (!input.checkValidity()) {
             if (currentTooltip) {
                 currentTooltip.style.visibility = 'hidden';
                 currentTooltip.style.opacity = '0';
-                currentTooltip = null;
             }
-        });
-    });
-
-    form.addEventListener('submit', function(event) {
-        validateForm();
-        if (!form.checkValidity()) {
-            event.preventDefault();
+            tooltip.style.visibility = 'visible';
+            tooltip.style.opacity = '1';
+            input.classList.add('error');
+            currentTooltip = tooltip;
+            allValid = false;
+        } else {
+            tooltip.style.visibility = 'hidden';
+            tooltip.style.opacity = '0';
+            input.classList.remove('error');
         }
     });
+    submitBtn.style.display = allValid ? 'block' : 'none';
+}
 
-    // Initial validation check to ensure the button is displayed if all fields are valid on page load
-    validateForm();
+inputs.forEach(input => {
+    input.addEventListener('input', validateForm);
+    input.addEventListener('focus', () => {
+        if (currentTooltip) {
+            currentTooltip.style.visibility = 'hidden';
+            currentTooltip.style.opacity = '0';
+            currentTooltip = null;
+        }
+    });
 });
+
+form.addEventListener('submit', function(event) {
+    validateForm();
+    if (!form.checkValidity()) {
+        event.preventDefault();
+    }
+});
+
+// Initial validation check to ensure the button is displayed if all fields are valid on page load
+validateForm();
