@@ -82,36 +82,48 @@
         }
     </style>
     <style>
-        .error {
-            border-color: red;
-        }
-
         .tooltip {
             position: relative;
-            display: inline-block;
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
         }
 
-        .tooltip .tooltiptext {
+        .tooltip input {
+            flex: 1;
+        }
+
+        .tooltiptext {
             visibility: hidden;
             width: 200px;
-            background-color: red;
+            background-color: #f44336;
+            /* Red */
             color: #fff;
             text-align: center;
-            border-radius: 5px;
+            border-radius: 6px;
             padding: 5px;
             position: absolute;
             z-index: 1;
-            bottom: 125%;
-            /* Position the tooltip above the text */
-            left: 50%;
-            margin-left: -100px;
+            right: -210px;
+            /* Position the tooltip to the right */
             opacity: 0;
             transition: opacity 0.3s;
         }
 
-        .tooltip:hover .tooltiptext {
+        .tooltip input.error+.tooltiptext {
             visibility: visible;
             opacity: 1;
+        }
+
+        .tooltip input.valid+.tooltiptext {
+            visibility: visible;
+            opacity: 1;
+            background-color: #4CAF50;
+            /* Green */
+        }
+
+        .submit-container {
+            text-align: center;
         }
     </style>
 </head>
@@ -134,7 +146,7 @@
         </form>
     </div>
     </div>
-    <div id="create-form" style="display: none;">
+    <div id="create-form">
         <form action="/register" method="post">
             <div class="tooltip">
                 <input type="text" name="username" placeholder="Nom d'utilisateur" required>
@@ -176,10 +188,12 @@
             var emailTooltip = document.getElementById('email-tooltip');
             if (!validateEmail(email)) {
                 event.target.classList.add('error');
+                event.target.classList.remove('valid');
                 emailTooltip.textContent = "Adresse email invalide.";
             } else {
                 event.target.classList.remove('error');
-                emailTooltip.textContent = "";
+                event.target.classList.add('valid');
+                emailTooltip.textContent = "Adresse email valide.";
             }
         });
 
@@ -189,10 +203,12 @@
             var passwordTooltip = document.getElementById('password-tooltip');
             if (!validatePassword(password, confirmPassword)) {
                 event.target.classList.add('error');
+                event.target.classList.remove('valid');
                 passwordTooltip.textContent = "Le mot de passe doit contenir au moins 6 caractères et correspondre à la confirmation.";
             } else {
                 event.target.classList.remove('error');
-                passwordTooltip.textContent = "";
+                event.target.classList.add('valid');
+                passwordTooltip.textContent = "Mot de passe valide.";
             }
         });
 
@@ -202,10 +218,12 @@
             var confirmPasswordTooltip = document.getElementById('confirm-password-tooltip');
             if (!validatePassword(password, confirmPassword)) {
                 event.target.classList.add('error');
+                event.target.classList.remove('valid');
                 confirmPasswordTooltip.textContent = "Les mots de passe ne correspondent pas.";
             } else {
                 event.target.classList.remove('error');
-                confirmPasswordTooltip.textContent = "";
+                event.target.classList.add('valid');
+                confirmPasswordTooltip.textContent = "Les mots de passe correspondent.";
             }
         });
 
@@ -224,9 +242,6 @@
             var emailTooltip = document.getElementById('email-tooltip');
             var passwordTooltip = document.getElementById('password-tooltip');
             var confirmPasswordTooltip = document.getElementById('confirm-password-tooltip');
-
-            // Expression régulière pour valider le format de l'email
-            var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
 
             // Réinitialiser les styles et les tooltips
             emailField.classList.remove('error');
