@@ -100,6 +100,7 @@ function showCreateForm() {
     const createForm = document.getElementById('create-form');
     const inputs = createForm.querySelectorAll('input');
     const submitContainer = createForm.querySelector('.submit-container');
+    const submitBtn = createForm.querySelector('#submit-btn');
     createForm.style.display = 'block';
 
     setTimeout(() => {
@@ -111,7 +112,7 @@ function showCreateForm() {
         });
         setTimeout(() => {
             submitContainer.style.opacity = 1;
-            validateForm();
+            submitBtn.style.display = 'none';
         }, inputs.length * 250);
     }, 500);
     formsVisible = true;
