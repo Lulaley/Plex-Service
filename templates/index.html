@@ -44,7 +44,8 @@
         }
 
         input[type="text"],
-        input[type="password"] {
+        input[type="password"],
+        input[type="email"] {
             display: block;
             margin-bottom: 10px;
             padding: 10px;
@@ -85,7 +86,8 @@
             }
 
             input[type="text"],
-            input[type="password"] {
+            input[type="password"],
+            input[type="email"] {
                 padding: 8px;
             }
         }
@@ -101,7 +103,8 @@
             }
 
             input[type="text"],
-            input[type="password"] {
+            input[type="password"],
+            input[type="email"] {
                 padding: 6px;
             }
         }
@@ -128,8 +131,8 @@
             padding: 5px;
             position: absolute;
             z-index: 1;
-            right: -210px;
-            /* Position the tooltip to the right */
+            left: 50%;
+            transform: translateX(-50%);
             opacity: 0;
             transition: opacity 0.3s;
         }
@@ -137,13 +140,6 @@
         .tooltip input.error+.tooltiptext {
             visibility: visible;
             opacity: 1;
-        }
-
-        .tooltip input.valid+.tooltiptext {
-            visibility: visible;
-            opacity: 1;
-            background-color: #4CAF50;
-            /* Green */
         }
 
         .submit-container {
