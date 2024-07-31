@@ -218,15 +218,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('#create-form form');
     const submitBtn = document.getElementById('submit-btn');
     const inputs = form.querySelectorAll('input');
+    let currentTooltip = null;
 
     function validateForm() {
         let allValid = true;
         inputs.forEach(input => {
             const tooltip = document.getElementById(`${input.id}-tooltip`);
             if (!input.checkValidity()) {
+                if (currentTooltip) {
+                    currentTooltip.style.visibility = 'hidden';
+                    currentTooltip.style.opacity = '0';
+                }
                 tooltip.style.visibility = 'visible';
                 tooltip.style.opacity = '1';
                 input.classList.add('error');
+                currentTooltip = tooltip;
                 allValid = false;
             } else {
                 tooltip.style.visibility = 'hidden';
@@ -239,6 +245,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     inputs.forEach(input => {
         input.addEventListener('input', validateForm);
+        input.addEventListener('focus', () => {
+            if (currentTooltip) {
+                currentTooltip.style.visibility = 'hidden';
+                currentTooltip.style.opacity = '0';
+                currentTooltip = null;
+            }
+        });
     });
 
     form.addEventListener('submit', function(event) {

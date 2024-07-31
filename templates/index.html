@@ -26,27 +26,26 @@
             </div>
         </form>
     </div>
-    </div>
     <div id="create-form">
         <form action="/register" method="post">
             <div class="tooltip">
-                <input type="text" name="username" placeholder="Nom d'utilisateur" required>
-                <span class="tooltiptext" id="username-tooltip"></span>
+                <input type="text" id="username" name="username" placeholder="Nom d'utilisateur" required>
+                <span class="tooltiptext" id="username-tooltip">Nom d'utilisateur requis</span>
             </div>
             <div class="tooltip">
-                <input type="text" name="email" placeholder="Adresse email" required>
-                <span class="tooltiptext" id="email-tooltip"></span>
+                <input type="text" id="email" name="email" placeholder="Adresse email" required>
+                <span class="tooltiptext" id="email-tooltip">Email invalide</span>
             </div>
             <div class="tooltip">
-                <input type="password" name="createPassword" placeholder="Mot de passe" required>
-                <span class="tooltiptext" id="password-tooltip"></span>
+                <input type="password" id="createPassword" name="createPassword" placeholder="Mot de passe" required>
+                <span class="tooltiptext" id="password-tooltip">Mot de passe requis</span>
             </div>
             <div class="tooltip">
-                <input type="password" name="confirm_password" placeholder="Confirmer le mot de passe" required>
-                <span class="tooltiptext" id="confirm-password-tooltip"></span>
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirmer le mot de passe" required>
+                <span class="tooltiptext" id="confirm-password-tooltip">Les mots de passe ne correspondent pas</span>
             </div>
             <div class="submit-container">
-                <input type="submit" value="Créer un compte">
+                <input type="submit" id="submit-btn" value="Créer un compte" style="display: none;">
             </div>
         </form>
     </div>
