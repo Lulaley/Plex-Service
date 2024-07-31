@@ -213,3 +213,38 @@ function showCreateForm() {
 }
 
 document.querySelector('.plex-logo').addEventListener('click', showButtons);
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('#create-form form');
+    const submitBtn = document.getElementById('submit-btn');
+    const inputs = form.querySelectorAll('input');
+
+    function validateForm() {
+        let allValid = true;
+        inputs.forEach(input => {
+            const tooltip = document.getElementById(`${input.id}-tooltip`);
+            if (!input.checkValidity()) {
+                tooltip.style.visibility = 'visible';
+                tooltip.style.opacity = '1';
+                input.classList.add('error');
+                allValid = false;
+            } else {
+                tooltip.style.visibility = 'hidden';
+                tooltip.style.opacity = '0';
+                input.classList.remove('error');
+            }
+        });
+        submitBtn.style.display = allValid ? 'block' : 'none';
+    }
+
+    inputs.forEach(input => {
+        input.addEventListener('input', validateForm);
+    });
+
+    form.addEventListener('submit', function(event) {
+        validateForm();
+        if (!form.checkValidity()) {
+            event.preventDefault();
+        }
+    });
+});

@@ -114,8 +114,7 @@ button {
 .tooltiptext {
     visibility: hidden;
     width: 200px;
-    background-color: #f44336;
-    /* Red */
+    background-color: #f44336; /* Red */
     color: #fff;
     text-align: center;
     border-radius: 6px;
