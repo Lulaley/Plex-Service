@@ -168,7 +168,6 @@ document.addEventListener('DOMContentLoaded', function() {
             emailTooltip.style.visibility = 'hidden';
             emailTooltip.style.opacity = '0';
         }
-        validateForm();
     });
 
     document.querySelector('input[name="createPassword"]').addEventListener('input', function (event) {
@@ -187,7 +186,6 @@ document.addEventListener('DOMContentLoaded', function() {
             passwordTooltip.style.visibility = 'hidden';
             passwordTooltip.style.opacity = '0';
         }
-        validateForm();
     });
 
     document.querySelector('input[name="confirm_password"]').addEventListener('input', function (event) {
@@ -207,7 +205,6 @@ document.addEventListener('DOMContentLoaded', function() {
             confirmPasswordTooltip.style.visibility = 'hidden';
             confirmPasswordTooltip.style.opacity = '0';
         }
-        validateForm();
     });
 
     inputs.forEach(input => {
