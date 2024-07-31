@@ -260,4 +260,7 @@ document.addEventListener('DOMContentLoaded', function() {
             event.preventDefault();
         }
     });
+
+    // Initial validation check to ensure the button is displayed if all fields are valid on page load
+    validateForm();
 });
