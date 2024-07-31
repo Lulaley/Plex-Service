@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -30,7 +31,8 @@
             cursor: pointer;
         }
 
-        #login-form, #create-form {
+        #login-form,
+        #create-form {
             display: none;
             padding: 20px;
             border-radius: 5px;
@@ -38,7 +40,8 @@
             opacity: 0;
         }
 
-        input[type="text"], input[type="password"] {
+        input[type="text"],
+        input[type="password"] {
             display: block;
             margin-bottom: 10px;
             padding: 10px;
@@ -55,7 +58,8 @@
             transition: opacity 0.5s ease-in-out;
         }
 
-        input[type="submit"], button {
+        input[type="submit"],
+        button {
             background-color: #ff9900;
             color: white;
             border: none;
@@ -76,40 +80,42 @@
                 width: 75%;
             }
         }
-</style>
-<style>
-    .error {
-        border-color: red;
-    }
+    </style>
+    <style>
+        .error {
+            border-color: red;
+        }
 
-    .tooltip {
-        position: relative;
-        display: inline-block;
-    }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
 
-    .tooltip .tooltiptext {
-        visibility: hidden;
-        width: 200px;
-        background-color: red;
-        color: #fff;
-        text-align: center;
-        border-radius: 5px;
-        padding: 5px;
-        position: absolute;
-        z-index: 1;
-        bottom: 125%; /* Position the tooltip above the text */
-        left: 50%;
-        margin-left: -100px;
-        opacity: 0;
-        transition: opacity 0.3s;
-    }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: red;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            /* Position the tooltip above the text */
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
 
-    .tooltip:hover .tooltiptext {
-        visibility: visible;
-        opacity: 1;
-    }
-</style>
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
 </head>
+
 <body>
     <div class="plex-logo">
         <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="showButtons()">
@@ -126,6 +132,7 @@
                 <input type="submit" value="Se connecter">
             </div>
         </form>
+    </div>
     </div>
     <div id="create-form" style="display: none;">
         <form action="/register" method="post">
@@ -150,53 +157,102 @@
             </div>
         </form>
     </div>
-    
+
     <script>
-        document.getElementById('create-form').addEventListener('submit', function(event) {
+        // Fonction de validation de l'email
+        function validateEmail(email) {
+            var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+            return emailPattern.test(email);
+        }
+
+        // Fonction de validation du mot de passe
+        function validatePassword(password, confirmPassword) {
+            return password === confirmPassword && password.length >= 6;
+        }
+
+        // Ajouter des écouteurs d'événements pour les champs de formulaire
+        document.querySelector('input[name="email"]').addEventListener('input', function (event) {
+            var email = event.target.value;
+            var emailTooltip = document.getElementById('email-tooltip');
+            if (!validateEmail(email)) {
+                event.target.classList.add('error');
+                emailTooltip.textContent = "Adresse email invalide.";
+            } else {
+                event.target.classList.remove('error');
+                emailTooltip.textContent = "";
+            }
+        });
+
+        document.querySelector('input[name="createPassword"]').addEventListener('input', function (event) {
+            var password = event.target.value;
+            var confirmPassword = document.querySelector('input[name="confirm_password"]').value;
+            var passwordTooltip = document.getElementById('password-tooltip');
+            if (!validatePassword(password, confirmPassword)) {
+                event.target.classList.add('error');
+                passwordTooltip.textContent = "Le mot de passe doit contenir au moins 6 caractères et correspondre à la confirmation.";
+            } else {
+                event.target.classList.remove('error');
+                passwordTooltip.textContent = "";
+            }
+        });
+
+        document.querySelector('input[name="confirm_password"]').addEventListener('input', function (event) {
+            var confirmPassword = event.target.value;
+            var password = document.querySelector('input[name="createPassword"]').value;
+            var confirmPasswordTooltip = document.getElementById('confirm-password-tooltip');
+            if (!validatePassword(password, confirmPassword)) {
+                event.target.classList.add('error');
+                confirmPasswordTooltip.textContent = "Les mots de passe ne correspondent pas.";
+            } else {
+                event.target.classList.remove('error');
+                confirmPasswordTooltip.textContent = "";
+            }
+        });
+
+        document.getElementById('create-form').addEventListener('submit', function (event) {
             // Récupérer les valeurs des champs
             var email = document.querySelector('input[name="email"]').value;
             var password = String(document.querySelector('input[name="createPassword"]').value);
             var confirmPassword = String(document.querySelector('input[name="confirm_password"]').value);
-    
+
             // Récupérer les éléments des champs
             var emailField = document.querySelector('input[name="email"]');
             var passwordField = document.querySelector('input[name="createPassword"]');
             var confirmPasswordField = document.querySelector('input[name="confirm_password"]');
-    
+
             // Récupérer les éléments des tooltips
             var emailTooltip = document.getElementById('email-tooltip');
             var passwordTooltip = document.getElementById('password-tooltip');
             var confirmPasswordTooltip = document.getElementById('confirm-password-tooltip');
-    
+
             // Expression régulière pour valider le format de l'email
             var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    
+
             // Réinitialiser les styles et les tooltips
             emailField.classList.remove('error');
             passwordField.classList.remove('error');
             confirmPasswordField.classList.remove('error');
-            emailTooltip.textContent = '';
-            passwordTooltip.textContent = '';
-            confirmPasswordTooltip.textContent = '';
-    
-            // Vérifier si l'email est au bon format
-            if (!emailPattern.test(email)) {
+            emailTooltip.textContent = "";
+            passwordTooltip.textContent = "";
+            confirmPasswordTooltip.textContent = "";
+
+            // Valider l'email
+            if (!validateEmail(email)) {
                 emailField.classList.add('error');
-                emailTooltip.textContent = 'Veuillez entrer une adresse email valide.';
-                event.preventDefault(); // Empêcher l'envoi du formulaire
-                return;
+                emailTooltip.textContent = "Adresse email invalide.";
+                event.preventDefault();
             }
-    
-            // Vérifier si les mots de passe sont identiques
-            if (password !== confirmPassword) {
+
+            // Valider les mots de passe
+            if (!validatePassword(password, confirmPassword)) {
                 passwordField.classList.add('error');
                 confirmPasswordField.classList.add('error');
-                passwordTooltip.textContent = 'Les mots de passe ne correspondent pas.';
-                confirmPasswordTooltip.textContent = 'Les mots de passe ne correspondent pas.';
-                event.preventDefault(); // Empêcher l'envoi du formulaire
-                return;
+                passwordTooltip.textContent = "Le mot de passe doit contenir au moins 6 caractères et correspondre à la confirmation.";
+                confirmPasswordTooltip.textContent = "Les mots de passe ne correspondent pas.";
+                event.preventDefault();
             }
         });
+
 
         let formsVisible = false;
 
@@ -303,8 +359,9 @@
             }, 500);
             formsVisible = true;
         }
-        
+
         document.querySelector('.plex-logo').addEventListener('click', showButtons);
     </script>
 </body>
+
 </html>
