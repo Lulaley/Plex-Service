@@ -20,6 +20,8 @@ def register(app):
                 write_log(f"Ce nom d'utilisateur existe déjà")
                 ds.disconnect()
                 return redirect(url_for('index'))
+            else:
+                write_log(f"Ce nom d'utilisateur n'existe pas")
             # Construire le DN et les attributs de l'utilisateur
             write_log(f"Construction de l'utilisateur")
             dn = f"uid={username},dmdName=users,{base_dn}"
