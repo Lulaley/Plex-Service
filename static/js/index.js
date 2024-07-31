@@ -10,102 +10,6 @@ function validatePassword(password) {
     return passwordPattern.test(password);
 }
 
-// Ajouter des écouteurs d'événements pour les champs de formulaire
-/* document.querySelector('input[name="email"]').addEventListener('input', function (event) {
-    var email = event.target.value;
-    var emailTooltip = document.getElementById('email-tooltip');
-    if (!validateEmail(email) && email.length > 0) {
-        event.target.classList.add('error');
-        event.target.classList.remove('valid');
-        emailTooltip.textContent = "Adresse email invalide.";
-    } else {
-        event.target.classList.remove('error');
-        event.target.classList.add('valid');
-        emailTooltip.textContent = "Adresse email valide.";
-    }
-});
-
-document.querySelector('input[name="createPassword"]').addEventListener('input', function (event) {
-    var password = event.target.value;
-    var passwordTooltip = document.getElementById('createPassword-tooltip');
-    if (!validatePassword(password) && password.length > 0) {
-        event.target.classList.add('error');
-        event.target.classList.remove('valid');
-        passwordTooltip.textContent = "Le mot de passe doit contenir au moins 10 caractères, une majuscule, une minuscule, un caractère spécial et un chiffre.";
-    } else {
-        event.target.classList.remove('error');
-        event.target.classList.add('valid');
-        passwordTooltip.textContent = "Mot de passe valide.";
-    }
-});
-
-document.querySelector('input[name="confirm_password"]').addEventListener('input', function (event) {
-    var confirmPassword = event.target.value;
-    var password = document.querySelector('input[name="createPassword"]').value;
-    var confirmPasswordTooltip = document.getElementById('confirm_password-tooltip');
-    if (password !== confirmPassword && confirmPassword.length > 0 && password.length > 0) {
-        event.target.classList.add('error');
-        event.target.classList.remove('valid');
-        confirmPasswordTooltip.textContent = "Les mots de passe ne correspondent pas.";
-    } else {
-        event.target.classList.remove('error');
-        event.target.classList.add('valid');
-        confirmPasswordTooltip.textContent = "Les mots de passe correspondent.";
-    }
-}); */
-
-/* document.getElementById('create-form').addEventListener('submit', function (event) {
-    // Récupérer les valeurs des champs
-    var email = document.querySelector('input[name="email"]').value;
-    var password = String(document.querySelector('input[name="createPassword"]').value);
-    var confirmPassword = String(document.querySelector('input[name="confirm_password"]').value);
-
-    // Récupérer les éléments des champs
-    var emailField = document.querySelector('input[name="email"]');
-    var passwordField = document.querySelector('input[name="createPassword"]');
-    var confirmPasswordField = document.querySelector('input[name="confirm_password"]');
-
-    // Récupérer les éléments des tooltips
-    var emailTooltip = document.getElementById('email-tooltip');
-    var passwordTooltip = document.getElementById('createPassword-tooltip');
-    var confirmPasswordTooltip = document.getElementById('confirm_password-tooltip');
-
-    // Réinitialiser les styles et les tooltips
-    emailField.classList.remove('error');
-    passwordField.classList.remove('error');
-    confirmPasswordField.classList.remove('error');
-    emailTooltip.textContent = "";
-    passwordTooltip.textContent = "";
-    confirmPasswordTooltip.textContent = "";
-
-    // Valider l'email
-    if (!validateEmail(email)) {
-        emailField.classList.add('error');
-        emailTooltip.textContent = "Adresse email invalide.";
-        event.preventDefault();
-    }
-
-    // Valider le mot de passe
-    if (!validatePassword(password)) {
-        passwordField.classList.add('error');
-        passwordTooltip.textContent = "Le mot de passe doit contenir au moins 10 caractères, une majuscule, une minuscule, un caractère spécial et un chiffre.";
-        event.preventDefault();
-    }
-
-    // Valider la confirmation du mot de passe
-    if (password !== confirmPassword) {
-        confirmPasswordField.classList.add('error');
-        confirmPasswordTooltip.textContent = "Les mots de passe ne correspondent pas.";
-        event.preventDefault();
-    }
-
-    // Bloquer la soumission si un des tooltips est invalide
-    if (emailTooltip.textContent || passwordTooltip.textContent || confirmPasswordTooltip.textContent) {
-        event.preventDefault();
-    }
-}); */
-
-
 let formsVisible = false;
 
 function hideForms(callback) {
@@ -207,6 +111,7 @@ function showCreateForm() {
         });
         setTimeout(() => {
             submitContainer.style.opacity = 1;
+            validateForm();
         }, inputs.length * 250);
     }, 500);
     formsVisible = true;
@@ -315,66 +220,3 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial validation check to ensure the button is displayed if all fields are valid on page load
     validateForm();
 });
-
-/* document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('#create-form form');
-    const submitBtn = document.getElementById('submit-btn');
-    const inputs = form.querySelectorAll('input');
-    let currentTooltip = null;
-
-    function validateForm() {
-        let allValid = true;
-        inputs.forEach(input => {
-            const tooltip = document.getElementById(`${input.id}-tooltip`);
-            if (tooltip !== null) {
-                if (input.value.trim() === '') {
-                    // Si le champ est vide, masquer le message d'erreur et réinitialiser la bordure
-                    tooltip.style.visibility = 'hidden';
-                    tooltip.style.opacity = '0';
-                    input.classList.remove('error');
-                    input.style.border = ''; // Réinitialiser la bordure
-                } else if (!input.checkValidity()) {
-                    // Si le champ n'est pas valide, afficher le message d'erreur
-                    if (currentTooltip) {
-                        currentTooltip.style.visibility = 'hidden';
-                        currentTooltip.style.opacity = '0';
-                    }
-                    tooltip.style.visibility = 'visible';
-                    tooltip.style.opacity = '1';
-                    input.classList.add('error');
-                    input.style.border = '1px solid red'; // Bordure rouge pour les champs invalides
-                    currentTooltip = tooltip;
-                    allValid = false;
-                } else {
-                    // Si le champ est valide, masquer le message d'erreur et définir une bordure verte
-                    tooltip.style.visibility = 'hidden';
-                    tooltip.style.opacity = '0';
-                    input.classList.remove('error');
-                    input.style.border = '1px solid green'; // Bordure verte pour les champs valides
-                }
-            }
-        });
-        submitBtn.style.display = allValid ? 'block' : 'none';
-    }
-
-    inputs.forEach(input => {
-        input.addEventListener('input', validateForm);
-        input.addEventListener('focus', () => {
-            if (currentTooltip) {
-                currentTooltip.style.visibility = 'hidden';
-                currentTooltip.style.opacity = '0';
-                currentTooltip = null;
-            }
-        });
-    });
-
-    form.addEventListener('submit', function(event) {
-        validateForm();
-        if (!form.checkValidity()) {
-            event.preventDefault();
-        }
-    });
-
-    // Initial validation check to ensure the button is displayed if all fields are valid on page load
-    validateForm();
-}); */
