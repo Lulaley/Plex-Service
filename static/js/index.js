@@ -237,6 +237,7 @@ function validateForm() {
             tooltip.style.visibility = 'hidden';
             tooltip.style.opacity = '0';
             input.classList.remove('error');
+            allValid = true;
         }
         console.log(input.id, input.checkValidity());
     });
