@@ -125,6 +125,9 @@
             }
 
             // Vérifier si les mots de passe sont identiques
+            console.log(password)
+            console.log(confirmPassword)
+            console.log(password !== confirmPassword)
             if (password !== confirmPassword) {
                 alert("Erreur de validation : Les mots de passe ne correspondent pas.");
                 event.preventDefault(); // Empêcher l'envoi du formulaire
