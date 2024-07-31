@@ -14,7 +14,7 @@ function validatePassword(password) {
 document.querySelector('input[name="email"]').addEventListener('input', function (event) {
     var email = event.target.value;
     var emailTooltip = document.getElementById('email-tooltip');
-    if (!validateEmail(email)) {
+    if (!validateEmail(email) && email.length > 0) {
         event.target.classList.add('error');
         event.target.classList.remove('valid');
         emailTooltip.textContent = "Adresse email invalide.";
@@ -28,7 +28,7 @@ document.querySelector('input[name="email"]').addEventListener('input', function
 document.querySelector('input[name="createPassword"]').addEventListener('input', function (event) {
     var password = event.target.value;
     var passwordTooltip = document.getElementById('createPassword-tooltip');
-    if (!validatePassword(password)) {
+    if (!validatePassword(password) && password.length > 0) {
         event.target.classList.add('error');
         event.target.classList.remove('valid');
         passwordTooltip.textContent = "Le mot de passe doit contenir au moins 10 caractères, une majuscule, une minuscule, un caractère spécial et un chiffre.";
@@ -43,7 +43,7 @@ document.querySelector('input[name="confirm_password"]').addEventListener('input
     var confirmPassword = event.target.value;
     var password = document.querySelector('input[name="createPassword"]').value;
     var confirmPasswordTooltip = document.getElementById('confirm_password-tooltip');
-    if (password !== confirmPassword) {
+    if (password !== confirmPassword && confirmPassword.length > 0 && password.length > 0) {
         event.target.classList.add('error');
         event.target.classList.remove('valid');
         confirmPasswordTooltip.textContent = "Les mots de passe ne correspondent pas.";
