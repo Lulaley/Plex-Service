@@ -43,7 +43,7 @@ class ControleurLdap:
 
     def search_user(self, username):
         try:
-            self.conn.bind_as_root()
+            self.bind_as_root()
             search_base = self.config.get_config('LDAP', 'base_dn')
             search_filter = f"(uid={username})"
             result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter)
@@ -58,7 +58,6 @@ class ControleurLdap:
             return False
 
     def add_entry(self, dn, attributes):
-        write_log("Tentative d'ajout de l'entrée: " + dn)
         try:
             result = self.conn.add_s(dn, attributes)
             write_log("Résultat de l'ajout: " + str(result))

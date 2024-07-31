@@ -16,7 +16,6 @@ def register(app):
             ds = ControleurLdap()
             # Vérifier si le compte existe déjà
             write_log(f"Verif")
-            ds.bind_as_root()
             if ds.search_user(username):
                 write_log(f"Ce nom d'utilisateur existe déjà")
                 ds.disconnect()
