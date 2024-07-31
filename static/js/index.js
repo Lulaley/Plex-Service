@@ -244,6 +244,7 @@ function validateForm() {
 
 inputs.forEach(input => {
     input.addEventListener('input', validateForm);
+    input.addEventListener('focus', validateForm);
     input.addEventListener('focus', () => {
         if (currentTooltip) {
             currentTooltip.style.visibility = 'hidden';
