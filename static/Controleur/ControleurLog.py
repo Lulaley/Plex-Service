@@ -30,16 +30,18 @@ def write_log(message):
         logger = logging.getLogger(caller_function)
         logger.setLevel(log_levels[log_level])
 
-        # Create file handler
-        fh = logging.FileHandler(log_file_path)
-        fh.setLevel(log_levels[log_level])
+        # Check if the logger already has handlers
+        if not logger.handlers:
+            # Create file handler
+            fh = logging.FileHandler(log_file_path)
+            fh.setLevel(log_levels[log_level])
 
-        # Create formatter and add it to the handler
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        fh.setFormatter(formatter)
+            # Create formatter and add it to the handler
+            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            fh.setFormatter(formatter)
 
-        # Add the handler to the logger
-        logger.addHandler(fh)
+            # Add the handler to the logger
+            logger.addHandler(fh)
 
         # Log the message with the caller function
         logger.log(log_levels[log_level], f"{message}")
