@@ -54,7 +54,7 @@ document.querySelector('input[name="confirm_password"]').addEventListener('input
     }
 }); */
 
-document.getElementById('create-form').addEventListener('submit', function (event) {
+/* document.getElementById('create-form').addEventListener('submit', function (event) {
     // Récupérer les valeurs des champs
     var email = document.querySelector('input[name="email"]').value;
     var password = String(document.querySelector('input[name="createPassword"]').value);
@@ -103,7 +103,7 @@ document.getElementById('create-form').addEventListener('submit', function (even
     if (emailTooltip.textContent || passwordTooltip.textContent || confirmPasswordTooltip.textContent) {
         event.preventDefault();
     }
-});
+}); */
 
 
 let formsVisible = false;
