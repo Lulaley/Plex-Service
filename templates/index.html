@@ -178,8 +178,9 @@
         }
 
         // Fonction de validation du mot de passe
-        function validatePassword(password, confirmPassword) {
-            return password === confirmPassword && password.length >= 6;
+        function validatePassword(password) {
+            var passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{10,}$/;
+            return passwordPattern.test(password);
         }
 
         // Ajouter des écouteurs d'événements pour les champs de formulaire
@@ -199,12 +200,11 @@
 
         document.querySelector('input[name="createPassword"]').addEventListener('input', function (event) {
             var password = event.target.value;
-            var confirmPassword = document.querySelector('input[name="confirm_password"]').value;
             var passwordTooltip = document.getElementById('password-tooltip');
-            if (!validatePassword(password, confirmPassword)) {
+            if (!validatePassword(password)) {
                 event.target.classList.add('error');
                 event.target.classList.remove('valid');
-                passwordTooltip.textContent = "Le mot de passe doit contenir au moins 6 caractères et correspondre à la confirmation.";
+                passwordTooltip.textContent = "Le mot de passe doit contenir au moins 10 caractères, une majuscule, une minuscule, un caractère spécial et un chiffre.";
             } else {
                 event.target.classList.remove('error');
                 event.target.classList.add('valid');
@@ -258,11 +258,16 @@
                 event.preventDefault();
             }
 
-            // Valider les mots de passe
-            if (!validatePassword(password, confirmPassword)) {
+            // Valider le mot de passe
+            if (!validatePassword(password)) {
                 passwordField.classList.add('error');
+                passwordTooltip.textContent = "Le mot de passe doit contenir au moins 10 caractères, une majuscule, une minuscule, un caractère spécial et un chiffre.";
+                event.preventDefault();
+            }
+    
+            // Valider la confirmation du mot de passe
+            if (password !== confirmPassword) {
                 confirmPasswordField.classList.add('error');
-                passwordTooltip.textContent = "Le mot de passe doit contenir au moins 6 caractères et correspondre à la confirmation.";
                 confirmPasswordTooltip.textContent = "Les mots de passe ne correspondent pas.";
                 event.preventDefault();
             }
