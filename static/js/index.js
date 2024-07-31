@@ -137,6 +137,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     input.style.border = ''; // Réinitialiser la bordure
                 } else if (!input.checkValidity()) {
                     allValid = false;
+                    tooltip.style.visibility = 'visible';
+                    tooltip.style.opacity = '1';
+                    input.classList.add('error');
+                    input.style.border = '1px solid red'; // Ajouter une bordure rouge pour indiquer l'erreur
+                } else {
+                    tooltip.style.visibility = 'hidden';
+                    tooltip.style.opacity = '0';
+                    input.classList.remove('error');
+                    input.style.border = ''; // Réinitialiser la bordure
                 }
             }
         });
