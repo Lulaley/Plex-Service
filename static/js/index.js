@@ -27,7 +27,7 @@ document.querySelector('input[name="email"]').addEventListener('input', function
 
 document.querySelector('input[name="createPassword"]').addEventListener('input', function (event) {
     var password = event.target.value;
-    var passwordTooltip = document.getElementById('password-tooltip');
+    var passwordTooltip = document.getElementById('createPassword-tooltip');
     if (!validatePassword(password)) {
         event.target.classList.add('error');
         event.target.classList.remove('valid');
@@ -42,7 +42,7 @@ document.querySelector('input[name="createPassword"]').addEventListener('input',
 document.querySelector('input[name="confirm_password"]').addEventListener('input', function (event) {
     var confirmPassword = event.target.value;
     var password = document.querySelector('input[name="createPassword"]').value;
-    var confirmPasswordTooltip = document.getElementById('confirm-password-tooltip');
+    var confirmPasswordTooltip = document.getElementById('confirm_password-tooltip');
     if (password !== confirmPassword) {
         event.target.classList.add('error');
         event.target.classList.remove('valid');
