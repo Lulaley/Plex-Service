@@ -99,7 +99,7 @@
         <form action="/register" method="post">
             <input type="text" name="username" placeholder="Nom d'utilisateur" required>
             <input type="text" name="email" placeholder="Adresse email" required>
-            <input type="password" name="password" placeholder="Mot de passe" required>
+            <input type="password" name="creatPassword" placeholder="Mot de passe" required>
             <input type="password" name="confirm_password" placeholder="Confirmer le mot de passe" required>
             <div class="submit-container">
                 <input type="submit" value="Créer un compte">
@@ -111,7 +111,7 @@
         document.getElementById('create-form').addEventListener('submit', function(event) {
             // Récupérer les valeurs des champs
             var email = document.querySelector('input[name="email"]').value;
-            var password = String(document.querySelector('input[name="password"]').value);
+            var password = String(document.querySelector('input[name="creatPassword"]').value);
             var confirmPassword = String(document.querySelector('input[name="confirm_password"]').value);
 
             // Expression régulière pour valider le format de l'email
