@@ -214,54 +214,54 @@ function showCreateForm() {
 
 document.querySelector('.plex-logo').addEventListener('click', showButtons);
 
-const form = document.querySelector('#create-form form');
-const submitBtn = document.getElementById('submit-btn');
-const inputs = form.querySelectorAll('input');
-let currentTooltip = null;
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('#create-form form');
+    const submitBtn = document.getElementById('submit-btn');
+    const inputs = form.querySelectorAll('input');
+    let currentTooltip = null;
 
-function validateForm() {
-    let allValid = true;
+    function validateForm() {
+        let allValid = true;
+        inputs.forEach(input => {
+            const tooltip = document.getElementById(`${input.id}-tooltip`);
+            if (!input.checkValidity()) {
+                if (currentTooltip) {
+                    currentTooltip.style.visibility = 'hidden';
+                    currentTooltip.style.opacity = '0';
+                }
+                tooltip.style.visibility = 'visible';
+                tooltip.style.opacity = '1';
+                input.classList.add('error');
+                currentTooltip = tooltip;
+                allValid = false;
+            } else {
+                tooltip.style.visibility = 'hidden';
+                tooltip.style.opacity = '0';
+                input.classList.remove('error');
+            }
+            console.log(input.id, input.checkValidity());
+        });
+        submitBtn.style.display = allValid ? 'block' : 'none';
+    }
+
     inputs.forEach(input => {
-        const tooltip = document.getElementById(`${input.id}-tooltip`);
-        if (!input.checkValidity()) {
+        input.addEventListener('input', validateForm);
+        input.addEventListener('focus', () => {
             if (currentTooltip) {
                 currentTooltip.style.visibility = 'hidden';
                 currentTooltip.style.opacity = '0';
+                currentTooltip = null;
             }
-            tooltip.style.visibility = 'visible';
-            tooltip.style.opacity = '1';
-            input.classList.add('error');
-            currentTooltip = tooltip;
-            allValid = false;
-        } else {
-            tooltip.style.visibility = 'hidden';
-            tooltip.style.opacity = '0';
-            input.classList.remove('error');
-            allValid = true;
-        }
-        console.log(input.id, input.checkValidity());
+        });
     });
-    submitBtn.style.display = allValid ? 'block' : 'none';
-}
 
-inputs.forEach(input => {
-    input.addEventListener('input', validateForm);
-    input.addEventListener('focus', validateForm);
-    input.addEventListener('focus', () => {
-        if (currentTooltip) {
-            currentTooltip.style.visibility = 'hidden';
-            currentTooltip.style.opacity = '0';
-            currentTooltip = null;
+    form.addEventListener('submit', function(event) {
+        validateForm();
+        if (!form.checkValidity()) {
+            event.preventDefault();
         }
     });
-});
 
-form.addEventListener('submit', function(event) {
+    // Initial validation check to ensure the button is displayed if all fields are valid on page load
     validateForm();
-    if (!form.checkValidity()) {
-        event.preventDefault();
-    }
 });
-
-// Initial validation check to ensure the button is displayed if all fields are valid on page load
-validateForm();
