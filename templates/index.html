@@ -216,7 +216,7 @@
             var confirmPassword = event.target.value;
             var password = document.querySelector('input[name="createPassword"]').value;
             var confirmPasswordTooltip = document.getElementById('confirm-password-tooltip');
-            if (!validatePassword(password, confirmPassword)) {
+            if (password !== confirmPassword) {
                 event.target.classList.add('error');
                 event.target.classList.remove('valid');
                 confirmPasswordTooltip.textContent = "Les mots de passe ne correspondent pas.";
@@ -269,6 +269,11 @@
             if (password !== confirmPassword) {
                 confirmPasswordField.classList.add('error');
                 confirmPasswordTooltip.textContent = "Les mots de passe ne correspondent pas.";
+                event.preventDefault();
+            }
+
+            // Bloquer la soumission si un des tooltips est invalide
+            if (emailTooltip.textContent || passwordTooltip.textContent || confirmPasswordTooltip.textContent) {
                 event.preventDefault();
             }
         });
