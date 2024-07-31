@@ -227,15 +227,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (tooltip !== null) {
                 console.log('tooltip : ',tooltip);
                 if (!input.checkValidity()) {
-                    if (currentTooltip) {
-                        currentTooltip.style.visibility = 'hidden';
-                        currentTooltip.style.opacity = '0';
-                    }
                     input.style.border = '1px solid red';
                     tooltip.style.visibility = 'visible';
                     tooltip.style.opacity = '1';
                     input.classList.add('error');
-                    currentTooltip = tooltip;
                     allValid = false;
                 } else {
                     input.style.border = '1px solid green';
