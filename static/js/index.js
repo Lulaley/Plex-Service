@@ -238,6 +238,7 @@ function validateForm() {
             tooltip.style.opacity = '0';
             input.classList.remove('error');
         }
+        console.log(input.id, input.checkValidity());
     });
     submitBtn.style.display = allValid ? 'block' : 'none';
 }
