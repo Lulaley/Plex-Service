@@ -67,8 +67,8 @@ document.getElementById('create-form').addEventListener('submit', function (even
 
     // Récupérer les éléments des tooltips
     var emailTooltip = document.getElementById('email-tooltip');
-    var passwordTooltip = document.getElementById('password-tooltip');
-    var confirmPasswordTooltip = document.getElementById('confirm-password-tooltip');
+    var passwordTooltip = document.getElementById('createPassword-tooltip');
+    var confirmPasswordTooltip = document.getElementById('confirm_password-tooltip');
 
     // Réinitialiser les styles et les tooltips
     emailField.classList.remove('error');
