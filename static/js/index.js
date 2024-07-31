@@ -224,6 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let allValid = true;
         inputs.forEach(input => {
             const tooltip = document.getElementById(`${input.id}-tooltip`);
+            console.log('tooltip : ',tooltip);
             if (!input.checkValidity()) {
                 if (currentTooltip) {
                     currentTooltip.style.visibility = 'hidden';
