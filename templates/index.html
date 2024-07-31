@@ -111,8 +111,8 @@
         document.getElementById('create-form').addEventListener('submit', function(event) {
             // Récupérer les valeurs des champs
             var email = document.querySelector('input[name="email"]').value;
-            var password = document.querySelector('input[name="password"]').value;
-            var confirmPassword = document.querySelector('input[name="confirm_password"]').value;
+            var password = String(document.querySelector('input[name="password"]').value);
+            var confirmPassword = String(document.querySelector('input[name="confirm_password"]').value);
 
             // Expression régulière pour valider le format de l'email
             var emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
@@ -125,7 +125,7 @@
             }
 
             // Vérifier si les mots de passe sont identiques
-            if (password != confirmPassword) {
+            if (password !== confirmPassword) {
                 alert("Erreur de validation : Les mots de passe ne correspondent pas.");
                 event.preventDefault(); // Empêcher l'envoi du formulaire
                 return;
