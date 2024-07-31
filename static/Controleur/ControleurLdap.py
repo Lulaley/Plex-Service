@@ -108,13 +108,4 @@ class ControleurLdap:
             write_log("Déconnexion LDAP réussie")
         except ldap.LDAPError as e:
             write_log("Erreur lors de la déconnexion LDAP: " + str(e))
-
-    def entry_exists(self, dn):
-        try:
-            write_log(f"Vérification de l'existence de l'entrée: {dn}")
-            self.connection.search_s(dn, '(objectClass=*)')
-            return len(self.connection.entries) > 0
-        except Exception as e:
-            write_log(f"Erreur lors de la vérification de l'existence de l'entrée: {str(e)}")
-            return False
         

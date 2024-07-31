@@ -13,6 +13,10 @@ def register(app):
 
             conf = ControleurConf()
             base_dn = conf.get_config('LDAP', 'base_dn')
+            # Vérifier si le compte existe déjà
+            if ds.search_user(username):
+                write_log(f"Ce nom d'utilisateur existe déjà")
+                return redirect(url_for('index'))
             # Construire le DN et les attributs de l'utilisateur
 
             dn = f"uid={username},dmdName=users,{base_dn}"
