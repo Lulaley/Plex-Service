@@ -152,6 +152,10 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.style.display = allValid ? 'block' : 'none';
     }
 
+    let emailValid = false;
+    let passwordValid = false;
+    let confirmPasswordValid = false;
+    
     document.querySelector('input[name="email"]').addEventListener('input', function (event) {
         var email = event.target.value;
         var emailTooltip = document.getElementById('email-tooltip');
@@ -161,15 +165,18 @@ document.addEventListener('DOMContentLoaded', function() {
             emailTooltip.textContent = "Adresse email invalide.";
             emailTooltip.style.visibility = 'visible';
             emailTooltip.style.opacity = '1';
+            emailValid = false;
         } else {
             event.target.classList.remove('error');
             event.target.classList.add('valid');
             emailTooltip.textContent = "Adresse email valide.";
             emailTooltip.style.visibility = 'hidden';
             emailTooltip.style.opacity = '0';
+            emailValid = true;
         }
+        toggleSubmitButton();
     });
-
+    
     document.querySelector('input[name="createPassword"]').addEventListener('input', function (event) {
         var password = event.target.value;
         var passwordTooltip = document.getElementById('createPassword-tooltip');
@@ -179,15 +186,18 @@ document.addEventListener('DOMContentLoaded', function() {
             passwordTooltip.textContent = "Le mot de passe doit contenir au moins 10 caractères, une majuscule, une minuscule, un caractère spécial et un chiffre.";
             passwordTooltip.style.visibility = 'visible';
             passwordTooltip.style.opacity = '1';
+            passwordValid = false;
         } else {
             event.target.classList.remove('error');
             event.target.classList.add('valid');
             passwordTooltip.textContent = "Mot de passe valide.";
             passwordTooltip.style.visibility = 'hidden';
             passwordTooltip.style.opacity = '0';
+            passwordValid = true;
         }
+        toggleSubmitButton();
     });
-
+    
     document.querySelector('input[name="confirm_password"]').addEventListener('input', function (event) {
         var confirmPassword = event.target.value;
         var password = document.querySelector('input[name="createPassword"]').value;
@@ -198,14 +208,26 @@ document.addEventListener('DOMContentLoaded', function() {
             confirmPasswordTooltip.textContent = "Les mots de passe ne correspondent pas.";
             confirmPasswordTooltip.style.visibility = 'visible';
             confirmPasswordTooltip.style.opacity = '1';
+            confirmPasswordValid = false;
         } else {
             event.target.classList.remove('error');
             event.target.classList.add('valid');
             confirmPasswordTooltip.textContent = "Les mots de passe correspondent.";
             confirmPasswordTooltip.style.visibility = 'hidden';
             confirmPasswordTooltip.style.opacity = '0';
+            confirmPasswordValid = true;
         }
+        toggleSubmitButton();
     });
+    
+    function toggleSubmitButton() {
+        const submitBtn = document.querySelector('#submitBtn');
+        if (emailValid && passwordValid && confirmPasswordValid) {
+            submitBtn.style.display = 'block';
+        } else {
+            submitBtn.style.display = 'none';
+        }
+    }
 
     inputs.forEach(input => {
         input.addEventListener('focus', () => {
