@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     function toggleSubmitButton() {
-        const submitBtn = document.querySelector('#submitBtn');
+        const submitBtn = document.getElementById('submit-btn');
         if (emailValid && passwordValid && confirmPasswordValid) {
             console.log('All fields are valid');
             submitBtn.style.display = 'block';
