@@ -1,0 +1,138 @@
+body {
+    background-color: #313B45;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    flex-direction: column;
+}
+
+.plex-logo {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    transition: transform 0.5s ease-in-out;
+}
+
+.plex-logo img {
+    width: 25%;
+    cursor: pointer;
+}
+
+#login-form,
+#create-form {
+    display: none;
+    padding: 20px;
+    border-radius: 5px;
+    padding: 10px;
+    opacity: 0;
+    width: 100%;
+    max-width: 400px;
+    box-sizing: border-box;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+    display: block;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.submit-container {
+    display: flex;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+input[type="submit"],
+button {
+    background-color: #ff9900;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Media queries pour rendre le formulaire responsive */
+@media only screen and (max-width: 600px) {
+    .plex-logo img {
+        width: 50%;
+    }
+
+    #login-form,
+    #create-form {
+        padding: 15px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"] {
+        padding: 8px;
+    }
+}
+
+@media only screen and (max-width: 400px) {
+    .plex-logo img {
+        width: 75%;
+    }
+
+    #login-form,
+    #create-form {
+        padding: 10px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"] {
+        padding: 6px;
+    }
+}
+
+.tooltip {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.tooltip input {
+    flex: 1;
+}
+
+.tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: #f44336;
+    /* Red */
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tooltip input.error+.tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+.submit-container {
+    text-align: center;
+}
