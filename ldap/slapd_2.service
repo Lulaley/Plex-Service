@@ -1,0 +1,16 @@
+[Unit]
+Description=OpenLDAP Server Daemon
+After=network.target
+Wants=network.target
+
+[Service]
+Type=forking
+ExecStartPre=/bin/mkdir -p /run/slapd
+ExecStartPre=/bin/chown ldap:ldap /run/slapd
+ExecStart=/opt/openldap/libexec/slapd -h "ldap://*:389 ldaps://*:636 ldapi:///" -u ldap -g ldap -f /opt/openldap/etc/openldap/slapd.conf
+ExecReload=/opt/openlda/libexec/slapd -h "ldap://*:389 ldaps://*:636 ldapi:///" -u ldap -g ldap -f /opt/openldap/etc/openldap/slapd.conf
+ExecStop=/opt/openldap/libexec/slapd -h "ldap://*:389 ldaps://*:636 ldapi:///" -u ldap -g ldap -f /opt/openldap/etc/openldap/slapd.conf -k
+PIDFile=/opt/openldap/var/run/slapd.pid
+
+[Install]
+WantedBy=multi-user.target
