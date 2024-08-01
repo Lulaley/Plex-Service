@@ -61,7 +61,6 @@ class ControleurLdap:
     def add_entry(self, dn, attributes):
         try:
             result = self.conn.add_s(dn, attributes)
-            write_log("Résultat de l'ajout: " + str(result))
             if result:
                 write_log("Entrée " + dn + " ajoutée avec succès")
                 return True
