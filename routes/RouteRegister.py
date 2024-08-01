@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for, flash, session
 from static.Controleur.ControleurLdap import ControleurLdap
 from static.Controleur.ControleurConf import ControleurConf
 from static.Controleur.ControleurLog import write_log
-from passlib.hash import ldap_salted_sha1
+from passlib.hash import ldap_salted_sha1 , ldap_sha1 # pip install passlib
 
 def register(app):
     @app.route('/register', methods=['GET', 'POST'])
