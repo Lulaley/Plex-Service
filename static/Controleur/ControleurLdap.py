@@ -6,6 +6,7 @@ class ControleurLdap:
         self.config = ControleurConf()
         self.server = self.config.get_config('LDAP', 'server')
         self.conn = ldap.initialize(self.server)
+        self.conn.start_tls_s()
         self.conn.set_option(ldap.OPT_PROTOCOL_VERSION, 3)
 
     def bind_as_root(self):
