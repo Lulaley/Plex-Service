@@ -1,0 +1,56 @@
+body {
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+.center-logo {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    animation: moveLogo 3s forwards;
+}
+
+.blur-background {
+    filter: blur(10px);
+    animation: unblurBackground 3s forwards;
+}
+
+.fade-in {
+    opacity: 0;
+    animation: fadeInElements 3s forwards;
+}
+
+@keyframes moveLogo {
+    0% {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        top: 10px; /* Adjust this value to the final position of the logo */
+        left: 10px; /* Adjust this value to the final position of the logo */
+        transform: translate(-43%, -45%) scale(0.1); /* Adjust scale to match the navbar logo size */
+    }
+}
+
+@keyframes unblurBackground {
+    0% {
+        filter: blur(10px);
+    }
+    100% {
+        filter: blur(0);
+    }
+}
+
+@keyframes fadeInElements {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
