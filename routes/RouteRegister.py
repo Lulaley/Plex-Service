@@ -2,9 +2,6 @@ from flask import render_template, request, redirect, url_for, flash, session
 from static.Controleur.ControleurLdap import ControleurLdap
 from static.Controleur.ControleurConf import ControleurConf
 from static.Controleur.ControleurLog import write_log
-<<<<<<< HEAD
-from passlib.hash import ldap_salted_sha1 , ldap_sha1 # pip install passlib
-=======
 from passlib.hash import ldap_salted_sha1, ldap_sha1
 import re
 
@@ -14,7 +11,6 @@ def is_hashed(password):
         r'^\{SHA\}', r'^\{SSHA\}', r'^\{MD5\}', r'^\{CRYPT\}', r'^\{SMD5\}'
     ]
     return any(re.match(pattern, password) for pattern in hash_patterns)
->>>>>>> eaa6a103abe8f21046e83079deb17542c5938097
 
 def register(app):
     @app.route('/register', methods=['GET', 'POST'])
