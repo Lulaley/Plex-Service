@@ -2,15 +2,15 @@
 attributetype ( 1.2.250.1.49.5.1 NAME 'rightsAgreement'
   DESC 'User rights agreement status'
   EQUALITY caseIgnoreMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  SINGLE-VALUE )
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
 
 # Define the userInfos attribute
 attributetype ( 1.2.250.1.49.5.2 NAME 'userInfos'
   DESC 'Additional user information'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  MULTI-VALUE )
+  SUBSTR caseIgnoreSubstringsMatch )
 
 # Define the otherUserInfos objectclass
 objectclass ( 1.2.250.1.49.6.1 NAME 'otherUserInfos'
