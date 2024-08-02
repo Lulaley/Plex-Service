@@ -9,8 +9,8 @@ attributetype ( 1.2.250.1.49.5.1 NAME 'rightsAgreement'
 attributetype ( 1.2.250.1.49.5.2 NAME 'userInfos'
   DESC 'Additional user information'
   EQUALITY caseIgnoreMatch
-  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-  SUBSTR caseIgnoreSubstringsMatch )
+  SUBSTR caseIgnoreSubstringsMatch 
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
 
 # Define the title attribute
 attributetype ( 1.2.250.1.49.5.3 NAME 'title'
