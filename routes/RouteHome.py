@@ -8,7 +8,7 @@ def get_user_rights(username):
     conf = ControleurConf()
     write_log(f"Recherche des droits pour l'utilisateur: {username}")
     res = ds.search_user(username)
-    if ds.search_user(username):
+    if res:
         user_dn = f"(uid={username})"
         search_base = conf.get_config('LDAP', 'base_dn')
         user_entry = ds.search_entry(search_base, user_dn)
@@ -16,10 +16,13 @@ def get_user_rights(username):
         # Log the content of user_entry
         write_log(f"Contenu de user_entry pour l'utilisateur {username}: {user_entry}")
         
-        rights_agreement = user_entry.get('rightsAgreement', [None])[0]
-        write_log(f"Droits trouvés pour l'utilisateur {username}: {rights_agreement}")
-        ds.disconnect()
-        return rights_agreement
+        if user_entry:
+            # Extract the attributes dictionary from the first tuple
+            attributes = user_entry[0][1]
+            rights_agreement = attributes.get('rightsAgreement', [None])[0].decode('utf-8')
+            write_log(f"Droits trouvés pour l'utilisateur {username}: {rights_agreement}")
+            ds.disconnect()
+            return rights_agreement
     write_log(f"Utilisateur {username} non trouvé dans LDAP")
     ds.disconnect()
     return None
