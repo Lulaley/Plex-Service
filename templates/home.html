@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,14 +10,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/homeSpinner.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/homeAnim.css') }}">
 </head>
+
 <body>
-    <h1>Welcome to the Home Page</h1>
-    {% if show_download %}
-        <button>Download</button>
-    {% endif %}
-    {% if show_users %}
-        <button>Users</button>
-    {% endif %}
     <div class="center-logo">
         <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo">
     </div>
@@ -30,6 +25,12 @@
                 <button>Demandes</button>
             </div>
             <div class="right-buttons">
+                {% if show_download %}
+                <button>Download</button>
+                {% endif %}
+                {% if show_users %}
+                <button>Users</button>
+                {% endif %}
                 <span class="username">{{ username }}</span>
                 <button onclick="window.location.href='{{ url_for('inner_logout') }}'">Déconnexion</button>
             </div>
@@ -40,9 +41,10 @@
         <div class="text-info">
             <p>Bienvenue sur le service de demandes d'accès à des films ou séries pour le Plex de {owner-plex}.</p>
             <p> - Vous pouvez rechercher des films ou séries et demander l'accès à ceux-ci.</p>
-            <p> - Vous pouvez voir où  en sont vos demandes.</p>
-            <p>Si vous rencontrer un problème ou souhaiter proposer une amélioration, veuillez contacter les développeur à l'adresse suivante : {dev-plex-service@gmail.com}</p>
-        </div> 
+            <p> - Vous pouvez voir où en sont vos demandes.</p>
+            <p>Si vous rencontrer un problème ou souhaiter proposer une amélioration, veuillez contacter les développeur
+                à l'adresse suivante : {dev-plex-service@gmail.com}</p>
+        </div>
         <div class="loadingContainer">
             <div class="loadingAnimation">
                 <svg class="spinner40 spinner-red">
@@ -63,4 +65,5 @@
     </div>
     <script src="{{ url_for('static', filename='js/home.js') }}"></script>
 </body>
+
 </html>
