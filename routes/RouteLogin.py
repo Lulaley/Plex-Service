@@ -24,6 +24,7 @@ def login(app):
                 session['username'] = username
                 # Rediriger vers la page d'accueil
                 home(app)
+                return redirect(url_for('inner_home'))
             else:
                 write_log(f"Échec de la connexion pour l'utilisateur: {username}")
                 # Affichage d'un message d'erreur en cas d'échec

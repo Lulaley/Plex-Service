@@ -20,6 +20,7 @@ def get_user_rights(username):
     return None
 
 def home(app):
+    write_log("Affichage de la page d'accueil")
     @app.route('/home')
     def inner_home():
         if 'username' in session:
