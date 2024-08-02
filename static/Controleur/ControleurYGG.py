@@ -16,12 +16,24 @@ class ControleurYGG:
             username = self.conf.get_config('YGG', 'username')
             password = self.conf.get_config('YGG', 'password')
 
+            if not url or not username or not password:
+                write_log("URL, nom d'utilisateur ou mot de passe manquant dans la configuration.")
+                return False
+
             write_log("Tentative de connexion à YGG...")
+
+            # Utiliser cloudscraper pour gérer les protections Cloudflare
+            scraper = cloudscraper.create_scraper()
 
             # Perform the initial request to get the Cloudflare cookies
             write_log("Récupération des cookies Cloudflare...")
-            response = self.session.get(url)
-            response.raise_for_status()
+            try:
+                response = scraper.get(url)
+                response.raise_for_status()
+            except requests.exceptions.RequestException as e:
+                write_log(f"Erreur lors de la requête HTTPS: {e}")
+                return False
+
             write_log(f"Code de statut de la récupération des cookies: {response.status_code}")
             write_log(f"Reponse de la récupération des cookies: {response.text}")
 
@@ -40,7 +52,7 @@ class ControleurYGG:
             write_log(f"Debut de la connexion avec les cookies: __cfduid={self.cfduid}, cf_clearance={self.cf_clearance}")
 
             # Perform the login request with the required cookies and authentication data
-            response = self.session.post(url, data={'id': username, 'pass': password}, cookies={'__cfduid': self.cfduid, 'cf_clearance': self.cf_clearance})
+            response = scraper.post(url, data={'id': username, 'pass': password}, cookies={'__cfduid': self.cfduid, 'cf_clearance': self.cf_clearance})
             write_log(f"Reponse de la connexion: {response.text}")
 
             # Check if the login was successful based on the response
