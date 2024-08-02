@@ -9,6 +9,7 @@ from flask import Flask, render_template, session, redirect, url_for
 from routes.RouteLogin import login
 from routes.RouteRegister import register
 from routes.RouteLogout import logout
+from routes.RouteHome import home
 
 # Importation des controleurs
 from static.Controleur.ControleurConf import ControleurConf
@@ -36,6 +37,7 @@ def home():
 login(app)
 register(app)
 logout(app)
+home(app)
 
 if __name__ == '__main__':
     app.run(debug=True, port=conf.get_config('APP', 'port'), host='0.0.0.0', ssl_context=('cert.pem', 'key.pem'))
