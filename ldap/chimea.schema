@@ -12,15 +12,15 @@ attributetype ( 1.2.250.1.49.5.2 NAME 'userInfos'
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
 
-# define the title attribute
-attributetype ( 1.2.250.1.49.5.3 NAME 'title'
+# define the plexTitle attribute
+attributetype ( 1.2.250.1.49.5.3 NAME 'plexTitle'
   DESC 'Title of the movie, series, or episode'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
 
-# define the description attribute
-attributetype ( 1.2.250.1.49.5.4 NAME 'description'
+# define the plexDescription attribute
+attributetype ( 1.2.250.1.49.5.4 NAME 'plexDescription'
   DESC 'Description of the movie, series, or episode'
   EQUALITY caseIgnoreMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
