@@ -26,7 +26,7 @@
             </div>
             <div class="right-buttons">
                 {% if show_download %}
-                <button>Téléchargement</button>
+                <button onclick="window.location.href='{{ url_for('inner_download') }}'">Téléchargement</button>
                 {% endif %}
                 {% if show_users %}
                 <button>Utilisateurs</button>

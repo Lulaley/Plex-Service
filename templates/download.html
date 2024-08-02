@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plex Service - Download</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/plex-icon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/homeMain.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/homeSpinner.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/homeAnim.css') }}">
+</head>
+<body>
+    <div class="center-logo">
+        <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo">
+    </div>
+
+    <div class="navbar blur-background fade-in">
+        <div class="hamburger" onclick="toggleMenu()">☰</div>
+        <div class="menu">
+            <div class="left-buttons">
+                <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo">
+                <button>Recherche</button>
+                <button>Demandes</button>
+            </div>
+            <div class="right-buttons">
+                {% if show_download %}
+                <button>Téléchargement</button>
+                {% endif %}
+                {% if show_users %}
+                <button>Utilisateurs</button>
+                {% endif %}
+                <button class="username">{{ username }}</button>
+                <button onclick="window.location.href='{{ url_for('inner_logout') }}'">Déconnexion</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="center-container blur-background fade-in">
+        <form action="/search" method="get">
+            <input type="text" name="titre" placeholder="Rechercher sur YGG par nom de film ou série" reguired>
+            <input type="text" name="uploader" placeholder="Rechercher par uploader" optional>
+            
+            <label for="category">Catégorie :</label>
+            <select name="category" id="category">
+                <option value="2145" selected>Film/Vidéo</option>
+            </select>
+            
+            <label for="subcategory">Sous-catégorie :</label>
+            <select name="subcategory" id="subcategory" optional>
+                <option value="2178">Animation</option>
+                <option value="2179">Animation Série</option>
+                <option value="2183">Film</option>
+                <option value="2184">Série TV</option>
+            </select>
+            
+            <button type="submit">Rechercher</button>
+        </form>
+        {% if results %}
+        <div class="results-container">
+            <h2>Résultats de la recherche</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Titre</th>
+                        <th>Uploader</th>
+                        <th>Catégorie</th>
+                        <th>Sous-catégorie</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr>
+                        <td>{{ result.titre }}</td>
+                        <td>{{ result.uploader }}</td>
+                        <td>{{ result.category }}</td>
+                        <td>{{ result.subcategory }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>
