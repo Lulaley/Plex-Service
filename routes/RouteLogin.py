@@ -22,8 +22,7 @@ def login(app):
                 write_log(f"Connexion réussie pour l'utilisateur: {username}")
                 # Initialiser la variable de session
                 session['username'] = username
-                # Rediriger vers la page d'accueil
-                home(app)
+                # Rediriger vers la page d'accueil pour vérifier les droits
                 return redirect(url_for('inner_home'))
             else:
                 write_log(f"Échec de la connexion pour l'utilisateur: {username}")
