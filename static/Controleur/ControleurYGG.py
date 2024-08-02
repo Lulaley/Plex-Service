@@ -1,6 +1,7 @@
 import requests
 from .ControleurLog import write_log
 from .ControleurConf import ControleurConf
+import cloudscraper
 
 class ControleurYGG:
     def __init__(self):
