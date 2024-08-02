@@ -1,143 +1,138 @@
-# Define the rightsAgreement attribute
+# define the rightsAgreement attribute
 attributetype ( 1.2.250.1.49.5.1 NAME 'rightsAgreement'
   DESC 'User rights agreement status'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
 
-# Define the userInfos attribute
+# define the userInfos attribute
 attributetype ( 1.2.250.1.49.5.2 NAME 'userInfos'
   DESC 'Additional user information'
   EQUALITY caseIgnoreMatch
-  SUBSTR caseIgnoreSubstringsMatch 
+  SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
 
-# Define the title attribute
-#attributetype ( 1.2.250.1.49.5.3 NAME 'title'
-#  DESC 'Title of the movie, series, or episode'
-#  EQUALITY caseIgnoreMatch
-#  SUBSTR caseIgnoreSubstringsMatch
-#  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
-#
-## Define the description attribute
-#attributetype ( 1.2.250.1.49.5.4 NAME 'description'
-#  DESC 'Description of the movie, series, or episode'
-#  EQUALITY caseIgnoreMatch
-#  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
-#
-## Define the releaseDate attribute
-#attributetype ( 1.2.250.1.49.5.5 NAME 'releaseDate'
-#  DESC 'Release date of the movie, series, or episode'
-#  EQUALITY generalizedTimeMatch
-#  ORDERING generalizedTimeOrderingMatch
-#  SYNTAX 1.3.6.1.4.1.1466.115.121.1.24 )
-#
-## Define the genre attribute
-#attributetype ( 1.2.250.1.49.5.6 NAME 'genre'
-#  DESC 'Genre of the movie, series, or episode'
-#  EQUALITY caseIgnoreMatch
-#  SUBSTR caseIgnoreSubstringsMatch
-#  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
-#
-## Define the director attribute
-#attributetype ( 1.2.250.1.49.5.7 NAME 'director'
-#  DESC 'Director of the movie or series'
-#  EQUALITY caseIgnoreMatch
-#  SUBSTR caseIgnoreSubstringsMatch
-#  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
-#
-## Define the duration attribute
-#attributetype ( 1.2.250.1.49.5.8 NAME 'duration'
-#  DESC 'Duration of the movie, series, or episode'
-#  EQUALITY integerMatch
-#  ORDERING integerOrderingMatch
-#  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 )
-#
-## Define the quality attribute
-#attributetype ( 1.2.250.1.49.5.9 NAME 'quality'
-#  DESC 'Quality of the movie, series, or episode'
-#  EQUALITY caseIgnoreMatch
-#  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
-#
-## Define the languages attribute
-#attributetype ( 1.2.250.1.49.5.10 NAME 'languages'
-#  DESC 'Languages available for the movie, series, or episode'
-#  EQUALITY caseIgnoreMatch
-#  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-#  MULTI-VALUE )
-#
-## Define the subtitles attribute
-#attributetype ( 1.2.250.1.49.5.11 NAME 'subtitles'
-#  DESC 'Subtitles available for the movie, series, or episode'
-#  EQUALITY caseIgnoreMatch
-#  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-#  MULTI-VALUE )
-#
-## Define the actors attribute
-#attributetype ( 1.2.250.1.49.5.12 NAME 'actors'
-#  DESC 'Actors in the movie, series, or episode'
-#  EQUALITY caseIgnoreMatch
-#  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
-#  MULTI-VALUE )
-#
-## Define the seasonNumber attribute
-#attributetype ( 1.2.250.1.49.5.13 NAME 'seasonNumber'
-#  DESC 'Season number of the series'
-#  EQUALITY integerMatch
-#  ORDERING integerOrderingMatch
-#  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 )
-#
-## Define the episodeNumber attribute
-#attributetype ( 1.2.250.1.49.5.14 NAME 'episodeNumber'
-#  DESC 'Episode number of the series'
-#  EQUALITY integerMatch
-#  ORDERING integerOrderingMatch
-#  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 )
-#
-## Define the seasons attribute
-#attributetype ( 1.2.250.1.49.5.15 NAME 'seasons'
-#  DESC 'DNs of seasons in the series'
-#  EQUALITY distinguishedNameMatch
-#  SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
-#  MULTI-VALUE )
-#
-## Define the episodes attribute
-#attributetype ( 1.2.250.1.49.5.16 NAME 'episodes'
-#  DESC 'DNs of episodes in the season'
-#  EQUALITY distinguishedNameMatch
-#  SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
-#  MULTI-VALUE )
-#
-# Define the otherUserInfos objectclass
+# define the title attribute
+attributetype ( 1.2.250.1.49.5.3 NAME 'title'
+  DESC 'Title of the movie, series, or episode'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
+
+# define the description attribute
+attributetype ( 1.2.250.1.49.5.4 NAME 'description'
+  DESC 'Description of the movie, series, or episode'
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
+
+# define the releaseDate attribute
+attributetype ( 1.2.250.1.49.5.5 NAME 'releaseDate'
+  DESC 'Release date of the movie, series, or episode'
+  EQUALITY generalizedTimeMatch
+  ORDERING generalizedTimeOrderingMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.24 )
+
+# define the genre attribute
+attributetype ( 1.2.250.1.49.5.6 NAME 'genre'
+  DESC 'Genre of the movie, series, or episode'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
+
+# define the director attribute
+attributetype ( 1.2.250.1.49.5.7 NAME 'director'
+  DESC 'Director of the movie or series'
+  EQUALITY caseIgnoreMatch
+  SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
+
+# define the duration attribute
+attributetype ( 1.2.250.1.49.5.8 NAME 'duration'
+  DESC 'Duration of the movie, series, or episode'
+  EQUALITY integerMatch
+  ORDERING integerOrderingMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 )
+
+# define the quality attribute
+attributetype ( 1.2.250.1.49.5.9 NAME 'quality'
+  DESC 'Quality of the movie, series, or episode'
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
+
+# define the languages attribute
+attributetype ( 1.2.250.1.49.5.10 NAME 'languages'
+  DESC 'Languages available for the movie, series, or episode'
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
+
+# define the subtitles attribute
+attributetype ( 1.2.250.1.49.5.11 NAME 'subtitles'
+  DESC 'Subtitles available for the movie, series, or episode'
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
+
+# define the actors attribute
+attributetype ( 1.2.250.1.49.5.12 NAME 'actors'
+  DESC 'Actors in the movie, series, or episode'
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
+
+# define the seasonNumber attribute
+attributetype ( 1.2.250.1.49.5.13 NAME 'seasonNumber'
+  DESC 'Season number of the series'
+  EQUALITY integerMatch
+  ORDERING integerOrderingMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 )
+
+# define the episodeNumber attribute
+attributetype ( 1.2.250.1.49.5.14 NAME 'episodeNumber'
+  DESC 'Episode number of the series'
+  EQUALITY integerMatch
+  ORDERING integerOrderingMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 )
+
+# define the seasons attribute
+attributetype ( 1.2.250.1.49.5.15 NAME 'seasons'
+  DESC 'DNs of seasons in the series'
+  EQUALITY distinguishedNameMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.12 )
+
+# define the episodes attribute
+attributetype ( 1.2.250.1.49.5.16 NAME 'episodes'
+  DESC 'DNs of episodes in the season'
+  EQUALITY distinguishedNameMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.12 )
+
+# define the otherUserInfos objectclass
 objectclass ( 1.2.250.1.49.6.1 NAME 'otherUserInfos'
   DESC 'Object class for additional user information'
   SUP top STRUCTURAL
   MAY ( rightsAgreement $ userInfos ) )
 
-## Define the movie objectclass
-#objectclass ( 1.2.250.1.49.6.2 NAME 'movie'
-#  DESC 'Object class for movies'
-#  SUP top STRUCTURAL
-#  MUST ( title $ releaseDate )
-#  MAY ( description $ genre $ director $ duration $ quality $ languages $ subtitles $ actors ) )
-#
-## Define the series objectclass
-#objectclass ( 1.2.250.1.49.6.3 NAME 'series'
-#  DESC 'Object class for series'
-#  SUP top STRUCTURAL
-#  MUST ( title $ releaseDate )
-#  MAY ( description $ genre $ director $ duration $ quality $ languages $ subtitles $ actors $ seasonNumber $ episodeNumber $ seasons ) )
-#
-## Define the season objectclass
-#objectclass ( 1.2.250.1.49.6.4 NAME 'season'
-#  DESC 'Object class for seasons'
-#  SUP top STRUCTURAL
-#  MUST ( title $ releaseDate $ seasonNumber )
-#  MAY ( description $ genre $ director $ duration $ quality $ languages $ subtitles $ actors $ episodes ) )
-#
-## Define the episode objectclass
-#objectclass ( 1.2.250.1.49.6.5 NAME 'episode'
-#  DESC 'Object class for episodes'
-#  SUP top STRUCTURAL
-#  MUST ( title $ releaseDate $ seasonNumber $ episodeNumber )
-#  MAY ( description $ genre $ director $ duration $ quality $ languages $ subtitles $ actors ) )
+# define the movie objectclass
+objectclass ( 1.2.250.1.49.6.2 NAME 'movie'
+  DESC 'Object class for movies'
+  SUP top STRUCTURAL
+  MUST ( title $ releaseDate )
+  MAY ( description $ genre $ director $ duration $ quality $ languages $ subtitles $ actors ) )
+
+# define the series objectclass
+objectclass ( 1.2.250.1.49.6.3 NAME 'series'
+  DESC 'Object class for series'
+  SUP top STRUCTURAL
+  MUST ( title $ releaseDate )
+  MAY ( description $ genre $ director $ duration $ quality $ languages $ subtitles $ actors $ seasonNumber $ episodeNumber $ seasons ) )
+
+# define the season objectclass
+objectclass ( 1.2.250.1.49.6.4 NAME 'season'
+  DESC 'Object class for seasons'
+  SUP top STRUCTURAL
+  MUST ( title $ releaseDate $ seasonNumber )
+  MAY ( description $ genre $ director $ duration $ quality $ languages $ subtitles $ actors $ episodes ) )
+
+# define the episode objectclass
+objectclass ( 1.2.250.1.49.6.5 NAME 'episode'
+  DESC 'Object class for episodes'
+  SUP top STRUCTURAL
+  MUST ( title $ releaseDate $ seasonNumber $ episodeNumber )
+  MAY ( description $ genre $ director $ duration $ quality $ languages $ subtitles $ actors ) )
