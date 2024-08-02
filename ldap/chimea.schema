@@ -16,4 +16,4 @@ attributetype ( 1.2.250.1.49.5.2 NAME 'userInfos'
 objectclass ( 1.2.250.1.49.6.1 NAME 'otherUserInfos'
   DESC 'Object class for additional user information'
   SUP top AUXILIARY
-  MUST ( rightsAgreement $ userInfos ) )
+  MAY ( rightsAgreement $ userInfos ) )
