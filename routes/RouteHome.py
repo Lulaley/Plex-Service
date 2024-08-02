@@ -11,6 +11,10 @@ def get_user_rights(username):
         user_dn = f"(uid={username})"
         search_base = conf.get_config('LDAP', 'base_dn')
         user_entry = ds.search_entry(search_base, user_dn)
+        
+        # Log the content of user_entry
+        write_log(f"Contenu de user_entry pour l'utilisateur {username}: {user_entry}")
+        
         rights_agreement = user_entry.get('rightsAgreement', [None])[0]
         write_log(f"Droits trouvés pour l'utilisateur {username}: {rights_agreement}")
         ds.disconnect()
