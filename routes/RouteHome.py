@@ -38,13 +38,13 @@ def home(app):
             rights_agreement = get_user_rights(username)
             if rights_agreement == 'PlexService::SuperAdmin':
                 write_log(f"Utilisateur {username} est SuperAdmin")
-                return render_template('home.html', show_download=True, show_users=True)
+                return render_template('home.html', show_download=True, show_users=True, username=username)
             elif rights_agreement == 'PlexService::Admin':
                 write_log(f"Utilisateur {username} est Admin")
-                return render_template('home.html', show_download=True, show_users=False)
+                return render_template('home.html', show_download=True, show_users=False, username=username)
             else:
                 write_log(f"Utilisateur {username} n'a pas de droits spécifiques")
-                return render_template('home.html', show_download=False, show_users=False)
+                return render_template('home.html', show_download=False, show_users=False, username=username)
         else:
             write_log("Aucun utilisateur connecté, redirection vers l'index")
             return redirect(url_for('index'))
