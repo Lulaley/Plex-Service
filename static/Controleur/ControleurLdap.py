@@ -72,7 +72,7 @@ class ControleurLdap:
 
     def delete_entry(self, dn):
         try:
-            self.conn.bind_as_root()
+            self.bind_as_root()
             self.conn.delete_s(dn)
             write_log("Entrée supprimée avec succès")
             return True
@@ -82,7 +82,7 @@ class ControleurLdap:
 
     def modify_entry(self, dn, mod_list):
         try:
-            self.conn.bind_as_root()
+            self.bind_as_root()
             self.conn.modify_s(dn, mod_list)
             write_log("Entrée modifiée avec succès")
             return True
@@ -92,7 +92,7 @@ class ControleurLdap:
 
     def search_entry(self, search_base, search_filter):
         try:
-            self.conn.bind_as_root()
+            self.bind_as_root()
             result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter)
             if result:
                 write_log("Entrée trouvée")

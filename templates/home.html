@@ -1,252 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plex Service - Home</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/plex-icon.png') }}">
-    <style>
-        body {
-            background-color: #313B45; /* Fond plus sombre pour contraster avec le texte blanc */
-            color: white; /* Texte blanc */
-            font-family: Arial, sans-serif; /* Arial comme alternative à Helvetica Neue */
-            margin: 0;
-            padding: 0;
-        }
-    
-        .navbar {
-            background-color: #2C3E50;
-            padding: 10px 20px;
-        }
-    
-        .navbar img {
-            width: 50px; /* Taille du logo */
-            cursor: pointer; /* Curseur de la souris en forme de main */
-        }
-    
-        .navbar .menu {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-    
-        .navbar .menu button {
-            background-color: #ff9900;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            margin-left: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-    
-        .navbar .menu .username {
-            margin-right: 10px;
-        }
-    
-        .left-buttons {
-            display: grid;
-            align-items: center;
-            justify-content: center;
-            grid-template-columns: auto auto auto;
-        }
-    
-        button.left-buttons {
-            top: 11px;
-        }
-    
-        /* Cacher le hamburger par défaut */
-        .navbar .hamburger {
-            display: none;
-        }
-        
-        /* Styles pour les petits écrans */
-        @media (max-width: 600px) {
-            .navbar .menu {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-    
-            .left-buttons .right-buttons {
-                display: flex;
-                width: fit-content;
-            }
-    
-            .navbar .menu button {
-                width: fit-content;
-                margin: 5px;
-            }
-    
-            .navbar .hamburger {
-                display: block;
-                cursor: pointer;
-            }
-    
-            .navbar .menu {
-                display: none;
-            }
-    
-            .navbar .menu.active {
-                display: flex;
-            }
-        }
-    </style>
-    <style>
-        .center-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 90vh;
-        }
-
-        .loadingContainer {
-            position: relative;
-            width: 80px; /* Adjusted for new size */
-            height: 80px; /* Adjusted for new size */
-        }s
-
-        .loadingAnimation {
-            position: absolute;
-            top: 0;
-            left: 0;
-            margin: auto;
-        }
-
-        circle {
-            fill: transparent;
-            stroke-linecap: round;
-            stroke-dasharray: calc(3.14px * 40);
-            stroke-dashoffset: 40;
-            -webkit-animation: spinner 2s linear infinite;
-            -moz-animation: spinner 3s linear infinite;
-            -ms-animation: spinner 3s linear infinite;
-            -o-animation: spinner 3s linear infinite;
-            animation: spinner 3s linear infinite;
-        }
-
-        .spinner-red circle {
-            stroke: #8A2BE2 ;
-        }
-
-        .spinner-green circle {
-            stroke: #9457EB ;
-        }
-
-        .spinner-blue circle {
-            stroke: #9683EC;
-        }
-
-        .spinner40 {
-            width: 80px; /* Increased size */
-            height: 80px; /* Increased size */
-            x: 0px;
-            y: 0px;
-            display: block;
-            transform-origin: calc(0.5 * 80px) calc(0.5 * 80px); /* Adjusted for new size */
-            -webkit-animation: rotateSpinner 2s linear infinite;
-            -moz-animation: rotateSpinner 3s linear infinite;
-            -ms-animation: rotateSpinner 3s linear infinite;
-            -o-animation: rotateSpinner 3s linear infinite;
-            animation: rotateSpinner 3s linear infinite;
-            position: absolute;
-        }
-
-        .spinner-red {
-            animation-delay: 0s;
-        }
-
-        .spinner-green {
-            animation-delay: 5s;
-        }
-
-        .spinner-blue {
-            animation-delay: 10s;
-        }
-        
-        @keyframes spinner {
-            0% {
-                stroke-dashoffset: 26.4/*calc(0.66 * 40)*/;
-            }
-            50% {
-                stroke-dashoffset: 124.6/*calc(3.14 * 40)*/;
-            }
-            100% {
-                stroke-dashoffset: 0.66; /*calc(0.66);*/
-            }
-        }
-
-        @keyframes rotateSpinner {
-            0% {
-                transform: rotate(0deg);
-            }
-            50% {
-                transform: rotate(720deg);
-            }
-            100% {
-                transform: rotate(1080deg);
-            }
-        }
-    </style>
-    <style>
-        body {
-            overflow: hidden;
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
-
-        .center-logo {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1000;
-            animation: moveLogo 3s forwards;
-        }
-
-        .blur-background {
-            filter: blur(10px);
-            animation: unblurBackground 3s forwards;
-        }
-
-        .fade-in {
-            opacity: 0;
-            animation: fadeInElements 3s forwards;
-        }
-
-        @keyframes moveLogo {
-            0% {
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%) scale(1);
-            }
-            100% {
-                top: 10px; /* Adjust this value to the final position of the logo */
-                left: 10px; /* Adjust this value to the final position of the logo */
-                transform: translate(-43%, -45%) scale(0.1); /* Adjust scale to match the navbar logo size */
-            }
-        }
-
-        @keyframes unblurBackground {
-            0% {
-                filter: blur(10px);
-            }
-            100% {
-                filter: blur(0);
-            }
-        }
-
-        @keyframes fadeInElements {
-            0% {
-                opacity: 0;
-            }
-            100% {
-                opacity: 1;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/homeMain.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/homeSpinner.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/homeAnim.css') }}">
 </head>
+
 <body>
     <div class="center-logo">
         <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo">
@@ -261,7 +25,13 @@
                 <button>Demandes</button>
             </div>
             <div class="right-buttons">
-                <span class="username">{{ username }}</span>
+                {% if show_download %}
+                <button>Téléchargement</button>
+                {% endif %}
+                {% if show_users %}
+                <button>Utilisateurs</button>
+                {% endif %}
+                <button class="username">{{ username }}</button>
                 <button onclick="window.location.href='{{ url_for('inner_logout') }}'">Déconnexion</button>
             </div>
         </div>
@@ -271,9 +41,10 @@
         <div class="text-info">
             <p>Bienvenue sur le service de demandes d'accès à des films ou séries pour le Plex de {owner-plex}.</p>
             <p> - Vous pouvez rechercher des films ou séries et demander l'accès à ceux-ci.</p>
-            <p> - Vous pouvez voir où  en sont vos demandes.</p>
-            <p>Si vous rencontrer un problème ou souhaiter proposer une amélioration, veuillez contacter les développeur à l'adresse suivante : {dev-plex-service@gmail.com}</p>
-        </div> 
+            <p> - Vous pouvez voir où en sont vos demandes.</p>
+            <p>Si vous rencontrer un problème ou souhaiter proposer une amélioration, veuillez contacter les développeur
+                à l'adresse suivante : {dev-plex-service@gmail.com}</p>
+        </div>
         <div class="loadingContainer">
             <div class="loadingAnimation">
                 <svg class="spinner40 spinner-red">
@@ -292,25 +63,7 @@
             </div>
         </div>
     </div>
-    <script>
-        function toggleMenu() {
-            var menu = document.querySelector('.menu');
-            menu.classList.toggle('active');
-        }
-
-        window.onload = function() {
-            document.querySelector('.center-logo').classList.add('moveLogo');
-            document.querySelector('.navbar').classList.add('unblurBackground');
-            document.querySelector('.center-container').classList.add('unblurBackground');
-            document.querySelector('.navbar').classList.add('fadeInElements');
-            document.querySelector('.center-container').classList.add('fadeInElements');
-
-            setTimeout(function() {
-                document.querySelector('.navbar').classList.remove('blur-background');
-                document.querySelector('.center-container').classList.remove('blur-background');
-                document.querySelector('.center-logo').style.display = 'none'; // Hide the logo after animation
-            }, 3000); // Match the duration of the animation
-        };
-    </script>
+    <script src="{{ url_for('static', filename='js/home.js') }}"></script>
 </body>
+
 </html>
