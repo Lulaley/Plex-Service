@@ -26,12 +26,12 @@
             </div>
             <div class="right-buttons">
                 {% if show_download %}
-                <button>Download</button>
+                <button>Téléchargement</button>
                 {% endif %}
                 {% if show_users %}
-                <button>Users</button>
+                <button>Utilisateurs</button>
                 {% endif %}
-                <span class="username">{{ username }}</span>
+                <button class="username">{{ username }}</button>
                 <button onclick="window.location.href='{{ url_for('inner_logout') }}'">Déconnexion</button>
             </div>
         </div>
