@@ -28,7 +28,7 @@ class ControleurYGG:
         self.cf_clearance = cookies.get('cf_clearance')
 
         # Perform the login request with the required cookies and authentication data
-        response = self.session.post(url, data={'username': username, 'password': password}, cookies={'__cfduid': self.cfduid, 'cf_clearance': self.cf_clearance})
+        response = self.session.post(url, data={'id': username, 'pass': password}, cookies={'__cfduid': self.cfduid, 'cf_clearance': self.cf_clearance})
 
         # Check if the login was successful based on the response
         if response.status_code == 200 and 'Authentication failed' not in response.text:
