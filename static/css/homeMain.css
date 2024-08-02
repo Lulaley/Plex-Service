@@ -52,6 +52,15 @@ button.left-buttons {
     display: none;
 }
 
+.center-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+}
+
+
 /* Styles pour les petits écrans */
 @media (max-width: 600px) {
     .navbar .menu {
