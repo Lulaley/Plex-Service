@@ -9,6 +9,9 @@ body {
 .navbar {
     background-color: #2C3E50;
     padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .navbar img {
@@ -37,10 +40,8 @@ body {
 }
 
 .left-buttons {
-    display: grid;
+    display: flex;
     align-items: center;
-    justify-content: center;
-    grid-template-columns: auto auto auto;
 }
 
 button.left-buttons {
@@ -59,7 +60,6 @@ button.left-buttons {
     align-items: center;
     height: 90vh;
 }
-
 
 /* Styles pour les petits écrans */
 @media (max-width: 600px) {
@@ -90,4 +90,15 @@ button.left-buttons {
     .navbar .menu.active {
         display: flex;
     }
+
+    /* Hide the logo in the menu on mobile */
+    .navbar .menu .navbar-logo {
+        display: none;
+    }
+}
+
+/* Ensure the logo is always visible in the navbar */
+.navbar .left-buttons .navbar-logo {
+    display: inline-block;
+    margin-right: 10px;
 }
