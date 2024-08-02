@@ -19,7 +19,7 @@ def get_user_rights(username):
         if user_entry:
             # Extract the attributes dictionary from the first tuple
             attributes = user_entry[0][1]
-            rights_agreement = attributes.get('rightsAgreement', [None])[0].decode('utf-8')
+            rights_agreement = attributes.get('rightsAgreement', [b''])[0].decode('utf-8')
             write_log(f"Droits trouvés pour l'utilisateur {username}: {rights_agreement}")
             ds.disconnect()
             return rights_agreement
