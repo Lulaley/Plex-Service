@@ -23,6 +23,7 @@ def home(app):
     write_log("Affichage de la page d'accueil")
     @app.route('/home')
     def inner_home():
+        write_log("Vérification de l'utilisateur connecté")
         if 'username' in session:
             username = session['username']
             write_log(f"Utilisateur connecté: {username}")
