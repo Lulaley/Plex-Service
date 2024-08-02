@@ -11,35 +11,51 @@ class ControleurYGG:
         self.torrent_link = None
 
     def login(self):
-        url = self.conf.get_config('YGG', 'login_url')
-        username = self.conf.get_config('YGG', 'username')
-        password = self.conf.get_config('YGG', 'password')
+        try:
+            url = self.conf.get_config('YGG', 'login_url')
+            username = self.conf.get_config('YGG', 'username')
+            password = self.conf.get_config('YGG', 'password')
 
-        write_log("Tentative de connexion à YGG...")
+            write_log("Tentative de connexion à YGG...")
 
-        # Perform the initial request to get the Cloudflare cookies
-        write_log("Récupération des cookies Cloudflare...")
-        response = self.session.get(url)
-        response.raise_for_status()
-        write_log(f"Code de statut de la récupération des cookies: {response.status_code}")
-        write_log(f"Reponse de la récupération des cookies: {response.text}")
-        # Extract the required cookies from the response
-        cookies = response.cookies.get_dict()
-        write_log(f"Cookies extraits: {cookies}")
-        # Extract the '__cfduid' and 'cf_clearance' cookies
-        self.cfduid = cookies.get('__cfduid')
-        self.cf_clearance = cookies.get('cf_clearance')
+            # Perform the initial request to get the Cloudflare cookies
+            write_log("Récupération des cookies Cloudflare...")
+            response = self.session.get(url)
+            response.raise_for_status()
+            write_log(f"Code de statut de la récupération des cookies: {response.status_code}")
+            write_log(f"Reponse de la récupération des cookies: {response.text}")
 
-        write_log(f"Debut de la connexion avec les cookies: __cfduid={self.cfduid}, cf_clearance={self.cf_clearance}")
-        # Perform the login request with the required cookies and authentication data
-        response = self.session.post(url, data={'id': username, 'pass': password}, cookies={'__cfduid': self.cfduid, 'cf_clearance': self.cf_clearance})
-        write_log(f"Reponse de la connexion: {response.text}")
-        # Check if the login was successful based on the response
-        if response.status_code == 200 and 'Authentication failed' not in response.text:
-            write_log("Connexion réussie.")
-            return True
-        else:
-            write_log("Échec de la connexion.")
+            # Extract the required cookies from the response
+            cookies = response.cookies.get_dict()
+            write_log(f"Cookies extraits: {cookies}")
+
+            # Extract the '__cfduid' and 'cf_clearance' cookies
+            self.cfduid = cookies.get('__cfduid')
+            self.cf_clearance = cookies.get('cf_clearance')
+
+            if not self.cfduid or not self.cf_clearance:
+                write_log("Les cookies nécessaires n'ont pas été trouvés.")
+                return False
+
+            write_log(f"Debut de la connexion avec les cookies: __cfduid={self.cfduid}, cf_clearance={self.cf_clearance}")
+
+            # Perform the login request with the required cookies and authentication data
+            response = self.session.post(url, data={'id': username, 'pass': password}, cookies={'__cfduid': self.cfduid, 'cf_clearance': self.cf_clearance})
+            write_log(f"Reponse de la connexion: {response.text}")
+
+            # Check if the login was successful based on the response
+            if response.status_code == 200 and 'Authentication failed' not in response.text:
+                write_log("Connexion réussie.")
+                return True
+            else:
+                write_log("Échec de la connexion.")
+                return False
+
+        except requests.exceptions.RequestException as e:
+            write_log(f"Erreur lors de la requête: {e}")
+            return False
+        except Exception as e:
+            write_log(f"Erreur inattendue: {e}")
             return False
 
     def search(self, titre, uploader=None, categorie=None, sous_categorie=None):
