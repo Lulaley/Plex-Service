@@ -7,7 +7,9 @@ def get_user_rights(username):
     ds = ControleurLdap()
     conf = ControleurConf()
     write_log(f"Recherche des droits pour l'utilisateur: {username}")
-    if ds.search_user(username):
+    res = ds.search_user(username)
+    write_log(f"Résultat de la recherche: {res}")
+    if res:
         user_dn = f"(uid={username})"
         search_base = conf.get_config('LDAP', 'base_dn')
         user_entry = ds.search_entry(search_base, user_dn)
