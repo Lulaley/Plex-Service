@@ -10,6 +10,13 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/homeAnim.css') }}">
 </head>
 <body>
+    <h1>Welcome to the Home Page</h1>
+    {% if show_download %}
+        <button>Download</button>
+    {% endif %}
+    {% if show_users %}
+        <button>Users</button>
+    {% endif %}
     <div class="center-logo">
         <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo">
     </div>

@@ -1,6 +1,7 @@
 from flask import render_template, request, flash , session, redirect, url_for
 from static.Controleur.ControleurLdap import ControleurLdap
 from static.Controleur.ControleurConf import ControleurConf
+from routes.RouteHome import home
 
 
 def login(app):
@@ -19,7 +20,7 @@ def login(app):
                 # Initialiser la variable de session
                 session['username'] = username
                 # Rediriger vers la page d'accueil
-                return redirect(url_for('home'))
+                home(app)
             else:
                 # Affichage d'un message d'erreur en cas d'échec
                 flash('Échec de la connexion. Veuillez vérifier vos identifiants et réessayer.')
