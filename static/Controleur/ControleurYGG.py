@@ -18,11 +18,12 @@ class ControleurYGG:
         write_log("Tentative de connexion à YGG...")
 
         # Perform the initial request to get the Cloudflare cookies
+        write_log("Récupération des cookies Cloudflare...")
         response = self.session.get(url)
-
+        write_log(f"Reponse de la récupération des cookies: {response.text}")
         # Extract the required cookies from the response
         cookies = response.cookies.get_dict()
-
+        write_log(f"Cookies extraits: {cookies}")
         # Extract the '__cfduid' and 'cf_clearance' cookies
         self.cfduid = cookies.get('__cfduid')
         self.cf_clearance = cookies.get('cf_clearance')
