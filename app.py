@@ -26,12 +26,12 @@ def root():
 def index():
     return render_template('index.html')
 
-@app.route('/home')
+""" @app.route('/home')
 def home():
     if 'username' in session:
         return render_template('home.html', username=session['username'])
     else:
-        return redirect(url_for('index'))
+        return redirect(url_for('index')) """
 
 # Enregistrement des routes
 login(app)
