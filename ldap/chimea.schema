@@ -106,7 +106,7 @@ attributetype ( 1.2.250.1.49.5.16 NAME 'episodes'
 # define the otherUserInfos objectclass
 objectclass ( 1.2.250.1.49.6.1 NAME 'otherUserInfos'
   DESC 'Object class for additional user information'
-  SUP top STRUCTURAL
+  SUP top AUXILIARY
   MAY ( rightsAgreement $ userInfos ) )
 
 # define the movie objectclass
