@@ -20,6 +20,8 @@ class ControleurYGG:
         # Perform the initial request to get the Cloudflare cookies
         write_log("Récupération des cookies Cloudflare...")
         response = self.session.get(url)
+        response.raise_for_status()
+        write_log(f"Code de statut de la récupération des cookies: {response.status_code}")
         write_log(f"Reponse de la récupération des cookies: {response.text}")
         # Extract the required cookies from the response
         cookies = response.cookies.get_dict()
