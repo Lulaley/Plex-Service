@@ -1,4 +1,4 @@
-from flask import render_template, request
+from flask import render_template, request, session
 from static.Controleur.ControleurYGG import ControleurYGG
 
 
@@ -6,8 +6,9 @@ from static.Controleur.ControleurYGG import ControleurYGG
 def download(app):
     @app.route('/download')
     def inner_download():
+        username = session['username']
         # Vous pouvez ajouter ici la logique pour afficher les téléchargements
-        return render_template('download.html')
+        return render_template('download.html', username=username)
 
 def search(app):
     @app.route('/search', methods=['GET'])
