@@ -2,6 +2,7 @@ import requests
 from .ControleurLog import write_log
 from .ControleurConf import ControleurConf
 import cloudscraper
+import time
 
 class ControleurYGG:
     def __init__(self):
@@ -29,6 +30,10 @@ class ControleurYGG:
             self.cfduid = response.cookies.get('__cfduid')
             self.cf_clearance = response.cookies.get('cf_clearance')
             headers = response.headers
+            
+            # Wait for a few seconds before retrying
+            write_log("Waiting for 5 seconds before retrying...")
+            time.sleep(5)
             
             # Retry the GET request with the extracted cookies and headers
             write_log("Retrying GET request with extracted cookies and headers...")
