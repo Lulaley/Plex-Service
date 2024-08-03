@@ -36,16 +36,22 @@ class ControleurYGG:
                 EC.presence_of_element_located((By.NAME, 'id'))
             )
             
+            write_log("Page de connexion chargée.")
             # Remplir les champs de connexion
             username_field = self.driver.find_element(By.NAME, 'id')
             password_field = self.driver.find_element(By.NAME, 'pass')
             username_field.send_keys(username)
             password_field.send_keys(password)
             
+            write_log("Soumission du formulaire de connexion...")
             # Soumettre le formulaire
             password_field.submit()
             
+            write_log("Attente de la page de connexion...")
             # Vérifier si la connexion a réussi
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.TAG_NAME, 'body'))
+            )
             if "tableau de bord" in self.driver.page_source.lower():
                 write_log("Login successful")
                 return True
@@ -53,10 +59,9 @@ class ControleurYGG:
                 write_log("Login failed")
                 return False
         except Exception as e:
-            write_log(f"Exception during login process: {e}")
-            return False
-        finally:
-            self.driver.quit()
+            write_log(f"Erreur lors de la connexion : {e}")
+            raise
+
     def search(self, titre, uploader=None, categorie=None, sous_categorie=None):
         search_url = self.conf.get_config('YGG', 'search_url')
         write_log(f"Recherche de '{titre}' sur YGG...")
