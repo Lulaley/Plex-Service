@@ -72,6 +72,7 @@ class ControleurYGG:
                 return True
             else:
                 write_log(f"Login failed with status code: {login_response.status_code}")
+                write_log(f"Response text: {login_response.text}")
                 return False
         except Exception as e:
             write_log(f"Exception during login process: {e}")
