@@ -66,7 +66,7 @@ class ControleurYGG:
             write_log("Envoi de la requête de connexion...")
             # POST request to login
             login_response = self.scraper.post(login_url, data=login_data, headers=headers, cookies=response.cookies)
-            
+            write_log("Requête de connexion envoyée.")
             if login_response.status_code == 200:
                 write_log("Login successful")
                 return True
