@@ -1,8 +1,8 @@
+import json
+import os
 import requests
 from .ControleurLog import write_log
 from .ControleurConf import ControleurConf
-import json
-import os
 
 class ControleurYGG:
     def __init__(self):
@@ -28,24 +28,51 @@ class ControleurYGG:
             write_log(f"Erreur lors du chargement des cookies: {e}")
             return False
 
+    def save_cookies(self, cookies_file):
+        write_log(f"Sauvegarde des cookies dans le fichier: {cookies_file}")
+        try:
+            cookies = self.session.cookies.get_dict()
+            with open(cookies_file, 'w') as f:
+                json.dump(cookies, f)
+            write_log("Cookies sauvegardés avec succès")
+        except Exception as e:
+            write_log(f"Erreur lors de la sauvegarde des cookies: {e}")
+
     def login(self):
         try:
             login_url = self.conf.get_config('YGG', 'login_url')
+            username = self.conf.get_config('YGG', 'username')
+            password = self.conf.get_config('YGG', 'password')
+            
             write_log("Début de la tentative de connexion")
             write_log(f"URL de connexion: {login_url}")
 
             # Charger les cookies de session
-            if not self.load_cookies('cookies.json'):
-                write_log("Impossible de charger les cookies. Connexion manuelle requise.")
-                return False
+            if self.load_cookies('cookies.json'):
+                # Vérifier si la connexion est réussie avec les cookies
+                response = self.session.get(login_url)
+                write_log(f"Statut de la réponse: {response.status_code}")
+                write_log(f"Contenu de la réponse: {response.text}")
+                
+                if response.status_code == 200 and "tableau de bord" in response.text.lower():
+                    write_log("Connexion réussie avec les cookies.")
+                    return True
+                else:
+                    write_log("Les cookies sont invalides, tentative de connexion manuelle.")
             
-            # Vérifier si la connexion est réussie
-            response = self.session.get(login_url)
+            # Effectuer la requête de connexion manuelle
+            login_data = {
+                'id': username,
+                'pass': password
+            }
+            response = self.session.post(login_url, data=login_data)
+            
             write_log(f"Statut de la réponse: {response.status_code}")
             write_log(f"Contenu de la réponse: {response.text}")
             
             if response.status_code == 200 and "tableau de bord" in response.text.lower():
                 write_log("Connexion réussie.")
+                self.save_cookies('cookies.json')
                 return True
             else:
                 write_log(f"Échec de la connexion. Statut: {response.status_code}, Réponse: {response.text}")
@@ -69,7 +96,7 @@ class ControleurYGG:
 
         # Envoyer la requête de recherche
         try:
-            response = self.scraper.get(search_url, params=params, headers=headers, cookies=response.cookies)
+            response = self.scraper.get(search_url, params=params, cookies=response.cookies)
             if response.status_code == 200:
                 write_log("Recherche réussie")
                 return response.json()
