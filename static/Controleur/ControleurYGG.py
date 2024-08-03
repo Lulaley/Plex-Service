@@ -1,6 +1,7 @@
 import json
 import os
 import requests
+from twocaptcha import TwoCaptcha
 from .ControleurLog import write_log
 from .ControleurConf import ControleurConf
 
@@ -9,6 +10,7 @@ class ControleurYGG:
         write_log("Initialisation de ControleurYGG")
         self.session = requests.Session()
         self.conf = ControleurConf()
+        self.solver = TwoCaptcha('YOUR_2CAPTCHA_API_KEY')
         write_log("Configuration chargée")
         self.torrent_link = None
 
@@ -38,12 +40,21 @@ class ControleurYGG:
         except Exception as e:
             write_log(f"Erreur lors de la sauvegarde des cookies: {e}")
 
+    def solve_captcha(self, site_key, url):
+        try:
+            result = self.solver.recaptcha(sitekey=site_key, url=url)
+            return result['code']
+        except Exception as e:
+            write_log(f"Erreur lors de la résolution du CAPTCHA: {e}")
+            return None
+
     def login(self):
         try:
             login_url = self.conf.get_config('YGG', 'login_url')
             username = self.conf.get_config('YGG', 'username')
             password = self.conf.get_config('YGG', 'password')
-            
+            site_key = self.conf.get_config('YGG', 'site_key')  # Clé du site pour le CAPTCHA
+
             write_log("Début de la tentative de connexion")
             write_log(f"URL de connexion: {login_url}")
 
@@ -53,23 +64,30 @@ class ControleurYGG:
                 response = self.session.get(login_url)
                 write_log(f"Statut de la réponse: {response.status_code}")
                 write_log(f"Contenu de la réponse: {response.text}")
-                
+
                 if response.status_code == 200 and "tableau de bord" in response.text.lower():
                     write_log("Connexion réussie avec les cookies.")
                     return True
                 else:
                     write_log("Les cookies sont invalides, tentative de connexion manuelle.")
-            
+
+            # Résoudre le CAPTCHA
+            captcha_solution = self.solve_captcha(site_key, login_url)
+            if not captcha_solution:
+                write_log("Échec de la résolution du CAPTCHA.")
+                return False
+
             # Effectuer la requête de connexion manuelle
             login_data = {
                 'id': username,
-                'pass': password
+                'pass': password,
+                'g-recaptcha-response': captcha_solution
             }
             response = self.session.post(login_url, data=login_data)
-            
+
             write_log(f"Statut de la réponse: {response.status_code}")
             write_log(f"Contenu de la réponse: {response.text}")
-            
+
             if response.status_code == 200 and "tableau de bord" in response.text.lower():
                 write_log("Connexion réussie.")
                 self.save_cookies('cookies.json')
