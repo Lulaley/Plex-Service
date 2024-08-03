@@ -1,14 +1,16 @@
 import requests
 from .ControleurLog import write_log
 from .ControleurConf import ControleurConf
-import cloudscraper
+from selenium import webdriver #pip install selenium
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager #pip install webdriver_manager
 import time
 
 class ControleurYGG:
     def __init__(self):
-        self.scraper = cloudscraper.create_scraper()  # Utiliser cloudscraper pour contourner les protections Cloudflare
-        self.cfduid = None
-        self.cf_clearance = None
+        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
         self.conf = ControleurConf()
         self.torrent_link = None
 
@@ -18,74 +20,36 @@ class ControleurYGG:
             username = self.conf.get_config('YGG', 'username')
             password = self.conf.get_config('YGG', 'password')
             
-            # Initial GET request to obtain cookies and headers
-            write_log("Tentative de connexion à YGG...")
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                'Accept-Language': 'en-US,en;q=0.9',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Connection': 'keep-alive',
-                'Referer': login_url,
-                'Origin': login_url
-            }
-            response = self.scraper.get(login_url, headers=headers)
+            write_log("Tentative de connexion à YGG via Selenium...")
+            self.driver.get(login_url)
             
-            write_log("Cookies et headers obtenus.")
-            # Check if the response contains the expected content
-            if "Just a moment..." in response.text:
-                write_log("Encountered bot protection. Additional steps may be required.")
-                # Extract cookies and headers from the response
-                write_log("Extracting cookies and headers...")
-                self.cfduid = response.cookies.get('__cfduid')
-                self.cf_clearance = response.cookies.get('cf_clearance')
-                headers.update(response.headers)
-                
-                # Wait for a few seconds before retrying
-                write_log("Waiting for 5 seconds before retrying...")
-                time.sleep(5)
-                
-                # Retry the GET request with the extracted cookies and headers
-                write_log("Retrying GET request with extracted cookies and headers...")
-                try:
-                    response = self.scraper.get(login_url, cookies=response.cookies, headers=headers)
-                except Exception as e:
-                    write_log(f"Exception during retry GET request: {e}")
-                    return False
-                
-                if "Just a moment..." in response.text:
-                    write_log("Bot protection still encountered. Login failed.")
-                    return False
+            # Attendre que la page se charge et que les champs de connexion soient disponibles
+            time.sleep(5)
             
-            write_log("Connexion en cours...")
-            # Prepare login data
-            login_data = {
-                'id': username,
-                'pass': password
-            }
+            # Remplir les champs de connexion
+            username_field = self.driver.find_element(By.NAME, 'id')
+            password_field = self.driver.find_element(By.NAME, 'pass')
+            username_field.send_keys(username)
+            password_field.send_keys(password)
             
-            write_log("Envoi de la requête de connexion...")
-            # POST request to login
-            login_response = self.scraper.post(login_url, data=login_data, headers=headers, cookies=response.cookies)
+            # Soumettre le formulaire
+            password_field.send_keys(Keys.RETURN)
             
-            write_log(f"Login response status code: {login_response.status_code}")
-            if login_response.status_code == 200:
+            # Attendre que la connexion soit traitée
+            time.sleep(5)
+            
+            # Vérifier si la connexion a réussi
+            if "tableau de bord" in self.driver.page_source.lower():
                 write_log("Login successful")
                 return True
             else:
-                write_log(f"Login failed with status code: {login_response.status_code}")
-                try:
-                    write_log(f"Decoding response text...")
-                    response_text = login_response.text.encode('utf-8').decode('utf-8')
-                except UnicodeDecodeError:
-                    write_log("Response contains non-text content")
-                    response_text = "Response contains non-text content"
-                #write_log(f"Response text: {response_text}")
-                write_log(f"Response headers: {login_response.headers}")
+                write_log("Login failed")
                 return False
         except Exception as e:
             write_log(f"Exception during login process: {e}")
             return False
-
+        finally:
+            self.driver.quit()
     def search(self, titre, uploader=None, categorie=None, sous_categorie=None):
         search_url = self.conf.get_config('YGG', 'search_url')
         write_log(f"Recherche de '{titre}' sur YGG...")
