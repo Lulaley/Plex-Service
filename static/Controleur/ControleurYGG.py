@@ -47,6 +47,7 @@ class ControleurYGG:
             write_log("Début de la tentative de connexion")
             write_log(f"URL de connexion: {login_url}")
 
+            write_log("Chargement des cookies...")
             # Charger les cookies de session
             if self.load_cookies('cookies.json'):
                 # Vérifier si la connexion est réussie avec les cookies
