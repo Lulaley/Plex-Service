@@ -7,6 +7,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
+import pickle
 
 class ControleurYGG:
     def __init__(self):
@@ -14,7 +15,7 @@ class ControleurYGG:
         chrome_options.binary_location = "/usr/bin/google-chrome"  # Spécifiez le chemin de l'exécutable Chrome
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--headless")  # Exécuter Chrome en mode headless
+        # chrome_options.add_argument("--headless")  # Désactiver le mode headless
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--remote-debugging-port=9222")
         
@@ -22,14 +23,24 @@ class ControleurYGG:
         self.conf = ControleurConf()
         self.torrent_link = None
 
+    def load_cookies(self, cookies_file):
+        with open(cookies_file, 'rb') as f:
+            cookies = pickle.load(f)
+            for cookie in cookies:
+                self.driver.add_cookie(cookie)
+
     def login(self):
         try:
             login_url = self.conf.get_config('YGG', 'login_url')
-            username = self.conf.get_config('YGG', 'username')
-            password = self.conf.get_config('YGG', 'password')
+            self.driver.get(login_url)
+            
+            # Charger les cookies de session
+            self.load_cookies('cookies.pkl')
+            
+            # Recharger la page avec les cookies
+            self.driver.get(login_url)
             
             write_log("Tentative de connexion à YGG via Selenium...")
-            self.driver.get(login_url)
             
             # Attendre que la page se charge et que les champs de connexion soient disponibles
             WebDriverWait(self.driver, 10).until(
@@ -40,8 +51,8 @@ class ControleurYGG:
             # Remplir les champs de connexion
             username_field = self.driver.find_element(By.NAME, 'id')
             password_field = self.driver.find_element(By.NAME, 'pass')
-            username_field.send_keys(username)
-            password_field.send_keys(password)
+            username_field.send_keys(self.conf.get_config('YGG', 'username'))
+            password_field.send_keys(self.conf.get_config('YGG', 'password'))
             
             write_log("Soumission du formulaire de connexion...")
             # Soumettre le formulaire
