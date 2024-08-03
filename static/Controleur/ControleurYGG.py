@@ -60,6 +60,9 @@ class ControleurYGG:
             }
             response = self.scraper.post(login_url, data=login_data)
             
+            write_log(f"Statut de la réponse: {response.status_code}")
+            write_log(f"Contenu de la réponse: {response.text}")
+            
             if response.status_code == 200 and "tableau de bord" in response.text.lower():
                 write_log("Connexion réussie.")
                 self.save_cookies('cookies.pkl')
