@@ -35,50 +35,32 @@
     </div>
 
     <div class="center-container blur-background fade-in">
-        <form action="/search" method="get">
-            <input type="text" name="titre" placeholder="Rechercher sur YGG par nom de film ou série" reguired>
-            <input type="text" name="uploader" placeholder="Rechercher par uploader" optional>
-            
-            <label for="category">Catégorie :</label>
-            <select name="category" id="category">
-                <option value="2145" selected>Film/Vidéo</option>
-            </select>
-            
-            <label for="subcategory">Sous-catégorie :</label>
-            <select name="subcategory" id="subcategory" optional>
-                <option value="2178">Animation</option>
-                <option value="2179">Animation Série</option>
-                <option value="2183">Film</option>
-                <option value="2184">Série TV</option>
-            </select>
-            
-            <button type="submit">Rechercher</button>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <label for="torrent-file">Télécharger un fichier .torrent :</label>
+            <input type="file" name="torrent-file" id="torrent-file" accept=".torrent" required>
+            <button type="submit">Télécharger</button>
         </form>
-        {% if results %}
-        <div class="results-container">
-            <h2>Résultats de la recherche</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Titre</th>
-                        <th>Uploader</th>
-                        <th>Catégorie</th>
-                        <th>Sous-catégorie</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for result in results %}
-                    <tr>
-                        <td>{{ result.titre }}</td>
-                        <td>{{ result.uploader }}</td>
-                        <td>{{ result.category }}</td>
-                        <td>{{ result.subcategory }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    
+        <form action="/start_download" method="post">
+            <button type="submit">Lancer le téléchargement</button>
+        </form>
+    
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul class="flashes">
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+    
+        {% if download_status %}
+        <div class="status-container">
+            <h2>État du téléchargement</h2>
+            <p>{{ download_status }}</p>
         </div>
         {% endif %}
     </div>
-</body>
-</html>
+    </body>
+    </html>
