@@ -7,7 +7,7 @@ class ControleurYGG:
         self.scraper = cloudscraper.create_scraper(
             browser={
                 'browser': 'chrome',
-                'platform': 'windows',
+                'platform': 'linux',
                 'mobile': False
             }
         )  # Utilisation de cloudscraper avec User-Agent
