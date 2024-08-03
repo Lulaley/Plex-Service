@@ -38,12 +38,9 @@
         <form action="/upload" method="post" enctype="multipart/form-data">
             <label for="torrent-file">Télécharger un fichier .torrent :</label>
             <input type="file" name="torrent-file" id="torrent-file" accept=".torrent" required>
-            <button type="submit">Télécharger</button>
         </form>
     
-        <form action="/start_download" method="post">
-            <button type="submit">Lancer le téléchargement</button>
-        </form>
+        <button id="start-download-btn">Lancer le téléchargement</button>
     
         {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -62,5 +59,32 @@
         </div>
         {% endif %}
     </div>
+    <script>
+        document.getElementById('start-download-btn').addEventListener('click', function() {
+            var form = document.getElementById('torrent-form');
+            var formData = new FormData(form);
+        
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    return fetch('/start_download', {
+                        method: 'POST'
+                    });
+                } else {
+                    throw new Error('Échec de l\'upload du fichier .torrent');
+                }
+            }).then(response => {
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    throw new Error('Échec du lancement du téléchargement');
+                }
+            }).catch(error => {
+                alert(error.message);
+            });
+        });
+        </script>
     </body>
     </html>
