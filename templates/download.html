@@ -17,7 +17,7 @@
         <div class="hamburger" onclick="toggleMenu()">☰</div>
         <div class="menu">
             <div class="left-buttons">
-                <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo">
+                <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="window.location.href='{{ url_for('inner_home')}}'">
                 <button>Recherche</button>
                 <button>Demandes</button>
             </div>
