@@ -14,6 +14,7 @@ class ControleurYGG:
             username = self.conf.get_config('YGG', 'username')
             password = self.conf.get_config('YGG', 'password')
 
+            write_log("Tentative de connexion à YGG...")
             login_data = {
                 'id': username,
                 'pass': password
@@ -21,11 +22,13 @@ class ControleurYGG:
             response = self.scraper.post(login_url, data=login_data)
 
             if response.status_code == 200 and "tableau de bord" in response.text.lower():
+                write_log("Connexion réussie.")
                 return True
             else:
+                write_log(f"Échec de la connexion. Statut: {response.status_code}")
                 return False
         except Exception as e:
-            print(f"Erreur lors de la connexion : {e}")
+            write_log(f"Erreur lors de la connexion : {e}")
             raise
 
     def search(self, titre, uploader=None, categorie=None, sous_categorie=None):
