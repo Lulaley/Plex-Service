@@ -1,15 +1,13 @@
 import requests
 from .ControleurLog import write_log
 from .ControleurConf import ControleurConf
-import cfscrape
-import pickle
+import json
 import os
 
 class ControleurYGG:
     def __init__(self):
         write_log("Initialisation de ControleurYGG")
-        self.scraper = cfscrape.create_scraper()
-        write_log("Scraper cfscrape créé")
+        self.session = requests.Session()
         self.conf = ControleurConf()
         write_log("Configuration chargée")
         self.torrent_link = None
@@ -17,55 +15,37 @@ class ControleurYGG:
     def load_cookies(self, cookies_file):
         write_log(f"Chargement des cookies depuis le fichier: {cookies_file}")
         if not os.path.exists(cookies_file):
-            write_log(f"Le fichier {cookies_file} n'existe pas. Création d'un nouveau fichier de cookies.")
-            self.save_cookies(cookies_file)
+            write_log(f"Le fichier {cookies_file} n'existe pas.")
+            return False
         try:
-            with open(cookies_file, 'rb') as f:
-                cookies = pickle.load(f)
+            with open(cookies_file, 'r') as f:
+                cookies = json.load(f)
                 for cookie in cookies:
-                    self.scraper.cookies.set(cookie['name'], cookie['value'], domain=cookie['domain'])
+                    self.session.cookies.set(cookie['name'], cookie['value'], domain=cookie['domain'])
             write_log("Cookies chargés avec succès")
+            return True
         except Exception as e:
             write_log(f"Erreur lors du chargement des cookies: {e}")
-            raise
-
-    def save_cookies(self, cookies_file):
-        write_log(f"Sauvegarde des cookies dans le fichier: {cookies_file}")
-        try:
-            cookies = self.scraper.cookies
-            with open(cookies_file, 'wb') as f:
-                pickle.dump(cookies, f)
-            write_log("Cookies sauvegardés avec succès")
-        except Exception as e:
-            write_log(f"Erreur lors de la sauvegarde des cookies: {e}")
-            raise
+            return False
 
     def login(self):
         try:
             login_url = self.conf.get_config('YGG', 'login_url')
-            username = self.conf.get_config('YGG', 'username')
-            password = self.conf.get_config('YGG', 'password')
-            
             write_log("Début de la tentative de connexion")
             write_log(f"URL de connexion: {login_url}")
-            write_log(f"Nom d'utilisateur: {username}")
-            
+
             # Charger les cookies de session
-            self.load_cookies('cookies.pkl')
+            if not self.load_cookies('cookies.json'):
+                write_log("Impossible de charger les cookies. Connexion manuelle requise.")
+                return False
             
-            # Effectuer la requête de connexion
-            login_data = {
-                'id': username,
-                'pass': password
-            }
-            response = self.scraper.post(login_url, data=login_data)
-            
+            # Vérifier si la connexion est réussie
+            response = self.session.get(login_url)
             write_log(f"Statut de la réponse: {response.status_code}")
             write_log(f"Contenu de la réponse: {response.text}")
             
             if response.status_code == 200 and "tableau de bord" in response.text.lower():
                 write_log("Connexion réussie.")
-                self.save_cookies('cookies.pkl')
                 return True
             else:
                 write_log(f"Échec de la connexion. Statut: {response.status_code}, Réponse: {response.text}")
