@@ -13,53 +13,61 @@ class ControleurYGG:
         self.torrent_link = None
 
     def login(self):
-        login_url = self.conf.get_config('YGG', 'login_url')
-        username = self.conf.get_config('YGG', 'username')
-        password = self.conf.get_config('YGG', 'password')
-        
-        # Initial GET request to obtain cookies and headers
-        write_log("Tentative de connexion à YGG...")
-        response = self.scraper.get(login_url)
-        
-        write_log("Cookies et headers obtenus.")
-        # Check if the response contains the expected content
-        if "Just a moment..." in response.text:
-            write_log("Encountered bot protection. Additional steps may be required.")
-            # Extract cookies and headers from the response
-            write_log("Extracting cookies and headers...")
-            self.cfduid = response.cookies.get('__cfduid')
-            self.cf_clearance = response.cookies.get('cf_clearance')
-            headers = response.headers
+        try:
+            login_url = self.conf.get_config('YGG', 'login_url')
+            username = self.conf.get_config('YGG', 'username')
+            password = self.conf.get_config('YGG', 'password')
             
-            # Wait for a few seconds before retrying
-            write_log("Waiting for 5 seconds before retrying...")
-            time.sleep(5)
+            # Initial GET request to obtain cookies and headers
+            write_log("Tentative de connexion à YGG...")
+            response = self.scraper.get(login_url)
             
-            # Retry the GET request with the extracted cookies and headers
-            write_log("Retrying GET request with extracted cookies and headers...")
-            response = self.scraper.get(login_url, cookies=response.cookies, headers=headers)
+            write_log("Cookies et headers obtenus.")
+            # Check if the response contains the expected content
             if "Just a moment..." in response.text:
-                write_log("Bot protection still encountered. Login failed.")
+                write_log("Encountered bot protection. Additional steps may be required.")
+                # Extract cookies and headers from the response
+                write_log("Extracting cookies and headers...")
+                self.cfduid = response.cookies.get('__cfduid')
+                self.cf_clearance = response.cookies.get('cf_clearance')
+                headers = response.headers
+                
+                # Wait for a few seconds before retrying
+                write_log("Waiting for 5 seconds before retrying...")
+                time.sleep(5)
+                
+                # Retry the GET request with the extracted cookies and headers
+                write_log("Retrying GET request with extracted cookies and headers...")
+                try:
+                    response = self.scraper.get(login_url, cookies=response.cookies, headers=headers)
+                except Exception as e:
+                    write_log(f"Exception during retry GET request: {e}")
+                    return False
+                
+                if "Just a moment..." in response.text:
+                    write_log("Bot protection still encountered. Login failed.")
+                    return False
+            
+            write_log("Connexion en cours...")
+            # Prepare login data
+            login_data = {
+                'id': username,
+                'pass': password
+            }
+            
+            write_log("Envoi de la requête de connexion...")
+            # POST request to login
+            login_response = self.scraper.post(login_url, data=login_data)
+            
+            if login_response.status_code == 200:
+                write_log("Login successful")
+                return True
+            else:
+                write_log(f"Login failed with status code: {login_response.status_code}")
                 return False
-        
-        write_log("Connexion en cours...")
-        # Prepare login data
-        login_data = {
-            'id': username,
-            'pass': password
-        }
-        
-        write_log("Envoi de la requête de connexion...")
-        # POST request to login
-        login_response = self.scraper.post(login_url, data=login_data)
-        
-        if login_response.status_code == 200:
-            write_log("Login successful")
-            return True
-        else:
-            write_log("Login failed")
+        except Exception as e:
+            write_log(f"Exception during login process: {e}")
             return False
-
     def search(self, titre, uploader=None, categorie=None, sous_categorie=None):
         search_url = self.conf.get_config('YGG', 'search_url')
         write_log(f"Recherche de '{titre}' sur YGG...")
