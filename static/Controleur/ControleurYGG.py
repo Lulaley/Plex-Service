@@ -17,19 +17,23 @@ class ControleurYGG:
         password = self.conf.get_config('YGG', 'password')
         
         # Initial GET request to obtain cookies and headers
+        write_log("Tentative de connexion à YGG...")
         response = self.scraper.get(login_url)
         
+        write_log("Cookies et headers obtenus.")
         # Check if the response contains the expected content
         if "Just a moment..." in response.text:
             write_log("Encountered bot protection. Additional steps may be required.")
             return False
         
+        write_log("Connexion en cours...")
         # Prepare login data
         login_data = {
             'id': username,
             'pass': password
         }
         
+        write_log("Envoi de la requête de connexion...")
         # POST request to login
         login_response = self.scraper.post(login_url, data=login_data)
         
