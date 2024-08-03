@@ -24,7 +24,16 @@ class ControleurYGG:
         # Check if the response contains the expected content
         if "Just a moment..." in response.text:
             write_log("Encountered bot protection. Additional steps may be required.")
-            return False
+            # Extract cookies and headers from the response
+            self.cfduid = response.cookies.get('__cfduid')
+            self.cf_clearance = response.cookies.get('cf_clearance')
+            headers = response.headers
+            
+            # Retry the GET request with the extracted cookies and headers
+            response = self.scraper.get(login_url, cookies=response.cookies, headers=headers)
+            if "Just a moment..." in response.text:
+                write_log("Bot protection still encountered. Login failed.")
+                return False
         
         write_log("Connexion en cours...")
         # Prepare login data
