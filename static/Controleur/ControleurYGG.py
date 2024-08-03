@@ -5,70 +5,39 @@ import cloudscraper
 
 class ControleurYGG:
     def __init__(self):
-        self.session = requests.Session()
+        self.scraper = cloudscraper.create_scraper()  # Utiliser cloudscraper pour contourner les protections Cloudflare
         self.cfduid = None
         self.cf_clearance = None
         self.conf = ControleurConf()
         self.torrent_link = None
 
     def login(self):
-        try:
-            url = self.conf.get_config('YGG', 'login_url')
-            username = self.conf.get_config('YGG', 'username')
-            password = self.conf.get_config('YGG', 'password')
-
-            if not url or not username or not password:
-                write_log("URL, nom d'utilisateur ou mot de passe manquant dans la configuration.")
-                return False
-
-            write_log("Tentative de connexion à YGG...")
-
-            # Utiliser cloudscraper pour gérer les protections Cloudflare
-            scraper = cloudscraper.create_scraper()
-
-            # Perform the initial request to get the Cloudflare cookies
-            write_log("Récupération des cookies Cloudflare...")
-            try:
-                response = scraper.get(url)
-                response.raise_for_status()
-            except requests.exceptions.RequestException as e:
-                write_log(f"Erreur lors de la requête HTTPS: {e}")
-                return False
-
-            write_log(f"Code de statut de la récupération des cookies: {response.status_code}")
-            write_log(f"Reponse de la récupération des cookies: {response.text}")
-
-            # Extract the required cookies from the response
-            cookies = response.cookies.get_dict()
-            write_log(f"Cookies extraits: {cookies}")
-
-            # Extract the '__cfduid' and 'cf_clearance' cookies
-            self.cfduid = cookies.get('__cfduid')
-            self.cf_clearance = cookies.get('cf_clearance')
-
-            if not self.cfduid or not self.cf_clearance:
-                write_log("Les cookies nécessaires n'ont pas été trouvés.")
-                return False
-
-            write_log(f"Debut de la connexion avec les cookies: __cfduid={self.cfduid}, cf_clearance={self.cf_clearance}")
-
-            # Perform the login request with the required cookies and authentication data
-            response = scraper.post(url, data={'id': username, 'pass': password}, cookies={'__cfduid': self.cfduid, 'cf_clearance': self.cf_clearance})
-            write_log(f"Reponse de la connexion: {response.text}")
-
-            # Check if the login was successful based on the response
-            if response.status_code == 200 and 'Authentication failed' not in response.text:
-                write_log("Connexion réussie.")
-                return True
-            else:
-                write_log("Échec de la connexion.")
-                return False
-
-        except requests.exceptions.RequestException as e:
-            write_log(f"Erreur lors de la requête: {e}")
+        login_url = self.conf.get_config('YGG', 'login_url')
+        username = self.conf.get_config('YGG', 'username')
+        password = self.conf.get_config('YGG', 'password')
+        
+        # Initial GET request to obtain cookies and headers
+        response = self.scraper.get(login_url)
+        
+        # Check if the response contains the expected content
+        if "Just a moment..." in response.text:
+            print("Encountered bot protection. Additional steps may be required.")
             return False
-        except Exception as e:
-            write_log(f"Erreur inattendue: {e}")
+        
+        # Prepare login data
+        login_data = {
+            'id': username,
+            'pass': password
+        }
+        
+        # POST request to login
+        login_response = self.scraper.post(login_url, data=login_data)
+        
+        if login_response.status_code == 200:
+            print("Login successful")
+            return True
+        else:
+            print("Login failed")
             return False
 
     def search(self, titre, uploader=None, categorie=None, sous_categorie=None):
