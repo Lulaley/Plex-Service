@@ -72,7 +72,11 @@ class ControleurYGG:
                 return True
             else:
                 write_log(f"Login failed with status code: {login_response.status_code}")
-                write_log(f"Response text: {login_response.text}")
+                try:
+                    response_text = login_response.text.encode('utf-8').decode('utf-8')
+                except UnicodeDecodeError:
+                    response_text = "Response contains non-text content"
+                write_log(f"Response text: {response_text}")
                 return False
         except Exception as e:
             write_log(f"Exception during login process: {e}")
