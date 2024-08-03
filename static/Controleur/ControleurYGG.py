@@ -19,6 +19,10 @@ class ControleurYGG:
         # chrome_options.add_argument("--disable-gpu")  # Essayez de désactiver cette option
         chrome_options.add_argument("--remote-debugging-port=9222")
         
+        # Ajout de journaux pour vérifier les versions
+        write_log(f"Version de ChromeDriver: {ChromeDriverManager().install()}")
+        write_log(f"Options de Chrome: {chrome_options.arguments}")
+        
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
         self.conf = ControleurConf()
         self.torrent_link = None
