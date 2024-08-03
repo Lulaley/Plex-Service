@@ -10,7 +10,9 @@ import time
 
 class ControleurYGG:
     def __init__(self):
-        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.binary_location = "/usr/bin/google-chrome"  # Spécifiez le chemin de l'exécutable Chrome
+        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
         self.conf = ControleurConf()
         self.torrent_link = None
 

@@ -24,6 +24,7 @@ def search(app):
         write_log(f"Recherche de '{titre}' par '{uploader}' dans la catégorie '{categorie}' et sous-catégorie '{sous_categorie}'")
         # Utiliser le contrôleur YGG pour effectuer la recherche
         controleur_ygg = ControleurYGG()
+        write_log("Connexion à YGG...")
         if controleur_ygg.login():
             results = controleur_ygg.search(titre, uploader, categorie, sous_categorie)
             return render_template('download.html', results=results)
