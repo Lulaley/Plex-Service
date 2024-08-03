@@ -1,17 +1,22 @@
 import requests
 from .ControleurLog import write_log
 from .ControleurConf import ControleurConf
-from selenium import webdriver #pip install selenium
+from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager #pip install webdriver_manager
+from webdriver_manager.chrome import ChromeDriverManager
 import time
 
 class ControleurYGG:
     def __init__(self):
         chrome_options = webdriver.ChromeOptions()
         chrome_options.binary_location = "/usr/bin/google-chrome"  # Spécifiez le chemin de l'exécutable Chrome
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("--headless")  # Exécuter Chrome en mode headless
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--remote-debugging-port=9222")
+        
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
         self.conf = ControleurConf()
         self.torrent_link = None
