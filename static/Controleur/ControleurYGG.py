@@ -1,81 +1,58 @@
 import requests
 from .ControleurLog import write_log
 from .ControleurConf import ControleurConf
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
+import cfscrape # pip install cfscrape
 import pickle
 
 class ControleurYGG:
     def __init__(self):
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.binary_location = "/usr/bin/google-chrome"  # Spécifiez le chemin de l'exécutable Chrome
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        # chrome_options.add_argument("--headless")  # Désactiver le mode headless
-        # chrome_options.add_argument("--disable-gpu")  # Essayez de désactiver cette option
-        chrome_options.add_argument("--remote-debugging-port=9222")
-        
-        # Ajout de journaux pour vérifier les versions
-        write_log(f"Version de ChromeDriver: {ChromeDriverManager().install()}")
-        write_log(f"Options de Chrome: {chrome_options.arguments}")
-        
-        self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+        write_log("Initialisation de ControleurYGG")
+        self.scraper = cfscrape.create_scraper()
+        write_log("Scraper cfscrape créé")
         self.conf = ControleurConf()
+        write_log("Configuration chargée")
         self.torrent_link = None
 
     def load_cookies(self, cookies_file):
-        with open(cookies_file, 'rb') as f:
-            cookies = pickle.load(f)
-            for cookie in cookies:
-                self.driver.add_cookie(cookie)
+        write_log(f"Chargement des cookies depuis le fichier: {cookies_file}")
+        try:
+            with open(cookies_file, 'rb') as f:
+                cookies = pickle.load(f)
+                for cookie in cookies:
+                    self.scraper.cookies.set(cookie['name'], cookie['value'], domain=cookie['domain'])
+            write_log("Cookies chargés avec succès")
+        except Exception as e:
+            write_log(f"Erreur lors du chargement des cookies: {e}")
+            raise
 
     def login(self):
         try:
             login_url = self.conf.get_config('YGG', 'login_url')
-            self.driver.get(login_url)
+            username = self.conf.get_config('YGG', 'username')
+            password = self.conf.get_config('YGG', 'password')
+            
+            write_log("Début de la tentative de connexion")
+            write_log(f"URL de connexion: {login_url}")
+            write_log(f"Nom d'utilisateur: {username}")
             
             # Charger les cookies de session
             self.load_cookies('cookies.pkl')
             
-            # Recharger la page avec les cookies
-            self.driver.get(login_url)
+            # Effectuer la requête de connexion
+            login_data = {
+                'id': username,
+                'pass': password
+            }
+            response = self.scraper.post(login_url, data=login_data)
             
-            write_log("Tentative de connexion à YGG via Selenium...")
-            
-            # Attendre que la page se charge et que les champs de connexion soient disponibles
-            WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.NAME, 'id'))
-            )
-            
-            write_log("Page de connexion chargée.")
-            # Remplir les champs de connexion
-            username_field = self.driver.find_element(By.NAME, 'id')
-            password_field = self.driver.find_element(By.NAME, 'pass')
-            username_field.send_keys(self.conf.get_config('YGG', 'username'))
-            password_field.send_keys(self.conf.get_config('YGG', 'password'))
-            
-            write_log("Soumission du formulaire de connexion...")
-            # Soumettre le formulaire
-            password_field.submit()
-            
-            write_log("Attente de la page de connexion...")
-            # Vérifier si la connexion a réussi
-            WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.TAG_NAME, 'body'))
-            )
-            if "tableau de bord" in self.driver.page_source.lower():
+            if response.status_code == 200 and "tableau de bord" in response.text.lower():
                 write_log("Connexion réussie.")
                 return True
             else:
-                write_log("Échec de la connexion.")
+                write_log(f"Échec de la connexion. Statut: {response.status_code}, Réponse: {response.text}")
                 return False
         except Exception as e:
             write_log(f"Erreur lors de la connexion : {e}")
-            self.driver.save_screenshot('error_screenshot.png')  # Capture d'écran en cas d'erreur
             raise
 
     def search(self, titre, uploader=None, categorie=None, sous_categorie=None):
