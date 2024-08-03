@@ -4,7 +4,13 @@ from .ControleurConf import ControleurConf
 
 class ControleurYGG:
     def __init__(self):
-        self.scraper = cloudscraper.create_scraper()  # Utilisation de cloudscraper
+        self.scraper = cloudscraper.create_scraper(
+            browser={
+                'browser': 'chrome',
+                'platform': 'windows',
+                'mobile': False
+            }
+        )  # Utilisation de cloudscraper avec User-Agent
         self.conf = ControleurConf()
         self.torrent_link = None
 
