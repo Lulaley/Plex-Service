@@ -1,8 +1,9 @@
 import requests
 from .ControleurLog import write_log
 from .ControleurConf import ControleurConf
-import cfscrape # pip install cfscrape
+import cfscrape
 import pickle
+import os
 
 class ControleurYGG:
     def __init__(self):
@@ -15,6 +16,9 @@ class ControleurYGG:
 
     def load_cookies(self, cookies_file):
         write_log(f"Chargement des cookies depuis le fichier: {cookies_file}")
+        if not os.path.exists(cookies_file):
+            write_log(f"Le fichier {cookies_file} n'existe pas. Création d'un nouveau fichier de cookies.")
+            self.save_cookies(cookies_file)
         try:
             with open(cookies_file, 'rb') as f:
                 cookies = pickle.load(f)
@@ -23,6 +27,17 @@ class ControleurYGG:
             write_log("Cookies chargés avec succès")
         except Exception as e:
             write_log(f"Erreur lors du chargement des cookies: {e}")
+            raise
+
+    def save_cookies(self, cookies_file):
+        write_log(f"Sauvegarde des cookies dans le fichier: {cookies_file}")
+        try:
+            cookies = self.scraper.cookies
+            with open(cookies_file, 'wb') as f:
+                pickle.dump(cookies, f)
+            write_log("Cookies sauvegardés avec succès")
+        except Exception as e:
+            write_log(f"Erreur lors de la sauvegarde des cookies: {e}")
             raise
 
     def login(self):
@@ -47,6 +62,7 @@ class ControleurYGG:
             
             if response.status_code == 200 and "tableau de bord" in response.text.lower():
                 write_log("Connexion réussie.")
+                self.save_cookies('cookies.pkl')
                 return True
             else:
                 write_log(f"Échec de la connexion. Statut: {response.status_code}, Réponse: {response.text}")
