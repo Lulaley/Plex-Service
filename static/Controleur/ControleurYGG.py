@@ -21,7 +21,7 @@ class ControleurYGG:
         
         # Check if the response contains the expected content
         if "Just a moment..." in response.text:
-            print("Encountered bot protection. Additional steps may be required.")
+            write_log("Encountered bot protection. Additional steps may be required.")
             return False
         
         # Prepare login data
@@ -34,10 +34,10 @@ class ControleurYGG:
         login_response = self.scraper.post(login_url, data=login_data)
         
         if login_response.status_code == 200:
-            print("Login successful")
+            write_log("Login successful")
             return True
         else:
-            print("Login failed")
+            write_log("Login failed")
             return False
 
     def search(self, titre, uploader=None, categorie=None, sous_categorie=None):
