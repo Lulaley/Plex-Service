@@ -53,13 +53,14 @@ class ControleurYGG:
                 EC.presence_of_element_located((By.TAG_NAME, 'body'))
             )
             if "tableau de bord" in self.driver.page_source.lower():
-                write_log("Login successful")
+                write_log("Connexion réussie.")
                 return True
             else:
-                write_log("Login failed")
+                write_log("Échec de la connexion.")
                 return False
         except Exception as e:
             write_log(f"Erreur lors de la connexion : {e}")
+            self.driver.save_screenshot('error_screenshot.png')  # Capture d'écran en cas d'erreur
             raise
 
     def search(self, titre, uploader=None, categorie=None, sous_categorie=None):
