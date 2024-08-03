@@ -25,7 +25,10 @@ class ControleurYGG:
                 'id': username,
                 'pass': password
             }
-            response = self.scraper.post(login_url, data=login_data)
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36'
+            }
+            response = self.scraper.post(login_url, data=login_data, headers=headers)
 
             if response.status_code == 200 and "tableau de bord" in response.text.lower():
                 write_log("Connexion réussie.")
