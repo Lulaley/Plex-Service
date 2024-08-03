@@ -67,6 +67,7 @@ class ControleurYGG:
             # POST request to login
             login_response = self.scraper.post(login_url, data=login_data, headers=headers, cookies=response.cookies)
             
+            write_log(f"Login response status code: {login_response.status_code}")
             if login_response.status_code == 200:
                 write_log("Login successful")
                 return True
@@ -78,7 +79,7 @@ class ControleurYGG:
                 except UnicodeDecodeError:
                     write_log("Response contains non-text content")
                     response_text = "Response contains non-text content"
-                write_log(f"Response text: {response_text}")
+                #write_log(f"Response text: {response_text}")
                 return False
         except Exception as e:
             write_log(f"Exception during login process: {e}")
