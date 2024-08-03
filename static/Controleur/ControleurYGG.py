@@ -20,7 +20,13 @@ class ControleurYGG:
             
             # Initial GET request to obtain cookies and headers
             write_log("Tentative de connexion à YGG...")
-            response = self.scraper.get(login_url)
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Connection': 'keep-alive'
+            }
+            response = self.scraper.get(login_url, headers=headers)
             
             write_log("Cookies et headers obtenus.")
             # Check if the response contains the expected content
@@ -30,7 +36,7 @@ class ControleurYGG:
                 write_log("Extracting cookies and headers...")
                 self.cfduid = response.cookies.get('__cfduid')
                 self.cf_clearance = response.cookies.get('cf_clearance')
-                headers = response.headers
+                headers.update(response.headers)
                 
                 # Wait for a few seconds before retrying
                 write_log("Waiting for 5 seconds before retrying...")
@@ -57,7 +63,7 @@ class ControleurYGG:
             
             write_log("Envoi de la requête de connexion...")
             # POST request to login
-            login_response = self.scraper.post(login_url, data=login_data)
+            login_response = self.scraper.post(login_url, data=login_data, headers=headers)
             
             if login_response.status_code == 200:
                 write_log("Login successful")
@@ -68,6 +74,7 @@ class ControleurYGG:
         except Exception as e:
             write_log(f"Exception during login process: {e}")
             return False
+
     def search(self, titre, uploader=None, categorie=None, sous_categorie=None):
         search_url = self.conf.get_config('YGG', 'search_url')
         write_log(f"Recherche de '{titre}' sur YGG...")
