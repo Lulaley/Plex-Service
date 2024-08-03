@@ -73,8 +73,10 @@ class ControleurYGG:
             else:
                 write_log(f"Login failed with status code: {login_response.status_code}")
                 try:
+                    write_log(f"Decoding response text...")
                     response_text = login_response.text.encode('utf-8').decode('utf-8')
                 except UnicodeDecodeError:
+                    write_log("Response contains non-text content")
                     response_text = "Response contains non-text content"
                 write_log(f"Response text: {response_text}")
                 return False
