@@ -4,8 +4,9 @@ from .ControleurConf import ControleurConf
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
-import time
 
 class ControleurYGG:
     def __init__(self):
@@ -31,7 +32,9 @@ class ControleurYGG:
             self.driver.get(login_url)
             
             # Attendre que la page se charge et que les champs de connexion soient disponibles
-            time.sleep(5)
+            WebDriverWait(self.driver, 10).until(
+                EC.presence_of_element_located((By.NAME, 'id'))
+            )
             
             # Remplir les champs de connexion
             username_field = self.driver.find_element(By.NAME, 'id')
@@ -40,10 +43,7 @@ class ControleurYGG:
             password_field.send_keys(password)
             
             # Soumettre le formulaire
-            password_field.send_keys(Keys.RETURN)
-            
-            # Attendre que la connexion soit traitée
-            time.sleep(5)
+            password_field.submit()
             
             # Vérifier si la connexion a réussi
             if "tableau de bord" in self.driver.page_source.lower():
