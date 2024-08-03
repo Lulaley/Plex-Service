@@ -66,7 +66,7 @@ class ControleurYGG:
             write_log("Envoi de la requête de connexion...")
             # POST request to login
             login_response = self.scraper.post(login_url, data=login_data, headers=headers, cookies=response.cookies)
-            write_log("Requête de connexion envoyée.")
+            
             if login_response.status_code == 200:
                 write_log("Login successful")
                 return True
@@ -76,6 +76,32 @@ class ControleurYGG:
         except Exception as e:
             write_log(f"Exception during login process: {e}")
             return False
+
+    def search(self, titre, uploader=None, categorie=None, sous_categorie=None):
+        search_url = self.conf.get_config('YGG', 'search_url')
+        write_log(f"Recherche de '{titre}' sur YGG...")
+
+        # Formuler les paramètres de la requête de recherche
+        params = {'name': titre, 'description': '', 'file': '', 'do': 'search'}
+        if uploader:
+            params['uploader'] = uploader
+        if categorie:
+            params['category'] = categorie
+        if sous_categorie:
+            params['subcategory'] = sous_categorie
+
+        # Envoyer la requête de recherche
+        try:
+            response = self.scraper.get(search_url, params=params, headers=headers, cookies=response.cookies)
+            if response.status_code == 200:
+                write_log("Recherche réussie")
+                return response.json()
+            else:
+                write_log(f"Recherche échouée avec le code de statut: {response.status_code}")
+                return None
+        except Exception as e:
+            write_log(f"Exception pendant la recherche: {e}")
+            return None
 
     def search(self, titre, uploader=None, categorie=None, sous_categorie=None):
         search_url = self.conf.get_config('YGG', 'search_url')
