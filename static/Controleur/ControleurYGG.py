@@ -80,6 +80,7 @@ class ControleurYGG:
                     write_log("Response contains non-text content")
                     response_text = "Response contains non-text content"
                 #write_log(f"Response text: {response_text}")
+                write_log(f"Response headers: {login_response.headers}")
                 return False
         except Exception as e:
             write_log(f"Exception during login process: {e}")
