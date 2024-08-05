@@ -8,50 +8,20 @@ from static.Controleur.ControleurLog import write_log
 download_status = {}
 
 def download_torrent(torrent_file_path, save_path):
-    global download_status
-    # Création d'une instance de TorrentClient avec l'argument requis
-    torrent = TorrentClient(torrent_file_path, use_progress_bar=False, output_dir=save_path)
-    write_log(f'Téléchargement du torrent {torrent_file_path} démarré')
-    try:
-        
-        status = torrent.start()
-        write_log(f'Téléchargement du torrent {status} finit')
-        
+    import libtorrent as lt
+    import time
 
-        #write_log('{} terminé'.format(torrent.name))
+    ses = lt.session()
 
-        # Suppression du torrent de la session pour arrêter le partage
-        #torrent.remove()
+    info = lt.torrent_info(torrent_file_path)  # replace with your torrent file
+    h = ses.add_torrent({'ti': info, 'save_path': save_path})  # download to current directory
 
-    except OutOfPeers:
-        write_log('Erreur : Plus de pairs disponibles pour le téléchargement du torrent.')
-        download_status = {
-            'name': torrent_file_path,
-            'progress': 0,
-            'download_rate': 0,
-            'upload_rate': 0,
-            'num_peers': 0,
-            'state': 'Erreur : Plus de pairs disponibles'
-        }
-    except Exception as e:  
-        write_log('Erreur : {}'.format(e))
+    print('downloading', info.name())
+    while not h.is_seed():
+        s = h.status()
+        print('%.2f%% complete (down: %.1f kB/s up: %.1f kB/s peers: %d) %s' % (
+            s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000,
+            s.num_peers, s.state))
+        time.sleep(1)
 
-    # Réinitialisation de l'état du téléchargement
-    download_status = {}
-    return True
-
-def send_download_info(name, progress, download_rate, upload_rate, num_peers, state):
-    url = 'http://localhost:5001/download_info'
-    data = {
-        'name': name,
-        'progress': progress,
-        'download_rate': download_rate,
-        'upload_rate': upload_rate,
-        'num_peers': num_peers,
-        'state': state
-    }
-    requests.post(url, json=data)
-
-def get_download_status():
-    global download_status
-    return download_status
+    print(info.name(), 'complete')
