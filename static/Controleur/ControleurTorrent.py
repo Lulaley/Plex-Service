@@ -1,11 +1,11 @@
 from static.Controleur.ControleurLog import write_log
+import libtorrent as lt
+import time
 
 # Variable globale pour stocker l'état du téléchargement
 download_status = {}
 
 def download_torrent(torrent_file_path, save_path):
-    import libtorrent as lt
-    import time
 
     ses = lt.session()
 
