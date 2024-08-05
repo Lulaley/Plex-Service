@@ -38,9 +38,9 @@
         <form action="/upload" method="post" enctype="multipart/form-data" id="torrent-form">
             <label for="torrent-file">Télécharger un fichier .torrent :</label>
             <input type="file" name="torrent-file" id="torrent-file" accept=".torrent" required>
+            <button onclick="window.location.href='{{ url_for('inner_upload')}}'">Lancer le téléchargement</button>
         </form>
     
-        <button id="start-download-btn">Lancer le téléchargement</button>
     
         {% with messages = get_flashed_messages() %}
         {% if messages %}

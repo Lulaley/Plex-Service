@@ -34,7 +34,7 @@ def upload(app):
             file.save(file_path)
             write_log(f"Fichier .torrent téléchargé par {username} : {file.filename}")
             flash('Fichier .torrent téléchargé avec succès')
-            return redirect(url_for('inner_download'))
+            return redirect(url_for('inner_start_download'))
         else:
             write_log(f"Format de fichier non supporté par {username}")
             flash('Format de fichier non supporté')
