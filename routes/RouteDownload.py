@@ -29,11 +29,12 @@ def upload(app):
             return redirect(url_for('inner_download'))
         
         if file and file.filename.endswith('.torrent'):
-            file_path = os.path.join("/home/chimea/Plex-Stock", file.filename)
+            filename = file.filename.replace(' ', '_')
+            file_path = os.path.join("/home/chimea/Plex-Stock", filename)
             session['torrent_file_path'] = file_path
             write_log(f"Téléchargement du fichier .torrent par {username} : {file_path}")
             file.save(file_path)
-            write_log(f"Fichier .torrent téléchargé par {username} : {file.filename}")
+            write_log(f"Fichier .torrent téléchargé par {username} : {filename}")
             flash('Fichier .torrent téléchargé avec succès')
             return redirect(url_for('inner_start_download'))
         else:
