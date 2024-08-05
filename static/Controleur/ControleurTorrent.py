@@ -1,7 +1,3 @@
-import time
-import requests
-from PyBitTorrent import TorrentClient
-from PyBitTorrent.Exceptions import OutOfPeers
 from static.Controleur.ControleurLog import write_log
 
 # Variable globale pour stocker l'état du téléchargement
