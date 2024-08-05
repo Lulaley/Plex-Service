@@ -10,7 +10,7 @@ download_status = {}
 def download_torrent(torrent_file_path, save_path):
     global download_status
     # Création d'une instance de TorrentClient avec l'argument requis
-    torrent = TorrentClient(torrent_file_path, output_dir=save_path)
+    torrent = TorrentClient(torrent_file_path, use_progress_bar=False, output_dir=save_path)
     write_log(f'Téléchargement du torrent {torrent_file_path} démarré')
     try:
         
