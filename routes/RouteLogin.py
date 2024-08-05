@@ -27,7 +27,7 @@ def login(app):
             else:
                 write_log(f"Échec de la connexion pour l'utilisateur: {username}")
                 # Affichage d'un message d'erreur en cas d'échec
-                flash('Échec de la connexion. Veuillez vérifier vos identifiants et réessayer.')
+                write_log('Échec de la connexion. Veuillez vérifier vos identifiants et réessayer.')
             ds.disconnect()
         else:
             write_log("Affichage du formulaire de connexion")
