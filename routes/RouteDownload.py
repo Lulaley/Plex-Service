@@ -18,21 +18,25 @@ def upload(app):
         write_log(f"Affichage de la page d'upload pour l'utilisateur: {username}")
         
         if 'torrent-file' not in request.files:
+            write_log(f"Aucun fichier sélectionné par {username}")
             flash('Aucun fichier sélectionné')
             return redirect(url_for('inner_download'))
         
         file = request.files['torrent-file']
         if file.filename == '':
+            write_log(f"Aucun fichier sélectionné par {username}")
             flash('Aucun fichier sélectionné')
             return redirect(url_for('inner_download'))
         
         if file and file.filename.endswith('.torrent'):
-            file_path = os.path.join("/path/to/save", file.filename)
+            file_path = os.path.join("/home/chimea/Plex-Stock", file.filename)
+            session['torrent_file_path'] = file_path
             file.save(file_path)
             write_log(f"Fichier .torrent téléchargé par {username} : {file.filename}")
             flash('Fichier .torrent téléchargé avec succès')
             return redirect(url_for('inner_download'))
         else:
+            write_log(f"Format de fichier non supporté par {username}")
             flash('Format de fichier non supporté')
             return redirect(url_for('inner_download'))
 
@@ -41,8 +45,8 @@ def start_download(app):
     def inner_start_download():
         username = session.get('username')
         write_log(f"Envoi d'une requête de téléchargement pour l'utilisateur: {username}")
-        torrent_file_path = "/path/to/save/your_torrent_file.torrent"  # Remplacez par le chemin réel du fichier .torrent
-        save_path = "/path/to/save/downloads"  # Remplacez par le chemin réel où vous souhaitez enregistrer les téléchargements
+        torrent_file_path = session.get('torrent_file_path')  # Remplacez par le chemin réel du fichier .torrent
+        save_path = "/home/chimea/Plex-Stock"  # Remplacez par le chemin réel où vous souhaitez enregistrer les téléchargements
         download_torrent(torrent_file_path, save_path)
         flash('Téléchargement démarré')
         return redirect(url_for('inner_download'))
