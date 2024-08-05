@@ -1,6 +1,6 @@
 from flask import render_template, request, session, redirect, url_for, flash
 from static.Controleur.ControleurLog import write_log
-from static.Controleur.ControleurTorrent import download_torrent, get_download_status
+from static.Controleur.ControleurTorrent import download_torrent
 import os
 
 def download(app):
@@ -8,8 +8,7 @@ def download(app):
     def inner_download():
         username = session.get('username')
         write_log(f"Affichage de la page de téléchargement pour l'utilisateur: {username}")
-        download_status = get_download_status()
-        return render_template('download.html', username=username, download_status=download_status)
+        return render_template('download.html', username=username)
 
 def upload(app):
     @app.route('/upload', methods=['POST'])
