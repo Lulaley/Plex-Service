@@ -45,10 +45,20 @@ def upload(app):
 def start_download(app):
     @app.route('/start_download')
     def inner_start_download():
-        username = session.get('username')
-        write_log(f"Envoi d'une requête de téléchargement pour l'utilisateur: {username}")
-        torrent_file_path = session.get('torrent_file_path')  # Remplacez par le chemin réel du fichier .torrent
-        save_path = "/home/chimea/Plex-Stock"  # Remplacez par le chemin réel où vous souhaitez enregistrer les téléchargements
-        download_torrent(torrent_file_path, save_path)
+        try:
+            username = session.get('username')
+            write_log(f"Envoi d'une requête de téléchargement pour l'utilisateur: {username}")
+            torrent_file_path = session.get('torrent_file_path')  # Remplacez par le chemin réel du fichier .torrent
+            save_path = "/home/chimea/Plex-Stock"  # Remplacez par le chemin réel où vous souhaitez enregistrer les téléchargements
+        except:
+            write_log(f"Erreur lors de la récupération du chemin du fichier .torrent pour {username}")
+            flash('Erreur lors de la récupération du chemin du fichier .torrent')
+            return redirect(url_for('inner_download'))
+        try:
+            download_torrent(torrent_file_path, save_path)
+        except:
+            write_log(f"Erreur lors du téléchargement du fichier .torrent pour {username}")
+            flash('Erreur lors du téléchargement du fichier .torrent')
+            return redirect(url_for('inner_download'))  
         flash('Téléchargement démarré')
         return redirect(url_for('inner_download'))
