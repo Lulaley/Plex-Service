@@ -1,6 +1,6 @@
 import time
 import requests
-from PyBitTorrent import TorrentClient
+from PyBitTorrent import TorrentClient , 
 from static.Controleur.ControleurLog import write_log
 
 # Variable globale pour stocker l'état du téléchargement
@@ -8,14 +8,15 @@ download_status = {}
 
 def download_torrent(torrent_file_path, save_path):
     global download_status
-    # Création d'une instance de TorrentClient
-    client = TorrentClient()
+    # Création d'une instance de TorrentClient avec l'argument requis
+    torrent = TorrentClient(torrent_file_path, output_dir=save_path)
 
+    torrent.start()
     # Ajout du torrent et définition du chemin de sauvegarde
-    torrent = client.add_torrent(torrent_file_path, save_path)
-
+    #torrent = client.add_torrent(torrent_file_path, save_path)
+    
     write_log('Téléchargement en cours : {}'.format(torrent.name))
-    while not torrent.is_finished:
+    while not torrent.is_done():
         status = torrent.status()
         write_log('%.2f%% complet (téléchargement : %.1f kB/s, envoi : %.1f kB/s, pairs : %d)' % (
             status.progress * 100, status.download_rate / 1000, status.upload_rate / 1000,
@@ -37,7 +38,7 @@ def download_torrent(torrent_file_path, save_path):
     write_log('{} terminé'.format(torrent.name))
 
     # Suppression du torrent de la session pour arrêter le partage
-    client.remove_torrent(torrent)
+    torrent.remove()
 
     # Réinitialisation de l'état du téléchargement
     download_status = {}
