@@ -11,16 +11,17 @@ def download_torrent(torrent_file_path, save_path):
     global download_status
     # Création d'une instance de TorrentClient avec l'argument requis
     torrent = TorrentClient(torrent_file_path, output_dir=save_path)
-
+    write_log(f'Téléchargement du torrent {torrent_file_path} démarré')
     try:
+        
         status = torrent.start()
-        write_log(f'Téléchargement du torrent {status} démarré')
+        write_log(f'Téléchargement du torrent {status} finit')
         
 
         #write_log('{} terminé'.format(torrent.name))
 
         # Suppression du torrent de la session pour arrêter le partage
-        torrent.remove()
+        #torrent.remove()
 
     except OutOfPeers:
         write_log('Erreur : Plus de pairs disponibles pour le téléchargement du torrent.')
@@ -32,9 +33,12 @@ def download_torrent(torrent_file_path, save_path):
             'num_peers': 0,
             'state': 'Erreur : Plus de pairs disponibles'
         }
+    except Exception as e:  
+        write_log('Erreur : {}'.format(e))
 
     # Réinitialisation de l'état du téléchargement
     download_status = {}
+    return True
 
 def send_download_info(name, progress, download_rate, upload_rate, num_peers, state):
     url = 'http://localhost:5001/download_info'
