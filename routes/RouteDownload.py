@@ -43,7 +43,7 @@ def upload(app):
             return redirect(url_for('inner_download'))
 
 def start_download(app):
-    @app.route('/start_download', methods=['POST'])
+    @app.route('/start_download')
     def inner_start_download():
         username = session.get('username')
         write_log(f"Envoi d'une requête de téléchargement pour l'utilisateur: {username}")
