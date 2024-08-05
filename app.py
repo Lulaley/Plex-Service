@@ -10,7 +10,7 @@ from routes.RouteLogin import login
 from routes.RouteRegister import register
 from routes.RouteLogout import logout
 from routes.RouteHome import home
-from routes.RouteDownload import download
+from routes.RouteDownload import download, upload, start_download
 
 # Importation des controleurs
 from static.Controleur.ControleurConf import ControleurConf
@@ -40,6 +40,8 @@ register(app)
 logout(app)
 home(app)
 download(app)
+upload(app)
+start_download(app)
 
 if __name__ == '__main__':
     app.run(debug=True, port=conf.get_config('APP', 'port'), host='0.0.0.0', ssl_context=('cert.pem', 'key.pem'))
