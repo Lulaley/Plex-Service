@@ -31,6 +31,7 @@ def upload(app):
         if file and file.filename.endswith('.torrent'):
             file_path = os.path.join("/home/chimea/Plex-Stock", file.filename)
             session['torrent_file_path'] = file_path
+            write_log(f"Téléchargement du fichier .torrent par {username} : {file_path}")
             file.save(file_path)
             write_log(f"Fichier .torrent téléchargé par {username} : {file.filename}")
             flash('Fichier .torrent téléchargé avec succès')
