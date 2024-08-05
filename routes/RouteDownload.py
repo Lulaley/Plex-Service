@@ -55,6 +55,7 @@ def start_download(app):
             flash('Erreur lors de la récupération du chemin du fichier .torrent')
             return redirect(url_for('inner_download'))
         try:
+            write_log(f"Téléchargement du fichier .torrent pour {username}")
             download_torrent(torrent_file_path, save_path)
         except:
             write_log(f"Erreur lors du téléchargement du fichier .torrent pour {username}")
