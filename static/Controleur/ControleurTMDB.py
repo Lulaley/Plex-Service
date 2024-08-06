@@ -1,4 +1,5 @@
 import tmdbsimple as tmdb
+from .ControleurLog import write_log
 
 class ControleurTMDB:
     def __init__(self):
@@ -7,6 +8,7 @@ class ControleurTMDB:
         
     def search_serie_name(self, title):
         search = tmdb.Search()
+        write_log(f"Recherche de la série {title} dans la base de données TMDB")
         search.tv(query=title)
         return search.results[0]['name']
     
