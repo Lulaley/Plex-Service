@@ -1,4 +1,5 @@
 from flask import render_template, request, session, redirect, url_for, flash
+import threading
 from static.Controleur.ControleurLog import write_log
 from static.Controleur.ControleurTorrent import download_torrent
 import os
@@ -55,7 +56,8 @@ def start_download(app):
             return redirect(url_for('inner_download'))
         try:
             write_log(f"Téléchargement du fichier .torrent pour {username}")
-            download_torrent(str(torrent_file_path), str(save_path))
+            download_thread = threading.Thread(target=download_torrent, args=(torrent_file_path, save_path))
+            download_thread.start()
         except:
             write_log(f"Erreur lors du téléchargement du fichier .torrent pour {username}")
             flash('Erreur lors du téléchargement du fichier .torrent')
