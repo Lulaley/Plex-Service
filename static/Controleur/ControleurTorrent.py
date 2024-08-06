@@ -1,5 +1,6 @@
-from static.Controleur.ControleurLog import write_log
-from static.Controleur.ControleurConf import ControleurConf
+from .ControleurLog import write_log
+from .ControleurConf import ControleurConf
+from .ControleurTMDB import ControleurTMDB
 from flask import flash, get_flashed_messages
 import libtorrent as lt
 import time
@@ -13,9 +14,7 @@ def is_movie_or_series(torrent_info):
     Détermine si le contenu du torrent est un film ou une série.
     """
     files = torrent_info.files()
-    write_log(f"fichiers: {files}")
     num_files = files.num_files()
-    write_log(f"Nombre de fichiers dans le torrent: {files.num_files()}")
     movie_extensions = ['.mp4', '.mkv', '.avi']
     episode_pattern = re.compile(r'(E\d{2})|(Episode\s\d+)', re.IGNORECASE)
     series_pattern = re.compile(r'(S\d{2})|(Season\s\d+)', re.IGNORECASE)
@@ -38,6 +37,11 @@ def download_torrent(torrent_file_path, save_path):
     info = lt.torrent_info(torrent_file_path)  # replace with your torrent file
     write_log(f"info: {info}")
     content_type = is_movie_or_series(info)
+    if content_type == 'series':
+        write_log(f"Le contenu du torrent est identifié comme une série")
+        search = ControleurTMDB()
+        write_log(f"Recherche de la série {info.name} dans la base de données TMDB")
+        search.search_series(info.name())
     write_log(f"Le contenu du torrent est identifié comme: {content_type}")
     
     #h = ses.add_torrent({'ti': info, 'save_path': save_path})  # download to current directory
