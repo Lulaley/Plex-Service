@@ -41,7 +41,8 @@ def download_torrent(torrent_file_path, save_path):
         write_log(f"Le contenu du torrent est identifié comme une série")
         search = ControleurTMDB()
         write_log(f"Recherche de la série {info.name} dans la base de données TMDB")
-        search.search_series(info.name())
+        name = search.search_series(info.name())
+        write_log(f"Nom de la série: {name}")
     write_log(f"Le contenu du torrent est identifié comme: {content_type}")
     
     #h = ses.add_torrent({'ti': info, 'save_path': save_path})  # download to current directory
