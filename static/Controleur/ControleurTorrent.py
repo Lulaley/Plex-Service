@@ -36,10 +36,9 @@ def download_torrent(torrent_file_path, save_path):
     ses = lt.session()
     write_log(f"Chargement du fichier .torrent pour {torrent_file_path}")
     info = lt.torrent_info(torrent_file_path)  # replace with your torrent file
-    
+    write_log(f"info: {info}")
     content_type = is_movie_or_series(info)
     write_log(f"Le contenu du torrent est identifié comme: {content_type}")
-    info.info()
     
     #h = ses.add_torrent({'ti': info, 'save_path': save_path})  # download to current directory
 
