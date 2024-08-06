@@ -29,7 +29,7 @@ def upload(app):
         
         if file and file.filename.endswith('.torrent'):
             filename = file.filename.replace(' ', '_')
-            file_path = os.path.join("/home/chimea/Plex-Stock", filename)
+            file_path = os.path.join("/home/blazeone/", filename)
             session['torrent_file_path'] = file_path
             write_log(f"Téléchargement du fichier .torrent par {username} : {file_path}")
             file.save(file_path)
@@ -48,7 +48,7 @@ def start_download(app):
             username = session.get('username')
             write_log(f"Envoi d'une requête de téléchargement pour l'utilisateur: {username}")
             torrent_file_path = session.get('torrent_file_path')  # Remplacez par le chemin réel du fichier .torrent
-            save_path = "/home/chimea/Plex-Stock"  # Remplacez par le chemin réel où vous souhaitez enregistrer les téléchargements
+            save_path = "/home/blazeone/"  # Remplacez par le chemin réel où vous souhaitez enregistrer les téléchargements
         except:
             write_log(f"Erreur lors de la récupération du chemin du fichier .torrent pour {username}")
             flash('Erreur lors de la récupération du chemin du fichier .torrent')
