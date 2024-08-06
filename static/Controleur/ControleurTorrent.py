@@ -13,7 +13,9 @@ def is_movie_or_series(torrent_info):
     Détermine si le contenu du torrent est un film ou une série.
     """
     files = torrent_info.files()
+    write_log(f"fichiers: {files}")
     num_files = files.num_files()
+    write_log(f"Nombre de fichiers dans le torrent: {files.num_files()}")
     movie_extensions = ['.mp4', '.mkv', '.avi']
     episode_pattern = re.compile(r'(E\d{2})|(Episode\s\d+)', re.IGNORECASE)
     series_pattern = re.compile(r'(S\d{2})|(Season\s\d+)', re.IGNORECASE)
@@ -37,7 +39,7 @@ def download_torrent(torrent_file_path, save_path):
     
     content_type = is_movie_or_series(info)
     write_log(f"Le contenu du torrent est identifié comme: {content_type}")
-    info.print_files()
+    info.info()
     
     #h = ses.add_torrent({'ti': info, 'save_path': save_path})  # download to current directory
 
