@@ -30,6 +30,23 @@ def is_movie_or_series(torrent_info):
                 return 'movie'
     return 'unknown'
 
+def extract_title_prefix(filename):
+    # Liste des motifs à rechercher
+    patterns = [
+        r'S\d{2}', r'S\d{2}E\d{5}', r'Integral', r'Complete', r'season', r'episode',
+        r'S\.\d{2}', r'S\.\d{2}E\.\d{5}', r'S\.\d{2}\.E\.\d{5}'
+    ]
+    
+    # Rechercher le premier motif correspondant
+    for pattern in patterns:
+        match = re.search(pattern, filename, re.IGNORECASE)
+        if match:
+            # Extraire la sous-chaîne jusqu'au motif trouvé
+            return filename[:match.start()].strip()
+    
+    # Si aucun motif n'est trouvé, retourner la chaîne entière
+    return filename
+
 def download_torrent(torrent_file_path, save_path):
 
     ses = lt.session()
@@ -41,7 +58,8 @@ def download_torrent(torrent_file_path, save_path):
         write_log(f"Le contenu du torrent est identifié comme une série")
         search = ControleurTMDB()
         write_log(f"Recherche de la série {info.name()} dans la base de données TMDB")
-        name = search.search_series(info.name())
+        search_name = extract_title_prefix(info.name())
+        name = search.search_series(search_name)
         write_log(f"Nom de la série: {name}")
     write_log(f"Le contenu du torrent est identifié comme: {content_type}")
     
