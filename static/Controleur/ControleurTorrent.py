@@ -17,14 +17,15 @@ def download_torrent(torrent_file_path, save_path):
     h = ses.add_torrent({'ti': info, 'save_path': save_path})  # download to current directory
     write_log(f"Téléchargement du fichier .torrent pour {torrent_file_path} démarré")
 
-    write_log('downloading', info.name())
+    write_log(f"downloading {info.name()}")
     while not h.is_seed():
         s = h.status()
-        write_log('%.2f%% complete (down: %.1f kB/s up: %.1f kB/s peers: %d) %s' % (
+        log_message = '%.2f%% complete (down: %.1f kB/s up: %.1f kB/s peers: %d) %s' % (
             s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000,
-            s.num_peers, s.state))
+            s.num_peers, s.state)
+        write_log(log_message)
         time.sleep(1)
 
-    write_log(info.name(), 'complete')
+    write_log(f"{info.name()} complete")
     write_log(f"Téléchargement du fichier .torrent pour {torrent_file_path} terminé")
     ses.remove_torrent(h)
