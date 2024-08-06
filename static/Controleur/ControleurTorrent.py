@@ -37,7 +37,7 @@ def download_torrent(torrent_file_path, save_path):
     info = lt.torrent_info(torrent_file_path)  # replace with your torrent file
     write_log(f"info: {info}")
     content_type = is_movie_or_series(info)
-    if content_type == 'series':
+    if content_type == 'series' or content_type == 'episode':
         write_log(f"Le contenu du torrent est identifié comme une série")
         search = ControleurTMDB()
         write_log(f"Recherche de la série {info.name} dans la base de données TMDB")
