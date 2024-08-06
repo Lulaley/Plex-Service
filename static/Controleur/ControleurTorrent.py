@@ -60,7 +60,7 @@ def download_torrent(torrent_file_path, save_path):
         write_log(f"Recherche de la série {info.name()} dans la base de données TMDB")
         search_name = extract_title_prefix(info.name())
         write_log(f"Nom de la série extrait: {search_name}")
-        name = search.search_series(search_name)
+        name = search.search_serie_name(search_name)
         write_log(f"Nom de la série: {name}")
     write_log(f"Le contenu du torrent est identifié comme: {content_type}")
     
