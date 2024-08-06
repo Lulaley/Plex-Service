@@ -55,7 +55,7 @@ def start_download(app):
             return redirect(url_for('inner_download'))
         try:
             write_log(f"Téléchargement du fichier .torrent pour {username}")
-            download_torrent(torrent_file_path, save_path)
+            download_torrent(str(torrent_file_path), str(save_path))
         except:
             write_log(f"Erreur lors du téléchargement du fichier .torrent pour {username}")
             flash('Erreur lors du téléchargement du fichier .torrent')

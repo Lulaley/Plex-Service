@@ -25,7 +25,7 @@ def main(torrent_file, save_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Script de téléchargement")
     parser.add_argument('torrent_file', type=str, help='Le chemin vers le fichier torrent')
-    parser.add_argument('save_path', type=str, help='Le chemin vers sabe_path')
+    parser.add_argument('save_path', type=str, help='Le chemin vers save_path')
     
     args = parser.parse_args()
     main(args.torrent_file, args.save_path)

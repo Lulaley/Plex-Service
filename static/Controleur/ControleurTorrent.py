@@ -9,7 +9,8 @@ def download_torrent(torrent_file_path, save_path):
 
     write_log(f"Ouverture de la session de téléchargement pour {torrent_file_path}")
     ses = lt.session()
-
+    write_log(f"torrent_file_path: {torrent_file_path}")
+    write_log(f"save_path: {save_path}")
     write_log(f"Chargement du fichier .torrent pour {torrent_file_path}")
     info = lt.torrent_info(torrent_file_path)  # replace with your torrent file
     write_log(f"Chargement du fichier .torrent pour {torrent_file_path} terminé")
