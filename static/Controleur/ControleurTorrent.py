@@ -85,7 +85,7 @@ def download_torrent(torrent_file_path):
         write_log(f"Le contenu du torrent est identifié comme un film")
     write_log(f"Le contenu du torrent est identifié comme: {content_type}")
     
-    h = ses.add_torrent({'ti': info, 'save_path': save_path})  # download to current directory
+    #h = ses.add_torrent({'ti': info, 'save_path': save_path})  # download to current directory
 
     write_log(f"Téléchargement de {info.name()}")
     while not h.is_seed():
