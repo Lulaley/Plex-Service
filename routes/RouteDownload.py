@@ -80,11 +80,6 @@ def start_download(app):
         finally:
             # Marquer la fin du téléchargement
             session['is_downloading'] = False
-                
-            # Supprimer le fichier .torrent après le téléchargement
-            if os.path.exists(torrent_file_path):
-                os.remove(torrent_file_path)
-                write_log(f"Fichier .torrent supprimé pour {username} : {torrent_file_path}")
             return response
 
         #return Response(stream_with_context(generate()), mimetype='text/event-stream')

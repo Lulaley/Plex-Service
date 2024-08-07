@@ -101,3 +101,7 @@ def download_torrent(torrent_file_path):
     write_log(f"Téléchargement de {info.name()} Fini")
     ses.remove_torrent(h)
     yield "data: done\n\n"
+    
+    if os.path.exists(torrent_file_path):
+        os.remove(torrent_file_path)
+        write_log(f"Fichier .torrent supprimé : {torrent_file_path}")
