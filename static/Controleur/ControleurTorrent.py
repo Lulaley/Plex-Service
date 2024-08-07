@@ -80,6 +80,7 @@ def download_torrent(torrent_file_path):
         write_log(f"Nom de la série: {name}")
         name = name.replace(' ', '.')
         save_path = ensure_directory_exists(save_path, name)
+        write_log(f"Chemin de sauvegarde: {save_path}")
     else:
         save_path = conf.get_config('DLT', 'movies')
         write_log(f"Le contenu du torrent est identifié comme un film")
