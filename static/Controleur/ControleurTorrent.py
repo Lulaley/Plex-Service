@@ -62,7 +62,6 @@ def ensure_directory_exists(base_path, series_name):
 
 def download_torrent(torrent_file_path):
     conf = ControleurConf()
-    save_path = conf.get_config('DLT', )
     ses = lt.session()
     write_log(f"Chargement du fichier .torrent pour {torrent_file_path}")
     info = lt.torrent_info(torrent_file_path)  # replace with your torrent file
