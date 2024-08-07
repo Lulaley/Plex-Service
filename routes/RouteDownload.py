@@ -48,20 +48,19 @@ def start_download(app):
         try:
             username = session.get('username')
             write_log(f"Envoi d'une requête de téléchargement pour l'utilisateur: {username}")
-            torrent_file_path = session.get('torrent_file_path')  # Remplacez par le chemin réel du fichier .torrent
-            save_path = "/var/www/public/Plex-Service/tmp/"  # Remplacez par le chemin réel où vous souhaitez enregistrer les téléchargements
-        except:
-            write_log(f"Erreur lors de la récupération du chemin du fichier .torrent pour {username}")
+            torrent_file_path = session.get('torrent_file_path')
+            if not torrent_file_path:
+                raise Exception("Chemin du fichier .torrent non trouvé dans la session")
+        except Exception as e:
+            write_log(f"Erreur lors de la récupération du chemin du fichier .torrent pour {username}: {str(e)}")
             flash('Erreur lors de la récupération du chemin du fichier .torrent')
             return redirect(url_for('inner_download'))
         try:
             write_log(f"Téléchargement du fichier .torrent pour {username}")
-            #download_thread = threading.Thread(target=download_torrent, args=(torrent_file_path, save_path))
-            #download_thread.start()
             return Response(download_torrent(torrent_file_path), mimetype='text/event-stream')
-        except:
-            write_log(f"Erreur lors du téléchargement du fichier .torrent pour {username}")
+        except Exception as e:
+            write_log(f"Erreur lors du téléchargement du fichier .torrent pour {username}: {str(e)}")
             flash('Erreur lors du téléchargement du fichier .torrent')
-            return redirect(url_for('inner_download'))  
+            return redirect(url_for('inner_download'))
         flash('Téléchargement démarré')
         return redirect(url_for('inner_download'))

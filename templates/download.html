@@ -97,31 +97,41 @@
             fileInfo.textContent = 'Nom du fichier: ' + fileName;
         });
 
-        document.getElementById('start-download-btn').addEventListener('click', function() {
-            var eventSource = new EventSource('/start_download');
-            var progressBar = document.getElementById('progress-bar');
-            var fileInfo = document.getElementById('file-info');
-            var speedInfo = document.getElementById('speed-info');
+        document.getElementById('torrent-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    var eventSource = new EventSource('/start_download');
+                    var progressBar = document.getElementById('progress-bar');
+                    var speedInfo = document.getElementById('speed-info');
 
-            eventSource.onmessage = function(event) {
-                if (event.data === 'done') {
-                    eventSource.close();
-                    return;
-                }
+                    eventSource.onmessage = function(event) {
+                        if (event.data === 'done') {
+                            eventSource.close();
+                            return;
+                        }
 
-                var logMessage = event.data;
-                var progressMatch = logMessage.match(/(\d+\.\d+)% complete/);
-                if (progressMatch) {
-                    var progress = parseFloat(progressMatch[1]);
-                    progressBar.style.width = progress + '%';
-                    progressBar.textContent = progress.toFixed(2) + '%';
-                }
+                        var logMessage = event.data;
+                        var progressMatch = logMessage.match(/(\d+\.\d+)% complete/);
+                        if (progressMatch) {
+                            var progress = parseFloat(progressMatch[1]);
+                            progressBar.style.width = progress + '%';
+                            progressBar.textContent = progress.toFixed(2) + '%';
+                        }
 
-                var speedMatch = logMessage.match(/down: (\d+\.\d+ kB\/s)/);
-                if (speedMatch) {
-                    speedInfo.textContent = 'Vitesse: ' + speedMatch[1];
+                        var speedMatch = logMessage.match(/down: (\d+\.\d+ kB\/s)/);
+                        if (speedMatch) {
+                            speedInfo.textContent = 'Vitesse: ' + speedMatch[1];
+                        }
+                    };
+                } else {
+                    alert('Erreur lors du téléchargement du fichier .torrent');
                 }
-            };
+            });
         });
     </script>
     </body>
