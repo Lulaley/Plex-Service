@@ -68,12 +68,14 @@
             <button type="submit">Lancer le téléchargement</button>
         </form>
 
-        <div class="progress-container">
-            <div class="progress-bar" id="progress-bar">0%</div>
-        </div>
         <div class="status-info">
             <div id="file-info">Nom du fichier: Aucun fichier sélectionné</div>
+            </br>
             <div id="speed-info">Vitesse: 0 kB/s</div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar">0%</div>
         </div>
 
         {% with messages = get_flashed_messages() %}
@@ -119,7 +121,7 @@
                     eventSource.onmessage = function (event) {
                         if (event.data === 'done') {
                             eventSource.close();
-                            progressBar.style.width = '100%';
+                            progressBar.style.width = '50%';
                             progressBar.textContent = 'Téléchargement terminé';
                             speedInfo.textContent = 'Vitesse: 0 kB/s';
                             return;
