@@ -69,7 +69,7 @@ def start_download(app):
         
         def generate():
             try:
-                for chunk in download_torrent(torrent_file_path):
+                for chunk in Response(download_torrent(torrent_file_path), mimetype='text/event-stream'):
                     yield chunk
                 write_log(f"Téléchargement du fichier .torrent terminé pour {username}")
             except Exception as e:
