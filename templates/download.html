@@ -62,10 +62,10 @@
     </div>
 
     <div class="center-container blur-background fade-in">
-        <form action="/upload" method="post" enctype="multipart/form-data" id="torrent-form">
+        <form id="torrent-form">
             <label for="torrent-file">Télécharger un fichier .torrent :</label>
             <input type="file" name="torrent-file" id="torrent-file" accept=".torrent" required>
-            <button onclick="window.location.href='{{ url_for('inner_upload') }}'">Lancer le téléchargement</button>
+            <button type="submit">Lancer le téléchargement</button>
         </form>
 
         <div class="progress-container">
@@ -101,29 +101,44 @@
         });
 
         document.getElementById('torrent-form').addEventListener('submit', function (event) {
-            var eventSource = new EventSource('/start_download');
-            var progressBar = document.getElementById('progress-bar');
-            var speedInfo = document.getElementById('speed-info');
+            event.preventDefault(); // Empêche le comportement par défaut du formulaire
 
-            eventSource.onmessage = function (event) {
-                if (event.data === 'done') {
-                    eventSource.close();
-                    return;
-                }
+            var formData = new FormData();
+            var fileInput = document.getElementById('torrent-file');
+            formData.append('torrent-file', fileInput.files[0]);
 
-                var logMessage = event.data;
-                var progressMatch = logMessage.match(/(\d+\.\d+)% complete/);
-                if (progressMatch) {
-                    var progress = parseFloat(progressMatch[1]);
-                    progressBar.style.width = progress + '%';
-                    progressBar.textContent = progress.toFixed(2) + '%';
-                }
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            }).then(response => {
+                if (response.ok) {
+                    var eventSource = new EventSource('/start_download');
+                    var progressBar = document.getElementById('progress-bar');
+                    var speedInfo = document.getElementById('speed-info');
 
-                var speedMatch = logMessage.match(/down: (\d+\.\d+ kB\/s)/);
-                if (speedMatch) {
-                    speedInfo.textContent = 'Vitesse: ' + speedMatch[1];
+                    eventSource.onmessage = function (event) {
+                        if (event.data === 'done') {
+                            eventSource.close();
+                            return;
+                        }
+
+                        var logMessage = event.data;
+                        var progressMatch = logMessage.match(/(\d+\.\d+)% complete/);
+                        if (progressMatch) {
+                            var progress = parseFloat(progressMatch[1]);
+                            progressBar.style.width = progress + '%';
+                            progressBar.textContent = progress.toFixed(2) + '%';
+                        }
+
+                        var speedMatch = logMessage.match(/down: (\d+\.\d+ kB\/s)/);
+                        if (speedMatch) {
+                            speedInfo.textContent = 'Vitesse: ' + speedMatch[1];
+                        }
+                    };
+                } else {
+                    alert('Erreur lors du téléchargement du fichier .torrent');
                 }
-            };
+            });
         });
     </script>
 </body>
