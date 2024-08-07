@@ -90,8 +90,6 @@ def download_torrent(torrent_file_path):
     write_log(f"Téléchargement de {info.name()}")
     while not h.is_seed():
         s = h.status()
-        size = s.size
-        write_log(f"Taille du torrent: {size}")
         log_message = '%.2f%% complete (down: %.1f kB/s up: %.1f kB/s peers: %d) %s' % (
             s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000,
             s.num_peers, s.state)
