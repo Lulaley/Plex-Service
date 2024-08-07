@@ -7,6 +7,30 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/plex-icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/homeMain.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/download.css') }}">
+    <style>
+        .progress-container {
+            width: 100%;
+            background-color: #f3f3f3;
+            border-radius: 25px;
+            margin: 20px 0;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 30px;
+            background-color: #4caf50;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+            border-radius: 25px;
+        }
+
+        .status-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
     <div class="center-logo">
@@ -40,7 +64,14 @@
             <input type="file" name="torrent-file" id="torrent-file" accept=".torrent" required>
             <button onclick="window.location.href='{{ url_for('inner_upload') }}'">Lancer le téléchargement</button>
         </form>
-    
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar">0%</div>
+        </div>
+        <div class="status-info">
+            <div id="file-info">Nom du fichier: Aucun fichier sélectionné</div>
+            <div id="speed-info">Vitesse: 0 kB/s</div>
+        </div>
     
         {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -60,31 +91,38 @@
         {% endif %}
     </div>
     <script>
-        document.getElementById('start-download-btn').addEventListener('click', function() {
-            var form = document.getElementById('torrent-form');
-            var formData = new FormData(form);
-        
-            fetch('/upload', {
-                method: 'POST',
-                body: formData
-            }).then(response => {
-                if (response.ok) {
-                    return fetch('/start_download', {
-                        method: 'POST'
-                    });
-                } else {
-                    throw new Error('Échec de l\'upload du fichier .torrent');
-                }
-            }).then(response => {
-                if (response.ok) {
-                    window.location.reload();
-                } else {
-                    throw new Error('Échec du lancement du téléchargement');
-                }
-            }).catch(error => {
-                alert(error.message);
-            });
+        document.getElementById('torrent-file').addEventListener('change', function(event) {
+            var fileInfo = document.getElementById('file-info');
+            var fileName = event.target.files[0] ? event.target.files[0].name : 'Aucun fichier sélectionné';
+            fileInfo.textContent = 'Nom du fichier: ' + fileName;
         });
-        </script>
+
+        document.getElementById('start-download-btn').addEventListener('click', function() {
+            var eventSource = new EventSource('/download');
+            var progressBar = document.getElementById('progress-bar');
+            var fileInfo = document.getElementById('file-info');
+            var speedInfo = document.getElementById('speed-info');
+
+            eventSource.onmessage = function(event) {
+                if (event.data === 'done') {
+                    eventSource.close();
+                    return;
+                }
+
+                var logMessage = event.data;
+                var progressMatch = logMessage.match(/(\d+\.\d+)% complete/);
+                if (progressMatch) {
+                    var progress = parseFloat(progressMatch[1]);
+                    progressBar.style.width = progress + '%';
+                    progressBar.textContent = progress.toFixed(2) + '%';
+                }
+
+                var speedMatch = logMessage.match(/down: (\d+\.\d+ kB\/s)/);
+                if (speedMatch) {
+                    speedInfo.textContent = 'Vitesse: ' + speedMatch[1];
+                }
+            };
+        });
+    </script>
     </body>
     </html>

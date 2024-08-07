@@ -1,7 +1,7 @@
 from .ControleurLog import write_log
 from .ControleurConf import ControleurConf
 from .ControleurTMDB import ControleurTMDB
-from flask import flash, get_flashed_messages
+from flask import flash, get_flashed_messages, render_template, Response
 import libtorrent as lt
 import time
 import re
@@ -90,13 +90,15 @@ def download_torrent(torrent_file_path):
     write_log(f"Téléchargement de {info.name()}")
     while not h.is_seed():
         s = h.status()
+        s.si
         log_message = '%.2f%% complete (down: %.1f kB/s up: %.1f kB/s peers: %d) %s' % (
             s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000,
             s.num_peers, s.state)
         get_flashed_messages()
         write_log(log_message)
-        flash(log_message)
+        yield f"data: {log_message}\n\n"
         time.sleep(1)
 
     write_log(f"Téléchargement de {info.name()} Fini")
     ses.remove_torrent(h)
+    yield "data: done\n\n"
