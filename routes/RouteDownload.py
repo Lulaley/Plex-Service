@@ -62,6 +62,7 @@ def start_download(app):
             
             # Marquer le début du téléchargement
             session['is_downloading'] = True
+            generate()
         except Exception as e:
             write_log(f"Erreur lors de la récupération du chemin du fichier .torrent pour {username}: {str(e)}")
             flash('Erreur lors de la récupération du chemin du fichier .torrent')
@@ -69,8 +70,8 @@ def start_download(app):
         
         def generate():
             try:
-                for chunk in Response(download_torrent(torrent_file_path), mimetype='text/event-stream'):
-                    yield chunk
+                response = Response(download_torrent(torrent_file_path), mimetype='text/event-stream'):
+
                 write_log(f"Téléchargement du fichier .torrent terminé pour {username}")
             except Exception as e:
                 write_log(f"Erreur lors du téléchargement du fichier .torrent pour {username}: {str(e)}")
@@ -83,8 +84,9 @@ def start_download(app):
                 if os.path.exists(torrent_file_path):
                     os.remove(torrent_file_path)
                     write_log(f"Fichier .torrent supprimé pour {username} : {torrent_file_path}")
+                return response
 
-        return Response(stream_with_context(generate()), mimetype='text/event-stream')
+        #return Response(stream_with_context(generate()), mimetype='text/event-stream')
         
 """         try:
             write_log(f"Téléchargement du fichier .torrent pour {username}")
