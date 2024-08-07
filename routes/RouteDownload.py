@@ -1,4 +1,4 @@
-from flask import render_template, request, session, redirect, url_for, flash, Response
+from flask import render_template, request, session, redirect, url_for, flash, Response, stream_with_context
 import threading
 from static.Controleur.ControleurLog import write_log
 from static.Controleur.ControleurTorrent import download_torrent
@@ -48,7 +48,7 @@ def start_download(app):
     def inner_start_download():
         try:
             username = session.get('username')
-            write_log(f"Envoi d'une requête de téléchargement pour l'utilisateur: {username}")
+            write_log(f"Envoi d'une requ de téléchargement pour l'utilisateur: {username}")
             
             # Vérifier si un téléchargement est déjà en cours
             if session.get('is_downloading'):
@@ -67,7 +67,26 @@ def start_download(app):
             flash('Erreur lors de la récupération du chemin du fichier .torrent')
             return redirect(url_for('inner_download'))
         
-        try:
+        def generate():
+            try:
+                for chunk in download_torrent(torrent_file_path):
+                    yield chunk
+                write_log(f"Téléchargement du fichier .torrent terminé pour {username}")
+            except Exception as e:
+                write_log(f"Erreur lors du téléchargement du fichier .torrent pour {username}: {str(e)}")
+                flash('Erreur lors du téléchargement du fichier .torrent')
+            finally:
+                # Marquer la fin du téléchargement
+                session['is_downloading'] = False
+                
+                # Supprimer le fichier .torrent après le téléchargement
+                if os.path.exists(torrent_file_path):
+                    os.remove(torrent_file_path)
+                    write_log(f"Fichier .torrent supprimé pour {username} : {torrent_file_path}")
+
+        return Response(stream_with_context(generate()), mimetype='text/event-stream')
+        
+"""         try:
             write_log(f"Téléchargement du fichier .torrent pour {username}")
             response = Response(download_torrent(torrent_file_path), mimetype='text/event-stream')
             
@@ -92,10 +111,9 @@ def start_download(app):
             return redirect(url_for('inner_download'))
         
         flash('Téléchargement démarré')
-        return redirect(url_for('inner_download'))
+        return redirect(url_for('inner_download')) """
     
-    
-"""  def generate():
+"""     def generate():
             try:
                 for chunk in download_torrent(torrent_file_path):
                     yield chunk
