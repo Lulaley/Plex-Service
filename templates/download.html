@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -32,6 +33,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="center-logo">
         <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo">
@@ -41,7 +43,8 @@
         <div class="hamburger" onclick="toggleMenu()">☰</div>
         <div class="menu">
             <div class="left-buttons">
-                <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="window.location.href='{{ url_for('inner_home')}}'">
+                <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo"
+                    onclick="window.location.href='{{ url_for('inner_home')}}'">
                 <button>Recherche</button>
                 <button>Demandes</button>
             </div>
@@ -62,9 +65,9 @@
         <form action="/upload" method="post" enctype="multipart/form-data" id="torrent-form">
             <label for="torrent-file">Télécharger un fichier .torrent :</label>
             <input type="file" name="torrent-file" id="torrent-file" accept=".torrent" required>
-            <button type="submit">Lancer le téléchargement</button>
+            <button onclick="window.location.href='{{ url_for('inner_upload') }}'">Lancer le téléchargement</button>
         </form>
-        
+
         <div class="progress-container">
             <div class="progress-bar" id="progress-bar">0%</div>
         </div>
@@ -72,7 +75,7 @@
             <div id="file-info">Nom du fichier: Aucun fichier sélectionné</div>
             <div id="speed-info">Vitesse: 0 kB/s</div>
         </div>
-    
+
         {% with messages = get_flashed_messages() %}
         {% if messages %}
         <ul class="flashes">
@@ -82,7 +85,7 @@
         </ul>
         {% endif %}
         {% endwith %}
-    
+
         {% if download_status %}
         <div class="status-container">
             <h2>État du téléchargement</h2>
@@ -91,48 +94,38 @@
         {% endif %}
     </div>
     <script>
-        document.getElementById('torrent-file').addEventListener('change', function(event) {
+        document.getElementById('torrent-file').addEventListener('change', function (event) {
             var fileInfo = document.getElementById('file-info');
             var fileName = event.target.files[0] ? event.target.files[0].name : 'Aucun fichier sélectionné';
             fileInfo.textContent = 'Nom du fichier: ' + fileName;
         });
 
-        document.getElementById('torrent-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            var formData = new FormData(this);
-            fetch('/upload', {
-                method: 'POST',
-                body: formData
-            }).then(response => {
-                if (response.ok) {
-                    var eventSource = new EventSource('/start_download');
-                    var progressBar = document.getElementById('progress-bar');
-                    var speedInfo = document.getElementById('speed-info');
+        document.getElementById('torrent-form').addEventListener('submit', function (event) {
+            var eventSource = new EventSource('/start_download');
+            var progressBar = document.getElementById('progress-bar');
+            var speedInfo = document.getElementById('speed-info');
 
-                    eventSource.onmessage = function(event) {
-                        if (event.data === 'done') {
-                            eventSource.close();
-                            return;
-                        }
-
-                        var logMessage = event.data;
-                        var progressMatch = logMessage.match(/(\d+\.\d+)% complete/);
-                        if (progressMatch) {
-                            var progress = parseFloat(progressMatch[1]);
-                            progressBar.style.width = progress + '%';
-                            progressBar.textContent = progress.toFixed(2) + '%';
-                        }
-
-                        var speedMatch = logMessage.match(/down: (\d+\.\d+ kB\/s)/);
-                        if (speedMatch) {
-                            speedInfo.textContent = 'Vitesse: ' + speedMatch[1];
-                        }
-                    };
-                } else {
-                    alert('Erreur lors du téléchargement du fichier .torrent');
+            eventSource.onmessage = function (event) {
+                if (event.data === 'done') {
+                    eventSource.close();
+                    return;
                 }
-            });
+
+                var logMessage = event.data;
+                var progressMatch = logMessage.match(/(\d+\.\d+)% complete/);
+                if (progressMatch) {
+                    var progress = parseFloat(progressMatch[1]);
+                    progressBar.style.width = progress + '%';
+                    progressBar.textContent = progress.toFixed(2) + '%';
+                }
+
+                var speedMatch = logMessage.match(/down: (\d+\.\d+ kB\/s)/);
+                if (speedMatch) {
+                    speedInfo.textContent = 'Vitesse: ' + speedMatch[1];
+                }
+            };
         });
     </script>
-    </body>
-    </html>
+</body>
+
+</html>
