@@ -5,6 +5,7 @@ from flask import flash, get_flashed_messages
 import libtorrent as lt
 import time
 import re
+import os
 
 # Variable globale pour stocker l'état du téléchargement
 download_status = {}
@@ -47,14 +48,28 @@ def extract_title_prefix(filename):
     # Si aucun motif n'est trouvé, retourner la chaîne entière
     return filename
 
-def download_torrent(torrent_file_path, save_path):
+def ensure_directory_exists(base_path, series_name):
+    # Créer le chemin complet du dossier
+    directory_path = os.path.join(base_path, series_name)
+    
+    # Vérifier si le dossier existe, sinon le créer
+    if not os.path.exists(directory_path):
+        os.makedirs(directory_path)
+        write_log(f"Dossier créé: {directory_path}")
+    else:
+        write_log(f"Dossier déjà existant: {directory_path}")
+    return directory_path
 
+def download_torrent(torrent_file_path):
+    conf = ControleurConf()
+    save_path = conf.get_config('DLT', )
     ses = lt.session()
     write_log(f"Chargement du fichier .torrent pour {torrent_file_path}")
     info = lt.torrent_info(torrent_file_path)  # replace with your torrent file
     write_log(f"info: {info}")
     content_type = is_movie_or_series(info)
     if content_type == 'series' or content_type == 'episode':
+        save_path = conf.get_config('DLT', 'series')
         write_log(f"Le contenu du torrent est identifié comme une série")
         search = ControleurTMDB()
         write_log(f"Recherche de la série {info.name()} dans la base de données TMDB")
@@ -63,9 +78,14 @@ def download_torrent(torrent_file_path, save_path):
         write_log(f"Nom de la série extrait: {search_name}")
         name = search.search_serie_name(search_name)
         write_log(f"Nom de la série: {name}")
+        name = name.replace(' ', '.')
+        save_path = ensure_directory_exists(save_path, name)
+    else:
+        save_path = conf.get_config('DLT', 'movies')
+        write_log(f"Le contenu du torrent est identifié comme un film")
     write_log(f"Le contenu du torrent est identifié comme: {content_type}")
     
-    #h = ses.add_torrent({'ti': info, 'save_path': save_path})  # download to current directory
+    h = ses.add_torrent({'ti': info, 'save_path': save_path})  # download to current directory
 
     write_log(f"Téléchargement de {info.name()}")
     while not h.is_seed():

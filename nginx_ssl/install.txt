@@ -9,6 +9,12 @@ openssl rsa -in /home/chimea/Plex-Service/key.pem -out /home/chimea/Plex-Service
 # Remplacez l'ancienne clé par la nouvelle clé sans passphrase
 mv /home/chimea/Plex-Service/key_no_passphrase.pem /home/chimea/Plex-Service/key.pem
 
+cp cert.pem /etc/ssl/certs/
+cp key.pem /etc/ssl/private/
+chmod 444 /etc/ssl/certs/cert.pem
+chown root:root /etc/ssl/certs/cert.pem
+chmod 440 /etc/ssl/private/key.pem
+chown root:ssl-cert /etc/ssl/private/key.pem
 
 pip install gunicorn
 

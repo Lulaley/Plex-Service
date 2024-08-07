@@ -34,15 +34,13 @@ pour le mot de passe tu fait
 /opt/openldap-2.6.8/sbin/slappasswd -s ton_mot_de_passe
 ça va te sortir un {SSHA} que tu va devoir mettre dans le fichier slapd.conf a root_pw ça sera le mdp de ton compte de modfication
 
-chown -R ldap:root /opt/openldap-2.6.8*
-chmod 600 /opt/openldap-2.6.8/etc/openldap/*.conf
-chmod 644 /opt/openldap-2.6.8/etc/openldap/ldap.conf
-chmod 444 /opt/openldap-2.6.8/etc/openldap/schema/*
+chown -R ldap:root /opt/openldap*
+chmod 600 /opt/openldap/etc/openldap/*.conf
+chmod 644 /opt/openldap/etc/openldap/ldap.conf
+chmod 444 /opt/openldap/etc/openldap/schema/*
 
 créé le fichier si il faut
-ln -sfn /opt/openldap-2.6.8/etc/openldap/slapd.conf /etc/ldap/ldap.conf
+ln -sfn /opt/openldap/etc/openldap/lapd.conf /etc/ldap/ldap.conf
 
-/opt/openldap-2.6.8/bin/ldapadd -x -D "cn=root,dc=chimae-world,dc=fr" -W -f fr.ldif
+/opt/openldap/bin/ldapadd -x -D "cn=root,dc=chimae-world,dc=fr" -W -f fr.ldif
 il va te demande le mdp du compte root non crypte
-
-systemctl start slapd
