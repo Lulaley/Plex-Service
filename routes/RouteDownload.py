@@ -76,19 +76,18 @@ def start_download(app):
             # Supprimer le fichier .torrent après le téléchargement
             if os.path.exists(torrent_file_path):
                 os.remove(torrent_file_path)
-                write_log(f"Fichier .torrent supprimé pour {username} : {torrent_file_path}")
+                write_log(f"Downloading Finit - Fichier .torrent supprimé pour {username} : {torrent_file_path}")
             
             return response
         except Exception as e:
             write_log(f"Erreur lors du téléchargement du fichier .torrent pour {username}: {str(e)}")
             flash('Erreur lors du téléchargement du fichier .torrent')
             session['is_downloading'] = False
-            session['is_downloading'] = False
             
             # Supprimer le fichier .torrent en cas d'erreur
             if os.path.exists(torrent_file_path):
                 os.remove(torrent_file_path)
-                write_log(f"Fichier .torrent supprimé pour {username} : {torrent_file_path}")
+                write_log(f"Erreur - Fichier .torrent supprimé pour {username} : {torrent_file_path}")
             
             return redirect(url_for('inner_download'))
         
