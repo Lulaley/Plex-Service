@@ -93,7 +93,7 @@ def download_torrent(torrent_file_path):
         log_message = '%.2f%% complete (down: %.1f kB/s up: %.1f kB/s peers: %d) %s' % (
             s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000,
             s.num_peers, s.state)
-        get_flashed_messages()
+        #get_flashed_messages()
         write_log(log_message)
         yield f"data: {log_message}\n\n"
         time.sleep(1)
