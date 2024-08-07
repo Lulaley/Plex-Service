@@ -80,7 +80,7 @@ def start_download(app):
         finally:
             # Marquer la fin du téléchargement
             session['is_downloading'] = False
-            return response
+            
 
         #return Response(stream_with_context(generate()), mimetype='text/event-stream')
         
