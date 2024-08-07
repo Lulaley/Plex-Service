@@ -119,6 +119,9 @@
                     eventSource.onmessage = function (event) {
                         if (event.data === 'done') {
                             eventSource.close();
+                            progressBar.style.width = '100%';
+                            progressBar.textContent = 'Téléchargement terminé';
+                            speedInfo.textContent = 'Vitesse: 0 kB/s';
                             return;
                         }
 
@@ -132,7 +135,8 @@
 
                         var speedMatch = logMessage.match(/down: (\d+\.\d+ kB\/s)/);
                         if (speedMatch) {
-                            speedInfo.textContent = 'Vitesse: ' + speedMatch[1];
+                            var speed = parseFloat(speedMatch[1]);
+                            speedInfo.textContent = 'Vitesse: ' + formatSpeed(speed);
                         }
                     };
                 } else {
@@ -140,6 +144,16 @@
                 }
             });
         });
+
+        function formatSpeed(speed) {
+        if (speed < 1000) {
+            return speed.toFixed(2) + ' kB/s';
+        } else if (speed < 1000000) {
+            return (speed / 1000).toFixed(2) + ' MB/s';
+        } else {
+            return (speed / 1000000).toFixed(2) + ' GB/s';
+        }
+    }
     </script>
 </body>
 
