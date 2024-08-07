@@ -15,6 +15,7 @@ def upload(app):
     @app.route('/upload', methods=['POST'])
     def inner_upload():
         username = session.get('username')
+        session['is_downloading'] = False 
         write_log(f"Affichage de la page d'upload pour l'utilisateur: {username}")
         
         if 'torrent-file' not in request.files:
