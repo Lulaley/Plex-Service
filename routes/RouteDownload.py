@@ -48,19 +48,36 @@ def start_download(app):
         try:
             username = session.get('username')
             write_log(f"Envoi d'une requête de téléchargement pour l'utilisateur: {username}")
+            
+            # Vérifier si un téléchargement est déjà en cours
+            if session.get('is_downloading'):
+                write_log(f"Téléchargement déjà en cours pour {username}")
+                flash('Un téléchargement est déjà en cours')
+                return redirect(url_for('inner_download'))
+            
             torrent_file_path = session.get('torrent_file_path')
             if not torrent_file_path:
                 raise Exception("Chemin du fichier .torrent non trouvé dans la session")
+            
+            # Marquer le début du téléchargement
+            session['is_downloading'] = True
         except Exception as e:
             write_log(f"Erreur lors de la récupération du chemin du fichier .torrent pour {username}: {str(e)}")
             flash('Erreur lors de la récupération du chemin du fichier .torrent')
             return redirect(url_for('inner_download'))
+        
         try:
             write_log(f"Téléchargement du fichier .torrent pour {username}")
-            return Response(download_torrent(torrent_file_path), mimetype='text/event-stream')
+            response = Response(download_torrent(torrent_file_path), mimetype='text/event-stream')
+            
+            # Marquer la fin du téléchargement
+            session['is_downloading'] = False
+            return response
         except Exception as e:
             write_log(f"Erreur lors du téléchargement du fichier .torrent pour {username}: {str(e)}")
             flash('Erreur lors du téléchargement du fichier .torrent')
+            session['is_downloading'] = False
             return redirect(url_for('inner_download'))
+        
         flash('Téléchargement démarré')
         return redirect(url_for('inner_download'))
