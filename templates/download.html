@@ -8,30 +8,7 @@
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/plex-icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/homeMain.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/download.css') }}">
-    <style>
-        .progress-container {
-            width: 50%;
-            background-color: #f3f3f3;
-            border-radius: 25px;
-            margin: 20px 0;
-        }
-
-        .progress-bar {
-            width: 0%;
-            height: 30px;
-            background-color: #4caf50;
-            text-align: center;
-            line-height: 30px;
-            color: white;
-            border-radius: 25px;
-        }
-
-        .status-info {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/downloadStatus.css') }}">
 </head>
 
 <body>
@@ -70,8 +47,10 @@
     
         <div class="status-info">
             <div id="file-info">Nom du fichier: Aucun fichier sélectionné</div>
-            </br>
-            <div id="speed-info">Vitesse: 0 kB/s</div>
+            <div id="speed-info">Vitesse de téléchargement: 0 kB/s</div>
+            <div id="upload-speed-info">Vitesse d'upload: 0 kB/s</div>
+            <div id="elapsed-time">Temps écoulé: 0s</div>
+            <div id="remaining-time">Temps restant estimé: Inconnu</div>
         </div>
     
         <div class="progress-container">
@@ -95,69 +74,7 @@
         </div>
         {% endif %}
     </div>
-    <script>
-        document.getElementById('torrent-file').addEventListener('change', function (event) {
-            var fileInfo = document.getElementById('file-info');
-            var fileName = event.target.files[0] ? event.target.files[0].name : 'Aucun fichier sélectionné';
-            fileInfo.textContent = 'Nom du fichier: ' + fileName;
-        });
-    
-        document.getElementById('torrent-form').addEventListener('submit', function (event) {
-            event.preventDefault(); // Empêche le comportement par défaut du formulaire
-    
-            var formData = new FormData();
-            var fileInput = document.getElementById('torrent-file');
-            formData.append('torrent-file', fileInput.files[0]);
-    
-            fetch('/upload', {
-                method: 'POST',
-                body: formData
-            }).then(response => {
-                if (response.ok) {
-                    var eventSource = new EventSource('/start_download');
-                    var progressBar = document.getElementById('progress-bar');
-                    var speedInfo = document.getElementById('speed-info');
-    
-                    eventSource.onmessage = function (event) {
-                        var logMessage = event.data;
-                        var progressMatch = logMessage.match(/(\d+\.\d+)% complete/);
-                        if (progressMatch) {
-                            var progress = parseFloat(progressMatch[1]);
-                            progressBar.style.width = progress + '%';
-                            progressBar.textContent = progress.toFixed(2) + '%';
-                        }
-    
-                        var speedMatch = logMessage.match(/down: (\d+\.\d+ kB\/s)/);
-                        if (speedMatch) {
-                            var speed = parseFloat(speedMatch[1]);
-                            speedInfo.textContent = 'Vitesse: ' + formatSpeed(speed);
-                        }
-                    };
-    
-                    eventSource.onerror = function (error) {
-                        console.error('Erreur de l\'EventSource:', error);
-                        eventSource.close();
-                        alert('Erreur lors du téléchargement du fichier .torrent. Veuillez vérifier les logs du serveur pour plus de détails.');
-                    };
-                } else {
-                    alert('Erreur lors du téléchargement du fichier .torrent. Réponse du serveur non OK.');
-                }
-            }).catch(error => {
-                console.error('Erreur:', error);
-                alert('Erreur lors du téléchargement du fichier .torrent. Veuillez vérifier votre connexion réseau et réessayer.');
-            });
-        });
-    
-        function formatSpeed(speed) {
-            if (speed < 1000) {
-                return speed.toFixed(2) + ' kB/s';
-            } else if (speed < 1000000) {
-                return (speed / 1000).toFixed(2) + ' MB/s';
-            } else {
-                return (speed / 1000000).toFixed(2) + ' GB/s';
-            }
-        }
-    </script>
+    <script src="{{ url_for('static', filename='js/downloads.js') }}"></script>
 </body>
 
 </html>

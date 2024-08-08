@@ -65,6 +65,11 @@ def download_torrent(torrent_file_path):
     write_log(f"Début de la fonction download_torrent avec le chemin : {torrent_file_path}")
     conf = ControleurConf()
     ses = lt.session()
+    settings = {
+        'download_rate_limit': -1,  # Pas de limite de vitesse de téléchargement
+        'upload_rate_limit': -1,    # Pas de limite de vitesse d'upload
+    }
+    ses.apply_settings(settings)
     write_log(f"Chargement du fichier .torrent pour {torrent_file_path}")
     info = lt.torrent_info(torrent_file_path)
     write_log(f"info: {info}")
