@@ -61,6 +61,7 @@ def ensure_directory_exists(base_path, series_name):
     return directory_path
 
 def download_torrent(torrent_file_path):
+    write_log(f"Début de la fonction download_torrent avec le chemin : {torrent_file_path}")
     conf = ControleurConf()
     ses = lt.session()
     write_log(f"Chargement du fichier .torrent pour {torrent_file_path}")
