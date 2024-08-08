@@ -48,7 +48,7 @@ def start_download(app):
     def inner_start_download():
         try:
             username = session.get('username')
-            write_log(f"Envoi d'une requ de téléchargement pour l'utilisateur: {username}")
+            write_log(f"Envoi d'une requête de téléchargement pour l'utilisateur: {username}")
             
             # Vérifier si un téléchargement est déjà en cours
             if session.get('is_downloading'):
@@ -75,14 +75,14 @@ def start_download(app):
     def generate(torrent_file_path):
         try:
             username = session.get('username')
-            response = write_log(f"Téléchargement du fichier .torrent pour {username}")
-            Response(download_torrent(torrent_file_path), mimetype='text/event-stream')
-
+            write_log(f"Téléchargement du fichier .torrent pour {username}")
+            response = Response(download_torrent(torrent_file_path), mimetype='text/event-stream')
             write_log(f"Téléchargement du fichier .torrent terminé pour {username}")
             return response
         except Exception as e:
             write_log(f"Erreur lors du téléchargement du fichier .torrent pour {username}: {str(e)}")
             flash('Erreur lors du téléchargement du fichier .torrent')
+            return redirect(url_for('inner_download'))
             
 
         #return Response(stream_with_context(generate()), mimetype='text/event-stream')
