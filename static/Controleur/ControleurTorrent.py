@@ -17,7 +17,7 @@ def is_movie_or_series(torrent_info):
     files = torrent_info.files()
     num_files = files.num_files()
     movie_extensions = ['.mp4', '.mkv', '.avi']
-    episode_pattern = re.compile(r'(E\d{2})|(Episode\s\d+)', re.IGNORECASE)
+    episode_pattern = re.compile(r'(S\D{2}E\d{5})|(Episode\s\d+)', re.IGNORECASE)
     series_pattern = re.compile(r'(S\d{2})|(Season\s\d+)', re.IGNORECASE)
 
     for i in range(num_files):
@@ -88,6 +88,8 @@ def download_torrent(torrent_file_path):
     
     h = ses.add_torrent({'ti': info, 'save_path': save_path})  # download to current directory
 
+    end = False
+
     write_log(f"Téléchargement de {info.name()}")
     while not h.is_seed():
         s = h.status()
@@ -97,12 +99,16 @@ def download_torrent(torrent_file_path):
         #get_flashed_messages()
         write_log(log_message)
         yield f"data: {log_message}\n\n"
+        end = False
         time.sleep(1)
 
-    write_log(f"Téléchargement de {info.name()} Fini")
-    ses.remove_torrent(h)
-    yield "data: done\n\n"
+    end = True
+
+    if end:
+        write_log(f"Téléchargement de {info.name()} Fini")
+        ses.remove_torrent(h)
+        yield "data: done\n\n"
     
-    if os.path.exists(torrent_file_path):
-        os.remove(torrent_file_path)
-        write_log(f"Fichier .torrent supprimé : {torrent_file_path}")
+        if os.path.exists(torrent_file_path):
+            os.remove(torrent_file_path)
+            write_log(f"Fichier .torrent supprimé : {torrent_file_path}")
