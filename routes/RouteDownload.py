@@ -62,11 +62,11 @@ def start_download(app):
             
             # Marquer le début du téléchargement
             session['is_downloading'] = True
-            generate(torrent_file_path)
+            response = generate(torrent_file_path)
             write_log(f"Fin de la requête de téléchargement pour {username}")
             # Marquer la fin du téléchargement
             session['is_downloading'] = False
-            return redirect(url_for('inner_download'))
+            return response
         except Exception as e:
             write_log(f"Erreur lors de la récupération du chemin du fichier .torrent pour {username}: {str(e)}")
             flash('Erreur lors de la récupération du chemin du fichier .torrent')
