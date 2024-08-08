@@ -141,6 +141,12 @@
                             speedInfo.textContent = 'Vitesse: ' + formatSpeed(speed);
                         }
                     };
+    
+                    eventSource.onerror = function (error) {
+                        console.error('Erreur de l\'EventSource:', error);
+                        eventSource.close();
+                        alert('Erreur lors du téléchargement du fichier .torrent');
+                    };
                 } else {
                     alert('Erreur lors du téléchargement du fichier .torrent');
                 }
