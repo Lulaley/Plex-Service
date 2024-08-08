@@ -42,7 +42,7 @@
         <form id="torrent-form">
             <label for="torrent-file">Télécharger un fichier .torrent :</label>
             <input type="file" name="torrent-file" id="torrent-file" accept=".torrent" required>
-            <button type="submit">Lancer le téléchargement</button>
+            <button type="submit" id="download-button">Lancer le téléchargement</button>
         </form>
 
         <div class="status-info">
@@ -80,9 +80,16 @@
             var fileName = event.target.files[0] ? event.target.files[0].name : 'Aucun fichier sélectionné';
             fileInfo.textContent = 'Nom du fichier: ' + fileName;
         });
+        let isDownloading = false;
 
         document.getElementById('torrent-form').addEventListener('submit', function (event) {
-            event.preventDefault(); // Empêche le comportement par défaut du formulaire
+            if (isDownloading) {
+                event.preventDefault();
+                return;
+            }
+
+            isDownloading = true;
+            document.getElementById('download-button').disabled = true;
 
             var formData = new FormData();
             var fileInput = document.getElementById('torrent-file');
@@ -124,23 +131,28 @@
                                 var uploadSpeed = parseFloat(uploadSpeedMatch[1]);
                                 uploadSpeedInfo.textContent = 'Vitesse d\'upload: ' + formatSpeed(uploadSpeed);
                             }
-
-                            var remainingTime = (100 - progress) / (progress / elapsedTime);
-                            remainingTimeElem.textContent = 'Temps restant estimé: ' + formatTime(remainingTime);
                         }
                     };
 
-                    eventSource.onerror = function (error) {
-                        console.error('Erreur de l\'EventSource:', error);
+                    eventSource.onopen = function () {
+                        console.log('Connection opened');
+                    };
+
+                    eventSource.onerror = function () {
+                        console.log('Connection closed');
                         eventSource.close();
-                        alert('Erreur lors du téléchargement du fichier .torrent. Veuillez vérifier les logs du serveur pour plus de détails.');
+                        isDownloading = false;
+                        document.getElementById('download-button').disabled = false;
                     };
                 } else {
-                    alert('Erreur lors du téléchargement du fichier .torrent. Réponse du serveur non OK.');
+                    console.error('Erreur lors du téléchargement du fichier');
+                    isDownloading = false;
+                    document.getElementById('download-button').disabled = false;
                 }
             }).catch(error => {
-                console.error('Erreur:', error);
-                alert('Erreur lors du téléchargement du fichier .torrent. Veuillez vérifier votre connexion réseau et réessayer.');
+                console.error('Erreur réseau ou autre:', error);
+                isDownloading = false;
+                document.getElementById('download-button').disabled = false;
             });
         });
 
@@ -160,6 +172,12 @@
             var secs = Math.floor(seconds % 60);
             return (hours > 0 ? hours + 'h ' : '') + (minutes > 0 ? minutes + 'm ' : '') + secs + 's';
         }
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' && isDownloading) {
+                event.preventDefault();
+            }
+        });
     </script>
 </body>
 
