@@ -6,6 +6,7 @@ import libtorrent as lt
 import time
 import re
 import os
+import sys
 
 # Variable globale pour stocker l'état du téléchargement
 download_status = {}
@@ -96,11 +97,13 @@ def download_torrent(torrent_file_path):
             s.num_peers, s.state)
         write_log(log_message)
         yield f"data: {log_message}\n\n"
+        sys.stdout.flush()  # Force l'envoi des données
         time.sleep(1)
 
     write_log(f"Téléchargement de {info.name()} Fini")
     ses.remove_torrent(h)
     yield "data: done\n\n"
+    sys.stdout.flush()  # Force l'envoi des données
     
     if os.path.exists(torrent_file_path):
         os.remove(torrent_file_path)
