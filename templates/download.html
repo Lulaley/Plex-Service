@@ -67,17 +67,17 @@
             <input type="file" name="torrent-file" id="torrent-file" accept=".torrent" required>
             <button type="submit">Lancer le téléchargement</button>
         </form>
-
+    
         <div class="status-info">
             <div id="file-info">Nom du fichier: Aucun fichier sélectionné</div>
             </br>
             <div id="speed-info">Vitesse: 0 kB/s</div>
         </div>
-
+    
         <div class="progress-container">
             <div class="progress-bar" id="progress-bar">0%</div>
         </div>
-
+    
         {% with messages = get_flashed_messages() %}
         {% if messages %}
         <ul class="flashes">
@@ -87,7 +87,7 @@
         </ul>
         {% endif %}
         {% endwith %}
-
+    
         {% if download_status %}
         <div class="status-container">
             <h2>État du téléchargement</h2>
@@ -101,14 +101,14 @@
             var fileName = event.target.files[0] ? event.target.files[0].name : 'Aucun fichier sélectionné';
             fileInfo.textContent = 'Nom du fichier: ' + fileName;
         });
-
+    
         document.getElementById('torrent-form').addEventListener('submit', function (event) {
             event.preventDefault(); // Empêche le comportement par défaut du formulaire
-
+    
             var formData = new FormData();
             var fileInput = document.getElementById('torrent-file');
             formData.append('torrent-file', fileInput.files[0]);
-
+    
             fetch('/upload', {
                 method: 'POST',
                 body: formData
@@ -117,16 +117,16 @@
                     var eventSource = new EventSource('/start_download');
                     var progressBar = document.getElementById('progress-bar');
                     var speedInfo = document.getElementById('speed-info');
-
+    
                     eventSource.onmessage = function (event) {
                         if (event.data === 'done') {
                             eventSource.close();
-                            progressBar.style.width = '50%';
+                            progressBar.style.width = '100%';
                             progressBar.textContent = 'Téléchargement terminé';
                             speedInfo.textContent = 'Vitesse: 0 kB/s';
                             return;
                         }
-
+    
                         var logMessage = event.data;
                         var progressMatch = logMessage.match(/(\d+\.\d+)% complete/);
                         if (progressMatch) {
@@ -134,7 +134,7 @@
                             progressBar.style.width = progress + '%';
                             progressBar.textContent = progress.toFixed(2) + '%';
                         }
-
+    
                         var speedMatch = logMessage.match(/down: (\d+\.\d+ kB\/s)/);
                         if (speedMatch) {
                             var speed = parseFloat(speedMatch[1]);
@@ -144,18 +144,21 @@
                 } else {
                     alert('Erreur lors du téléchargement du fichier .torrent');
                 }
+            }).catch(error => {
+                console.error('Erreur:', error);
+                alert('Erreur lors du téléchargement du fichier .torrent');
             });
         });
-
+    
         function formatSpeed(speed) {
-        if (speed < 1000) {
-            return speed.toFixed(2) + ' kB/s';
-        } else if (speed < 1000000) {
-            return (speed / 1000).toFixed(2) + ' MB/s';
-        } else {
-            return (speed / 1000000).toFixed(2) + ' GB/s';
+            if (speed < 1000) {
+                return speed.toFixed(2) + ' kB/s';
+            } else if (speed < 1000000) {
+                return (speed / 1000).toFixed(2) + ' MB/s';
+            } else {
+                return (speed / 1000000).toFixed(2) + ' GB/s';
+            }
         }
-    }
     </script>
 </body>
 
