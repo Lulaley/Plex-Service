@@ -72,6 +72,7 @@ def start_download(app):
     def generate(torrent_file_path):
         try:
             username = session.get('username')
+            write_log(f"Téléchargement du fichier .torrent pour {username}")
             Response(download_torrent(torrent_file_path), mimetype='text/event-stream')
 
             write_log(f"Téléchargement du fichier .torrent terminé pour {username}")
