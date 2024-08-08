@@ -119,14 +119,6 @@
                     var speedInfo = document.getElementById('speed-info');
     
                     eventSource.onmessage = function (event) {
-                        if (event.data === 'done') {
-                            eventSource.close();
-                            progressBar.style.width = '100%';
-                            progressBar.textContent = 'Téléchargement terminé';
-                            speedInfo.textContent = 'Vitesse: 0 kB/s';
-                            return;
-                        }
-    
                         var logMessage = event.data;
                         var progressMatch = logMessage.match(/(\d+\.\d+)% complete/);
                         if (progressMatch) {
@@ -145,14 +137,14 @@
                     eventSource.onerror = function (error) {
                         console.error('Erreur de l\'EventSource:', error);
                         eventSource.close();
-                        alert('Erreur lors du téléchargement du fichier .torrent');
+                        alert('Erreur lors du téléchargement du fichier .torrent. Veuillez vérifier les logs du serveur pour plus de détails.');
                     };
                 } else {
-                    alert('Erreur lors du téléchargement du fichier .torrent');
+                    alert('Erreur lors du téléchargement du fichier .torrent. Réponse du serveur non OK.');
                 }
             }).catch(error => {
                 console.error('Erreur:', error);
-                alert('Erreur lors du téléchargement du fichier .torrent');
+                alert('Erreur lors du téléchargement du fichier .torrent. Veuillez vérifier votre connexion réseau et réessayer.');
             });
         });
     

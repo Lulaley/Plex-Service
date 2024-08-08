@@ -50,7 +50,6 @@ def start_download(app):
             username = session.get('username')
             write_log(f"Envoi d'une requête de téléchargement pour l'utilisateur: {username}")
             
-            # Vérifier si un téléchargement est déjà en cours
             if session.get('is_downloading'):
                 write_log(f"Téléchargement déjà en cours pour {username}")
                 flash('Un téléchargement est déjà en cours')
@@ -60,11 +59,8 @@ def start_download(app):
             if not torrent_file_path:
                 raise Exception("Chemin du fichier .torrent non trouvé dans la session")
             
-            # Marquer le début du téléchargement
             session['is_downloading'] = True
             response = generate(torrent_file_path)
-            write_log(f"Fin de la requête de téléchargement pour {username}")
-            # Marquer la fin du téléchargement
             session['is_downloading'] = False
             return response
         except Exception as e:

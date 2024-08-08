@@ -65,7 +65,7 @@ def download_torrent(torrent_file_path):
     conf = ControleurConf()
     ses = lt.session()
     write_log(f"Chargement du fichier .torrent pour {torrent_file_path}")
-    info = lt.torrent_info(torrent_file_path)  # replace with your torrent file
+    info = lt.torrent_info(torrent_file_path)
     write_log(f"info: {info}")
     content_type = is_movie_or_series(info)
     if content_type == 'series' or content_type == 'episode':
@@ -86,9 +86,7 @@ def download_torrent(torrent_file_path):
         write_log(f"Le contenu du torrent est identifié comme un film")
     write_log(f"Le contenu du torrent est identifié comme: {content_type}")
     
-    h = ses.add_torrent({'ti': info, 'save_path': save_path})  # download to current directory
-
-    end = False
+    h = ses.add_torrent({'ti': info, 'save_path': save_path})
 
     write_log(f"Téléchargement de {info.name()}")
     while not h.is_seed():
@@ -96,19 +94,14 @@ def download_torrent(torrent_file_path):
         log_message = '%.2f%% complete (down: %.1f kB/s up: %.1f kB/s peers: %d) %s' % (
             s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000,
             s.num_peers, s.state)
-        #get_flashed_messages()
         write_log(log_message)
         yield f"data: {log_message}\n\n"
-        end = False
         time.sleep(1)
 
-    end = True
-
-    if end:
-        write_log(f"Téléchargement de {info.name()} Fini")
-        ses.remove_torrent(h)
-        yield "data: done\n\n"
+    write_log(f"Téléchargement de {info.name()} Fini")
+    ses.remove_torrent(h)
+    yield "data: done\n\n"
     
-        if os.path.exists(torrent_file_path):
-            os.remove(torrent_file_path)
-            write_log(f"Fichier .torrent supprimé : {torrent_file_path}")
+    if os.path.exists(torrent_file_path):
+        os.remove(torrent_file_path)
+        write_log(f"Fichier .torrent supprimé : {torrent_file_path}")
