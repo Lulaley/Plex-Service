@@ -68,11 +68,11 @@ def start_download(app):
 
                     #response = Response(stream_with_context(download_torrent(torrent_file_path)), mimetype='text/event-stream')
                     #write_log(f"Contenu de la réponse: {response.get_data(as_text=True)}")
-                    return Response(generate(), mimetype='text/event-stream')
                 except Exception as e:
                     write_log(f"Erreur lors du téléchargement du fichier .torrent pour {username}: {str(e)}")
                     flash('Erreur lors du téléchargement du fichier .torrent')
                     return redirect(url_for('inner_download'))
+            return Response(generate(), mimetype='text/event-stream')
         except Exception as e:
             write_log(f"Erreur lors de la récupération du chemin du fichier .torrent pour {username}: {str(e)}")
             flash('Erreur lors de la récupération du chemin du fichier .torrent')
