@@ -113,6 +113,19 @@
     
                     eventSource.onmessage = function (event) {
                         var logMessage = event.data;
+    
+                        if (logMessage === 'done') {
+                            progressBar.style.width = '100%';
+                            progressBar.textContent = '100%';
+                            speedInfo.textContent = 'Vitesse de téléchargement: 0 kB/s';
+                            uploadSpeedInfo.textContent = 'Vitesse d\'upload: 0 kB/s';
+                            remainingTimeElem.textContent = 'Temps restant: 0s';
+                            eventSource.close();
+                            isDownloading = false;
+                            document.getElementById('download-button').disabled = false;
+                            return;
+                        }
+    
                         var progressMatch = logMessage.match(/(\d+\.\d+)% complete/);
                         var downloadSpeedMatch = logMessage.match(/down: (\d+\.\d+ kB\/s)/);
                         var uploadSpeedMatch = logMessage.match(/up: (\d+\.\d+ kB\/s)/);
