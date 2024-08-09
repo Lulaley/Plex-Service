@@ -58,10 +58,8 @@ def start_download(app):
             if not torrent_file_path:
                 raise Exception("Chemin du fichier .torrent non trouvé dans la session")
             
-            is_downloading = session.get('is_downloading')
-            if not is_downloading:
-                session['is_downloading'] = True
-                response = generate(torrent_file_path)
+            session['is_downloading'] = True
+            response = generate(torrent_file_path)
             return response
         except Exception as e:
             write_log(f"Erreur lors de la récupération du chemin du fichier .torrent pour {username}: {str(e)}")
@@ -74,7 +72,9 @@ def start_download(app):
             write_log(f"Téléchargement du fichier .torrent pour {username}")
             response = Response(stream_with_context(download_torrent(torrent_file_path)), mimetype='text/event-stream')
             write_log(f"Téléchargement du fichier .torrent terminé pour {username}")
-            session['is_downloading'] = False
+            write_log(f"Contenu de la réponse: {response.get_data(as_text=True)}")
+            if response.get_data(as_text=True) == 'done':
+                session['is_downloading'] = False
             return response
         except Exception as e:
             write_log(f"Erreur lors du téléchargement du fichier .torrent pour {username}: {str(e)}")
