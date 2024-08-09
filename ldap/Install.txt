@@ -40,7 +40,7 @@ chmod 644 /opt/openldap/etc/openldap/ldap.conf
 chmod 444 /opt/openldap/etc/openldap/schema/*
 
 créé le fichier si il faut
-ln -sfn /opt/openldap/etc/openldap/lapd.conf /etc/ldap/ldap.conf
+ln -sfn /opt/openldap/etc/openldap/ldap.conf /etc/ldap/ldap.conf
 
 /opt/openldap/bin/ldapadd -x -D "cn=root,dc=chimae-world,dc=fr" -W -f fr.ldif
 il va te demande le mdp du compte root non crypte
