@@ -109,6 +109,7 @@
                     var elapsedTimeElem = document.getElementById('elapsed-time');
                     var remainingTimeElem = document.getElementById('remaining-time');
                     var startTime = Date.now();
+                    var lastProgress = 0;
     
                     eventSource.onmessage = function (event) {
                         var logMessage = event.data;
@@ -132,6 +133,12 @@
                             if (uploadSpeedMatch) {
                                 var uploadSpeed = parseFloat(uploadSpeedMatch[1]);
                                 uploadSpeedInfo.textContent = 'Vitesse d\'upload: ' + formatSpeed(uploadSpeed);
+                            }
+    
+                            if (progress > lastProgress) {
+                                var remainingTime = (elapsedTime / progress) * (100 - progress);
+                                remainingTimeElem.textContent = 'Temps restant: ' + formatTime(remainingTime);
+                                lastProgress = progress;
                             }
                         }
                     };
