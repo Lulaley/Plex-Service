@@ -1,4 +1,4 @@
-from flask import render_template, request, session, redirect, url_for, flash, Response, stream_with_context
+from flask import render_template, request, session, jsonify, redirect, url_for, flash, Response, stream_with_context
 import threading
 from static.Controleur.ControleurLog import write_log
 from static.Controleur.ControleurTorrent import download_torrent
@@ -20,14 +20,12 @@ def upload(app):
         
         if 'torrent-file' not in request.files:
             write_log(f"Aucun fichier sélectionné par {username}")
-            flash('Aucun fichier sélectionné')
-            return redirect(url_for('inner_download'))
+            return jsonify({'success': False, 'message': 'Aucun fichier sélectionné'}), 400
         
         file = request.files['torrent-file']
         if file.filename == '':
             write_log(f"Aucun fichier sélectionné par {username}")
-            flash('Aucun fichier sélectionné')
-            return redirect(url_for('inner_download'))
+            return jsonify({'success': False, 'message': 'Aucun fichier sélectionné'}), 400
         
         if file and file.filename.endswith('.torrent'):
             filename = file.filename.replace(' ', '_')
@@ -35,11 +33,10 @@ def upload(app):
             session['torrent_file_path'] = file_path
             file.save(file_path)
             write_log(f"Fichier .torrent déposé par {username} : {file_path}")
-            return redirect(url_for('inner_start_download'))
+            return jsonify({'success': True, 'message': 'Fichier téléchargé avec succès', 'redirect_url': url_for('inner_start_download')})
         else:
             write_log(f"Format de fichier non supporté par {username}")
-            flash('Format de fichier non supporté')
-            return redirect(url_for('inner_download'))
+            return jsonify({'success': False, 'message': 'Format de fichier non supporté'}), 400)
 
 def start_download(app):
     @app.route('/start_download')
