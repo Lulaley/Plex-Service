@@ -46,7 +46,7 @@ def start_download(app):
     def inner_start_download():
         try:
             username = session.get('username')
-            def generate(username):
+            def generate(username, session):
                 write_log(f"Envoi d'une requête de téléchargement pour l'utilisateur: {username}")
                 
                 if session.get('is_downloading'):
@@ -71,7 +71,7 @@ def start_download(app):
                     write_log(f"Erreur lors du téléchargement du fichier .torrent pour {username}: {str(e)}")
                     flash('Erreur lors du téléchargement du fichier .torrent')
                     return redirect(url_for('inner_download'))
-            return Response(generate(username), mimetype='text/event-stream')
+            return Response(generate(username, session), mimetype='text/event-stream')
         except Exception as e:
             write_log(f"Erreur lors de la récupération du chemin du fichier .torrent pour {username}: {str(e)}")
             flash('Erreur lors de la récupération du chemin du fichier .torrent')
