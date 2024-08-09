@@ -47,6 +47,7 @@ def start_download(app):
         try:
             username = session.get('username')
             def generate():
+                username = session.get('username')
                 write_log(f"Envoi d'une requête de téléchargement pour l'utilisateur: {username}")
                 
                 if session.get('is_downloading'):
