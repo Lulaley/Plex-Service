@@ -111,6 +111,9 @@
                     var startTime = Date.now();
                     var lastProgress = 0;
     
+                    console.log(eventSource.onmessage);
+                    console.log(session['data']);
+
                     eventSource.onmessage = function (event) {
                         var logMessage = session('data')
     
