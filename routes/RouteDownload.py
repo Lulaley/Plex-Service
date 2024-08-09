@@ -1,4 +1,4 @@
-from flask import render_template, request, session, redirect, url_for, flash, Response, stream_with_context
+from flask import render_template, request, session, jsonify, redirect, url_for, flash, Response, stream_with_context
 import threading
 from static.Controleur.ControleurLog import write_log
 from static.Controleur.ControleurTorrent import download_torrent
