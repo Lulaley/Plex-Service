@@ -92,6 +92,8 @@
     
             isDownloading = true;
             document.getElementById('download-button').disabled = true;
+            document.getElementById('download-button').style.backgroundColor = "#ffb74a";
+            document.getElementById('download-button').style.cursor = "not-allowed";
     
             var formData = new FormData();
             var fileInput = document.getElementById('torrent-file');
