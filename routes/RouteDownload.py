@@ -72,8 +72,8 @@ def start_download(app):
         try:
             username = session.get('username')
             write_log(f"Téléchargement du fichier .torrent pour {username}")
-            response = Response(download_torrent(torrent_file_path), mimetype='text/event-stream')
-            #write_log(f"Contenu de la réponse: {response.get_data(as_text=True)}")
+            response = Response(stream_with_context(download_torrent(torrent_file_path)), mimetype='text/event-stream')
+            write_log(f"Contenu de la réponse: {response.get_data(as_text=True)}")
             return response
         except Exception as e:
             write_log(f"Erreur lors du téléchargement du fichier .torrent pour {username}: {str(e)}")
