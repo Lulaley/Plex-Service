@@ -61,8 +61,7 @@ def start_download(app):
             session['is_downloading'] = True
             response = generate(torrent_file_path)
             write_log(f"Téléchargement du fichier .torrent terminé pour {username}")
-            if response.get_data(as_text=True) == 'done':
-                session['is_downloading'] = False
+            session['is_downloading'] = False
             return response
         except Exception as e:
             write_log(f"Erreur lors de la récupération du chemin du fichier .torrent pour {username}: {str(e)}")
@@ -74,7 +73,6 @@ def start_download(app):
             username = session.get('username')
             write_log(f"Téléchargement du fichier .torrent pour {username}")
             response = Response(download_torrent(torrent_file_path), mimetype='text/event-stream')
-            response = stream_with_context(response)
             #write_log(f"Contenu de la réponse: {response.get_data(as_text=True)}")
             return response
         except Exception as e:
