@@ -33,9 +33,8 @@ def upload(app):
             filename = file.filename.replace(' ', '_')
             file_path = os.path.join("/var/www/public/Plex-Service/tmp/", filename)
             session['torrent_file_path'] = file_path
-            write_log(f"Téléchargement du fichier .torrent par {username} : {file_path}")
             file.save(file_path)
-            write_log(f"Fichier .torrent téléchargé par {username} : {filename}")
+            write_log(f"Fichier .torrent déposé par {username} : {file_path}")
             return redirect(url_for('inner_start_download'))
         else:
             write_log(f"Format de fichier non supporté par {username}")
