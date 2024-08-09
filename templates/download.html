@@ -111,11 +111,8 @@
                     var startTime = Date.now();
                     var lastProgress = 0;
     
-                    console.log("eventSource : ",eventSource);
-                    console.log("session data :",session['data']);
-
                     eventSource.onmessage = function (event) {
-                        var logMessage = session('data')
+                        var logMessage = event.data;
     
                         if (logMessage === 'done') {
                             progressBar.style.width = '100%';

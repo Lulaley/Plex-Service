@@ -101,7 +101,6 @@ def download_torrent(torrent_file_path):
             s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000,
             s.num_peers, s.state)
         write_log(log_message)
-        session['data'] = f"data : {log_message}\n\n"
         yield f"data: {log_message}\n\n"
         sys.stdout.flush()  # Force l'envoi des données
         time.sleep(1)
