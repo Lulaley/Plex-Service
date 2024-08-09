@@ -36,7 +36,7 @@ def upload(app):
             return jsonify({'success': True, 'message': 'Fichier téléchargé avec succès', 'redirect_url': url_for('inner_start_download')})
         else:
             write_log(f"Format de fichier non supporté par {username}")
-            return jsonify({'success': False, 'message': 'Format de fichier non supporté'}), 400)
+            return jsonify({'success': False, 'message': 'Format de fichier non supporté'}), 400
 
 def start_download(app):
     @app.route('/start_download')
