@@ -112,7 +112,7 @@
                     var lastProgress = 0;
     
                     eventSource.onmessage = function (event) {
-                        var logMessage = event.data;
+                        var logMessage = session('data')
     
                         if (logMessage === 'done') {
                             progressBar.style.width = '100%';

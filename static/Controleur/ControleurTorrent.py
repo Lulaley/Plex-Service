@@ -1,7 +1,7 @@
 from .ControleurLog import write_log
 from .ControleurConf import ControleurConf
 from .ControleurTMDB import ControleurTMDB
-from flask import flash, get_flashed_messages, render_template, Response
+from flask import flash, get_flashed_messages, render_template, Response, session
 import libtorrent as lt
 import time
 import re
@@ -101,6 +101,7 @@ def download_torrent(torrent_file_path):
             s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000,
             s.num_peers, s.state)
         write_log(log_message)
+        session['data'] = f"data : {log_message}\n\n"
         yield f"data: {log_message}\n\n"
         sys.stdout.flush()  # Force l'envoi des données
         time.sleep(1)
