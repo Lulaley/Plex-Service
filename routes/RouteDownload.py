@@ -36,7 +36,6 @@ def upload(app):
             write_log(f"Téléchargement du fichier .torrent par {username} : {file_path}")
             file.save(file_path)
             write_log(f"Fichier .torrent téléchargé par {username} : {filename}")
-            flash('Fichier .torrent téléchargé avec succès')
             return redirect(url_for('inner_start_download'))
         else:
             write_log(f"Format de fichier non supporté par {username}")
@@ -74,7 +73,7 @@ def start_download(app):
             username = session.get('username')
             write_log(f"Téléchargement du fichier .torrent pour {username}")
             response = Response(download_torrent(torrent_file_path), mimetype='text/event-stream')
-            response.headers['Content-Disposition'] = f'attachment; filename={torrent_file_path.split("/")[-1]}'
+            #response.headers['Content-Disposition'] = f'attachment; filename={torrent_file_path.split("/")[-1]}'
             write_log(f"Téléchargement du fichier .torrent terminé pour {username}")
             session['is_downloading'] = False
             return response
