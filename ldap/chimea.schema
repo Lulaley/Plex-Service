@@ -12,14 +12,14 @@ attributetype ( 1.2.250.1.49.5.2 NAME 'userInfos'
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
 
-# define the plexTitle attribute
+# define the title attribute
 attributetype ( 1.2.250.1.49.5.3 NAME 'plexTitle'
   DESC 'Title of the movie, series, or episode'
   EQUALITY caseIgnoreMatch
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
 
-# define the plexDescription attribute
+# define the description attribute
 attributetype ( 1.2.250.1.49.5.4 NAME 'plexDescription'
   DESC 'Description of the movie, series, or episode'
   EQUALITY caseIgnoreMatch
@@ -103,6 +103,27 @@ attributetype ( 1.2.250.1.49.5.16 NAME 'episodes'
   EQUALITY distinguishedNameMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.12 )
 
+# define the totalSeasons attribute
+attributetype ( 1.2.250.1.49.5.17 NAME 'totalSeasons'
+  DESC 'Total number of seasons in the series'
+  EQUALITY integerMatch
+  ORDERING integerOrderingMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 )
+
+# define the totalEpisodes attribute
+attributetype ( 1.2.250.1.49.5.18 NAME 'totalEpisodes'
+  DESC 'Total number of episodes in the series'
+  EQUALITY integerMatch
+  ORDERING integerOrderingMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 )
+
+# define the totalEpisodesInSeason attribute
+attributetype ( 1.2.250.1.49.5.19 NAME 'totalEpisodesInSeason'
+  DESC 'Total number of episodes in the season'
+  EQUALITY integerMatch
+  ORDERING integerOrderingMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 )
+
 # define the otherUserInfos objectclass
 objectclass ( 1.2.250.1.49.6.1 NAME 'otherUserInfos'
   DESC 'Object class for additional user information'
@@ -112,27 +133,27 @@ objectclass ( 1.2.250.1.49.6.1 NAME 'otherUserInfos'
 # define the movie objectclass
 objectclass ( 1.2.250.1.49.6.2 NAME 'movie'
   DESC 'Object class for movies'
-  SUP top STRUCTURAL
-  MUST ( title $ releaseDate )
-  MAY ( description $ genre $ director $ duration $ quality $ languages $ subtitles $ actors ) )
+  SUP top AUXILIARY
+  MUST ( cn $ plexTitle $ releaseDate )
+  MAY ( plexDescription $ genre $ director $ duration $ quality $ languages $ subtitles $ actors ) )
 
 # define the series objectclass
 objectclass ( 1.2.250.1.49.6.3 NAME 'series'
   DESC 'Object class for series'
   SUP top STRUCTURAL
-  MUST ( title $ releaseDate )
-  MAY ( description $ genre $ director $ duration $ quality $ languages $ subtitles $ actors $ seasonNumber $ episodeNumber $ seasons ) )
+  MUST ( cn $ plexTitle $ releaseDate )
+  MAY ( PlexDescription $ genre $ director $ duration $ quality $ languages $ subtitles $ actors $ seasonNumber $ episodeNumber $ seasons $ totalSeasons $ totalEpisodes ) )
 
 # define the season objectclass
 objectclass ( 1.2.250.1.49.6.4 NAME 'season'
   DESC 'Object class for seasons'
   SUP top STRUCTURAL
-  MUST ( title $ releaseDate $ seasonNumber )
-  MAY ( description $ genre $ director $ duration $ quality $ languages $ subtitles $ actors $ episodes ) )
+  MUST ( cn $ plexTitle $ releaseDate $ seasonNumber )
+  MAY ( plexDescription $ genre $ director $ duration $ quality $ languages $ subtitles $ actors $ episodes $ totalEpisodesInSeason ) )
 
 # define the episode objectclass
 objectclass ( 1.2.250.1.49.6.5 NAME 'episode'
   DESC 'Object class for episodes'
-  SUP top STRUCTURAL
-  MUST ( title $ releaseDate $ seasonNumber $ episodeNumber )
-  MAY ( description $ genre $ director $ duration $ quality $ languages $ subtitles $ actors ) )
+  SUP top AUXILIARY
+  MUST ( cn $ plexTitle $ releaseDate $ seasonNumber $ episodeNumber )
+  MAY ( plexDescription $ genre $ director $ duration $ quality $ languages $ subtitles $ actors ) )
