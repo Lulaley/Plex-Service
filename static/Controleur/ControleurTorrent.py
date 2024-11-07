@@ -19,7 +19,7 @@ def is_movie_or_series(torrent_info):
     num_files = files.num_files()
     movie_extensions = ['.mp4', '.mkv', '.avi']
     episode_pattern = re.compile(r'(S\D{2}E\d{5})|(Episode\s\d+)', re.IGNORECASE)
-    series_pattern = re.compile(r'(S\d{2})|(Season\s\d+)', re.IGNORECASE)
+    series_pattern = re.compile(r'(S\d{2})|(Season\s\d+)|(Integral)', re.IGNORECASE)
 
     for i in range(num_files):
         file_path = files.file_path(i)
