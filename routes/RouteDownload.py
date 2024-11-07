@@ -7,9 +7,13 @@ import os
 def download(app):
     @app.route('/download')
     def inner_download():
-        username = session.get('username')
-        write_log(f"Affichage de la page de téléchargement pour l'utilisateur: {username}")
-        return render_template('download.html', username=username)
+        if 'username' in session:
+            username = session.get('username')
+            write_log(f"Affichage de la page de téléchargement pour l'utilisateur: {username}")
+            return render_template('download.html', username=username) 
+        else:
+            write_log("Aucun utilisateur connecté, redirection vers l'index")
+            return redirect(url_for('index'))
 
 def upload(app):
     @app.route('/upload', methods=['POST'])
@@ -41,38 +45,34 @@ def upload(app):
 def start_download(app):
     @app.route('/start_download')
     def inner_start_download():
-        if 'username' in session:
-            try:
-                username = session.get('username')
+        try:
+            username = session.get('username')
+            
+            @stream_with_context
+            def generate():
+                write_log(f"Envoi d'une requête de téléchargement pour l'utilisateur: {username}")
                 
-                @stream_with_context
-                def generate():
-                    write_log(f"Envoi d'une requête de téléchargement pour l'utilisateur: {username}")
-                    
-                    if session.get('is_downloading'):
-                        write_log(f"Téléchargement déjà en cours pour {username}")
-                        flash('Un téléchargement est déjà en cours')
-                        return redirect(url_for('inner_download'))
-                    
-                    torrent_file_path = session.get('torrent_file_path')
-                    if not torrent_file_path:
-                        raise Exception("Chemin du fichier .torrent non trouvé dans la session")
-                    
-                    session['is_downloading'] = True
-                    try:
-                        write_log(f"Téléchargement du fichier .torrent pour {username}")
-                        for status in download_torrent(torrent_file_path):
-                            yield status
-                    except Exception as e:
-                        write_log(f"Erreur lors du téléchargement du fichier .torrent pour {username}: {str(e)}")
-                        flash('Erreur lors du téléchargement du fichier .torrent')
-                        return redirect(url_for('inner_download'))
+                if session.get('is_downloading'):
+                    write_log(f"Téléchargement déjà en cours pour {username}")
+                    flash('Un téléchargement est déjà en cours')
+                    return redirect(url_for('inner_download'))
                 
-                return Response(generate(), mimetype='text/event-stream')
-            except Exception as e:
-                write_log(f"Erreur lors de la récupération du chemin du fichier .torrent pour {username}: {str(e)}")
-                flash('Erreur lors de la récupération du chemin du fichier .torrent')
-                return redirect(url_for('inner_download'))
-        else:
-            write_log("Aucun utilisateur connecté, redirection vers l'index")
-            return redirect(url_for('index'))
+                torrent_file_path = session.get('torrent_file_path')
+                if not torrent_file_path:
+                    raise Exception("Chemin du fichier .torrent non trouvé dans la session")
+                
+                session['is_downloading'] = True
+                try:
+                    write_log(f"Téléchargement du fichier .torrent pour {username}")
+                    for status in download_torrent(torrent_file_path):
+                        yield status
+                except Exception as e:
+                    write_log(f"Erreur lors du téléchargement du fichier .torrent pour {username}: {str(e)}")
+                    flash('Erreur lors du téléchargement du fichier .torrent')
+                    return redirect(url_for('inner_download'))
+            
+            return Response(generate(), mimetype='text/event-stream')
+        except Exception as e:
+            write_log(f"Erreur lors de la récupération du chemin du fichier .torrent pour {username}: {str(e)}")
+            flash('Erreur lors de la récupération du chemin du fichier .torrent')
+            return redirect(url_for('inner_download'))
