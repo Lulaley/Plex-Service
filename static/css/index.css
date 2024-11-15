@@ -127,7 +127,7 @@ button {
     transition: opacity 0.3s;
 }
 
-.tooltip input.error+.tooltiptext {
+.tooltip input.error + .tooltiptext {
     visibility: visible;
     opacity: 1;
 }
@@ -149,5 +149,7 @@ button {
 .password-container .toggle-password {
     position: absolute;
     right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
     cursor: pointer;
 }
