@@ -135,3 +135,19 @@ button {
 .submit-container {
     text-align: center;
 }
+
+.password-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-container input {
+    padding-right: 30px; /* Espace pour l'icône */
+}
+
+.password-container .toggle-password {
+    position: absolute;
+    right: 10px;
+    cursor: pointer;
+}

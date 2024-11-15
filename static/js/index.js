@@ -118,6 +118,17 @@ function showCreateForm() {
     formsVisible = true;
 }
 
+function togglePasswordVisibility(element) {
+    const passwordInput = element.previousElementSibling;
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        element.textContent = '🙈'; // Icône pour masquer le mot de passe
+    } else {
+        passwordInput.type = 'password';
+        element.textContent = '👁️'; // Icône pour révéler le mot de passe
+    }
+}
+
 document.querySelector('.plex-logo').addEventListener('click', showButtons);
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.querySelector('#create-form form');
