@@ -1,22 +1,3 @@
-body {
-    background-color: #313B45;
-    color: white;
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    flex-direction: column;
-}
-
-.plex-logo {
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: center;
-    transition: transform 0.5s ease-in-out;
-}
-
 .plex-logo img {
     width: 25%;
     cursor: pointer;
@@ -92,6 +73,7 @@ button {
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
+    font-size: 1.2em; /* Ajustez la taille de l'icône si nécessaire */
 }
 
 /* Media queries pour rendre le formulaire responsive */
@@ -110,57 +92,4 @@ button {
     input[type="email"] {
         padding: 8px;
     }
-}
-
-@media only screen and (max-width: 400px) {
-    .plex-logo img {
-        width: 75%;
-    }
-
-    #login-form,
-    #create-form {
-        padding: 10px;
-    }
-
-    input[type="text"],
-    input[type="password"],
-    input[type="email"] {
-        padding: 6px;
-    }
-}
-
-.tooltip {
-    position: relative;
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.tooltip input {
-    flex: 1;
-}
-
-.tooltiptext {
-    visibility: hidden;
-    width: 200px;
-    background-color: #f44336; /* Red */
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px;
-    position: absolute;
-    z-index: 1;
-    left: 50%;
-    transform: translateX(-50%);
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
-.tooltip input.error+.tooltiptext {
-    visibility: visible;
-    opacity: 1;
-}
-
-.submit-container {
-    text-align: center;
 }
