@@ -34,6 +34,17 @@ body {
     box-sizing: border-box;
 }
 
+#login-form,
+#login-form input,
+#login-form .password-container,
+#login-form .toggle-password,
+#create-form,
+#create-form input,
+#create-form .password-container,
+#create-form .toggle-password {
+    /* Vos autres styles */
+}
+
 input[type="text"],
 input[type="password"],
 input[type="email"] {
@@ -149,5 +160,7 @@ button {
 .password-container .toggle-password {
     position: absolute;
     right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
     cursor: pointer;
 }
