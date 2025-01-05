@@ -109,11 +109,11 @@ def download_torrent(torrent_file_path):
     
     if free_space_gb < min_free_space_gb:
         write_log(f"Pas assez d'espace libre sur le disque. Espace requis: {min_free_space_gb} Go")
-        if conf.get_config('DLT', 'save') == 'true':
+        if conf.get_config('SAVE', 'use_save') == 'true':
             if content_type == 'series' or content_type == 'episode':
-                save_path = conf.get_config('DLT', 'save_series')
+                save_path = conf.get_config('SAVE', 'series')
             else:
-                save_path = conf.get_config('DLT', 'save_movies')
+                save_path = conf.get_config('SAVE', 'movies')
             write_log(f"Redirection du téléchargement vers: {save_path}")
         else:
             write_log("Pas assez d'espace libre et l'option de sauvegarde est désactivée. Annulation du téléchargement.")
