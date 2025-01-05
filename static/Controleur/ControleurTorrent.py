@@ -61,6 +61,13 @@ def ensure_directory_exists(base_path, series_name):
         write_log(f"Dossier déjà existant: {directory_path}")
     return directory_path
 
+def get_free_space_gb(directory):
+    """Retourne l'espace libre en Go pour le répertoire donné."""
+    statvfs = os.statvfs(directory)
+    # Calculer l'espace libre en Go
+    free_space_gb = (statvfs.f_frsize * statvfs.f_bavail) / (1024 ** 3)
+    return free_space_gb
+
 def download_torrent(torrent_file_path):
     write_log(f"Début de la fonction download_torrent avec le chemin : {torrent_file_path}")
     conf = ControleurConf()
@@ -74,6 +81,10 @@ def download_torrent(torrent_file_path):
     info = lt.torrent_info(torrent_file_path)
     write_log(f"info: {info}")
     content_type = is_movie_or_series(info)
+    
+    # Vérifier l'espace disque disponible
+    min_free_space_gb = 50
+    save_path = ""
     if content_type == 'series' or content_type == 'episode':
         save_path = conf.get_config('DLT', 'series')
         write_log(f"Le contenu du torrent est identifié comme une série")
@@ -90,7 +101,24 @@ def download_torrent(torrent_file_path):
     else:
         save_path = conf.get_config('DLT', 'movies')
         write_log(f"Le contenu du torrent est identifié comme un film")
+    
     write_log(f"Le contenu du torrent est identifié comme: {content_type}")
+    
+    free_space_gb = get_free_space_gb(save_path)
+    write_log(f"Espace libre sur le disque: {free_space_gb:.2f} Go")
+    
+    if free_space_gb < min_free_space_gb:
+        write_log(f"Pas assez d'espace libre sur le disque. Espace requis: {min_free_space_gb} Go")
+        if conf.get_config('DLT', 'save') == 'true':
+            if content_type == 'series' or content_type == 'episode':
+                save_path = conf.get_config('DLT', 'save_series')
+            else:
+                save_path = conf.get_config('DLT', 'save_movies')
+            write_log(f"Redirection du téléchargement vers: {save_path}")
+        else:
+            write_log("Pas assez d'espace libre et l'option de sauvegarde est désactivée. Annulation du téléchargement.")
+            yield "data: not enough space\n\n"
+            return
     
     h = ses.add_torrent({'ti': info, 'save_path': save_path})
 
