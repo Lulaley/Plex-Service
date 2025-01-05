@@ -109,6 +109,7 @@ def download_torrent(torrent_file_path):
     
     if free_space_gb < min_free_space_gb:
         write_log(f"Pas assez d'espace libre sur le disque. Espace requis: {min_free_space_gb} Go")
+        write_log(f"Vérification de l'option de sauvegarde: {conf.get_config('SAVE', 'use_save')}")
         if conf.get_config('SAVE', 'use_save') == 'true':
             if content_type == 'series' or content_type == 'episode':
                 save_path = conf.get_config('SAVE', 'series')
