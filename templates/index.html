@@ -18,10 +18,10 @@
         <button id="creer" onclick="showCreateForm()">Créer</button>
     </div>
     <div id="login-form" style="display: none;">
-        <form action="/index" method="post">
-            <input type="text" name="username" placeholder="Nom d'utilisateur" required>
+        <form action="/index" method="post" autocomplete="on">
+            <input type="text" name="username" placeholder="Nom d'utilisateur" required autocomplete="username">
             <div class="password-container">
-                <input type="password" name="password" placeholder="Mot de passe" required>
+                <input type="password" name="password" placeholder="Mot de passe" required autocomplete="current-password">
                 <span class="toggle-password" onclick="togglePasswordVisibility(this)">👁️</span>
             </div>
             <div class="submit-container">
@@ -30,19 +30,19 @@
         </form>
     </div>
     <div id="create-form">
-        <form action="/register" method="post">
+        <form action="/register" method="post" autocomplete="on">
             <div class="tooltip">
-                <input type="text" id="username" name="username" placeholder="Nom d'utilisateur" required>
+                <input type="text" id="username" name="username" placeholder="Nom d'utilisateur" required autocomplete="username">
             </div>
             <div class="tooltip">
-                <input type="text" id="email" name="email" placeholder="Adresse email" required>
+                <input type="text" id="email" name="email" placeholder="Adresse email" required autocomplete="email">
             </div>
             <div class="tooltip password-container">
-                <input type="password" id="createPassword" name="createPassword" placeholder="Mot de passe" required>
+                <input type="password" id="createPassword" name="createPassword" placeholder="Mot de passe" required autocomplete="new-password">
                 <span class="toggle-password" onclick="togglePasswordVisibility(this)">👁️</span>
             </div>
             <div class="tooltip password-container">
-                <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirmer le mot de passe" required>
+                <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirmer le mot de passe" required autocomplete="new-password">
                 <span class="toggle-password" onclick="togglePasswordVisibility(this)">👁️</span>
             </div>
             <div class="submit-container">

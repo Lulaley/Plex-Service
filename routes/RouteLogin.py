@@ -3,6 +3,7 @@ from static.Controleur.ControleurLdap import ControleurLdap
 from static.Controleur.ControleurConf import ControleurConf
 from static.Controleur.ControleurLog import write_log
 from routes.RouteHome import home
+from datetime import timedelta
 
 def login(app):
     @app.route('/index', methods=['GET', 'POST'])
@@ -22,6 +23,8 @@ def login(app):
                 write_log(f"Connexion réussie pour l'utilisateur: {username}")
                 # Initialiser la variable de session
                 session['username'] = username
+                session.permanent = True  # La session sera permanente
+                app.permanent_session_lifetime = timedelta(days=7)  # Durée de la session
                 # Rediriger vers la page d'accueil pour vérifier les droits
                 return redirect(url_for('inner_home'))
             else:
