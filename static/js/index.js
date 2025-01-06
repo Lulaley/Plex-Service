@@ -36,25 +36,11 @@ function hideForms(callback) {
 }
 
 function showButtons() {
-    const logo = document.querySelector('.plex-logo');
     const buttons = document.getElementById('buttons');
-
-    if (formsVisible) {
-        hideForms(() => {
-            buttons.style.display = 'none';
-            setTimeout(() => {
-                buttons.style.opacity = 0;
-            }, 500);
-        });
-    } else {
-        buttons.style.display = 'block';
-        setTimeout(() => {
-            buttons.style.opacity = 1;
-        }, 500);
-        setTimeout(() => {
-            showLoginForm();
-        }, 50);
-    }
+    buttons.style.display = 'block';
+    setTimeout(() => {
+        buttons.style.opacity = 1;
+    }, 500);
 }
 
 function showLoginForm() {
