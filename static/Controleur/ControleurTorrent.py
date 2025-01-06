@@ -145,8 +145,9 @@ def download_torrent(torrent_file_path):
             yield "data: not enough space\n\n"
             return
     
-    save_path = ensure_directory_exists(save_path, name)
-    write_log(f"Chemin de sauvegarde: {save_path}")
+    if content_type == 'series' or content_type == 'episode':
+        save_path = ensure_directory_exists(save_path, name)
+        write_log(f"Chemin de sauvegarde: {save_path}")
     
     h = ses.add_torrent({'ti': info, 'save_path': save_path})
 
