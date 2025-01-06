@@ -2,11 +2,16 @@ import logging
 import inspect
 from .ControleurConf import ControleurConf
 
-def write_log(message):
+def write_log(log_level=None, message=""):
     # Get the configuration
     conf = ControleurConf()
     log_file_path = conf.get_config('LOG', 'file')
-    log_level = conf.get_config('LOG', 'level').upper()
+    
+    # Use the provided log_level or fall back to the default from the configuration
+    if log_level is None:
+        log_level = conf.get_config('LOG', 'level').upper()
+    else:
+        log_level = log_level.upper()
 
     # Map string log levels to logging module constants
     log_levels = {

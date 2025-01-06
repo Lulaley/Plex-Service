@@ -103,8 +103,6 @@ def download_torrent(torrent_file_path):
         name = search.search_serie_name(search_name)
         write_log(f"Nom de la série: {name}")
         name = name.replace(' ', '.')
-        save_path = ensure_directory_exists(save_path, name)
-        write_log(f"Chemin de sauvegarde: {save_path}")
     else:
         save_path = conf.get_config('DLT', 'movies')
         write_log(f"Le contenu du torrent est identifié comme un film")
@@ -122,38 +120,33 @@ def download_torrent(torrent_file_path):
                 save_path = conf.get_config('SAVE', 'series')
             else:
                 save_path = conf.get_config('SAVE', 'movies')
-            write_log(f"Redirection du téléchargement vers: {save_path}")
-        else:
-            write_log("Pas assez d'espace libre et l'option de sauvegarde est désactivée. Annulation du téléchargement.")
-            yield "data: not enough space\n\n"
-            return
-    
-    total_space_gb = get_total_space_gb(save_path)
-    free_space_gb = get_free_space_gb(save_path)
-    # Lire les pourcentages d'utilisation de l'espace disque depuis la configuration
-    series_max_usage = int(conf.get_config('SAVE', 'series_max_usage'))
-    movies_max_usage = int(conf.get_config('SAVE', 'movies_max_usage'))
-    
-    # Vérifier que le répertoire de sauvegarde ne dépasse pas le pourcentage d'utilisation de l'espace disque
-    if content_type == 'series' or content_type == 'episode':
-        max_usage_gb = total_space_gb * (series_max_usage / 100)
-    else:
-        max_usage_gb = total_space_gb * (movies_max_usage / 100)
-    
-    if free_space_gb < max_usage_gb:
-        write_log(f"Le répertoire de sauvegarde dépasse {max_usage_gb:.2f} Go de l'espace disque. Espace requis: {max_usage_gb:.2f} Go")
-        write_log(f"Espace libre: {free_space_gb:.2f} Go")
-        write_log(f"Vérification de l'option de sauvegarde: {conf.get_config('SAVE', 'use_save')}")
-        if conf.get_config('SAVE', 'use_save') == 'true':
+            
+            total_space_gb = get_total_space_gb(save_path)
+            free_space_gb = get_free_space_gb(save_path)
+            write_log(f"Espace libre: {free_space_gb:.2f} Go")
+            # Lire les pourcentages d'utilisation de l'espace disque depuis la configuration
+            series_max_usage = int(conf.get_config('SAVE', 'series_max_usage'))
+            movies_max_usage = int(conf.get_config('SAVE', 'movies_max_usage'))
+
+            # Vérifier que le répertoire de sauvegarde ne dépasse pas le pourcentage d'utilisation de l'espace disque
             if content_type == 'series' or content_type == 'episode':
-                save_path = conf.get_config('SAVE', 'series')
+                max_usage_gb = total_space_gb * (series_max_usage / 100)
             else:
-                save_path = conf.get_config('SAVE', 'movies')
+                max_usage_gb = total_space_gb * (movies_max_usage / 100)
+                
+            if free_space_gb < max_usage_gb:
+                write_log('ERROR',"Le répertoire de sauvegarde dépasse le pourcentage d'utilisation de l'espace disque et l'option de sauvegarde est désactivée. Annulation du téléchargement.")
+                yield "data: not enough space\n\n"
+                return
             write_log(f"Redirection du téléchargement vers: {save_path}")
+
         else:
-            write_log("Le répertoire de sauvegarde dépasse le pourcentage d'utilisation de l'espace disque et l'option de sauvegarde est désactivée. Annulation du téléchargement.")
+            write_log('ERROR',"Pas assez d'espace libre et l'option de sauvegarde est désactivée. Annulation du téléchargement.")
             yield "data: not enough space\n\n"
             return
+    
+    save_path = ensure_directory_exists(save_path, name)
+    write_log(f"Chemin de sauvegarde: {save_path}")
     
     h = ses.add_torrent({'ti': info, 'save_path': save_path})
 
