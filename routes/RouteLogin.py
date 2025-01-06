@@ -11,6 +11,7 @@ def login(app):
         if request.method == 'POST':
             username = request.form['username']
             password = request.form['password']
+            remember_me = 'remember_me' in request.form
 
             write_log(f"Tentative de connexion pour l'utilisateur: {username}")
 
@@ -23,8 +24,9 @@ def login(app):
                 write_log(f"Connexion réussie pour l'utilisateur: {username}")
                 # Initialiser la variable de session
                 session['username'] = username
-                session.permanent = True  # La session sera permanente
-                app.permanent_session_lifetime = timedelta(days=7)  # Durée de la session
+                session.permanent = remember_me  # La session sera permanente si "remember_me" est coché
+                if remember_me:
+                    app.permanent_session_lifetime = timedelta(days=7)  # Durée de la session
                 # Rediriger vers la page d'accueil pour vérifier les droits
                 return redirect(url_for('inner_home'))
             else:
