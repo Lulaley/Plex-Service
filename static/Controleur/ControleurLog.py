@@ -2,7 +2,7 @@ import logging
 import inspect
 from .ControleurConf import ControleurConf
 
-def write_log(log_level=None, message=""):
+def write_log(message, log_level=None):
     # Get the configuration
     conf = ControleurConf()
     log_file_path = conf.get_config('LOG', 'file')
