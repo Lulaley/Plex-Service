@@ -75,6 +75,15 @@ def get_total_space_gb(directory):
     total_space_gb = (statvfs.f_frsize * statvfs.f_blocks) / (1024 ** 3)
     return total_space_gb
 
+def get_directory_size_gb(directory):
+    """Retourne la taille totale en Go des fichiers dans le répertoire donné."""
+    total_size = 0
+    for dirpath, dirnames, filenames in os.walk(directory):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            total_size += os.path.getsize(fp)
+    return total_size / (1024 ** 3)
+
 def download_torrent(torrent_file_path):
     write_log(f"Début de la fonction download_torrent avec le chemin : {torrent_file_path}")
     conf = ControleurConf()
@@ -123,7 +132,10 @@ def download_torrent(torrent_file_path):
             
             total_space_gb = get_total_space_gb(save_path)
             free_space_gb = get_free_space_gb(save_path)
+            used_space_gb = get_directory_size_gb(save_path)
             write_log(f"Espace libre: {free_space_gb:.2f} Go")
+            write_log(f"Espace utilisé par le dossier: {used_space_gb:.2f} Go")
+            
             # Lire les pourcentages d'utilisation de l'espace disque depuis la configuration
             series_max_usage = int(conf.get_config('SAVE', 'series_max_usage'))
             movies_max_usage = int(conf.get_config('SAVE', 'movies_max_usage'))
@@ -134,7 +146,7 @@ def download_torrent(torrent_file_path):
             else:
                 max_usage_gb = total_space_gb * (movies_max_usage / 100)
                 
-            if free_space_gb < max_usage_gb:
+            if used_space_gb > max_usage_gb:
                 write_log("Le répertoire de sauvegarde dépasse le pourcentage d'utilisation de l'espace disque et l'option de sauvegarde est désactivée. Annulation du téléchargement.", "ERROR")
                 yield "data: not enough space\n\n"
                 return
