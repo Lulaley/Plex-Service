@@ -147,7 +147,7 @@ def download_torrent(torrent_file_path):
                 max_usage_gb = total_space_gb * (movies_max_usage / 100)
                 
             if used_space_gb > max_usage_gb:
-                write_log("Le répertoire de sauvegarde dépasse le pourcentage d'utilisation de l'espace disque et l'option de sauvegarde est désactivée. Annulation du téléchargement.", "ERROR")
+                write_log(f"Le répertoire de sauvegarde dépasse le pourcentage d'utilisation de l'espace disque. Espace requis: {max_usage_gb} Go . Annulation du téléchargement.", "ERROR")
                 yield "data: not enough space\n\n"
                 return
             write_log(f"Redirection du téléchargement vers: {save_path}")

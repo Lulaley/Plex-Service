@@ -20,6 +20,7 @@ def register(app):
             password = request.form['createPassword']
             email = request.form['email']
 
+            write_log(f"Tentative d'inscription pour l'utilisateur: {username}")
             if not is_hashed(password):
                 hashed_password = ldap_salted_sha1.hash(password)
             else:
@@ -30,28 +31,29 @@ def register(app):
             ds = ControleurLdap()
             # Vérifier si le compte existe déjà
             if ds.search_user(username):
-                write_log(f"Ce nom d'utilisateur existe déjà")
+                write_log(f"L'utilisateur {username} existe déjà")
                 ds.disconnect()
                 return redirect(url_for('index'))
+            write_log(f"L'utilisateur {username} n'existe pas, ajout en cours")
             # Construire le DN et les attributs de l'utilisateur
-            dn = f"uid={username},dmdName=users,{base_dn}"
-            attributes = [
-                ('objectClass', [b'inetOrgPerson', b'organizationalPerson', b'person']),
-                ('uid', [username.encode('utf-8')]),
-                ('sn', [username.encode('utf-8')]),  # Nom de famille
-                ('cn', [username.encode('utf-8')]),  # Nom complet
-                ('userPassword', [hashed_password.encode('utf-8')]),  # Mot de passe en clair
-                ('mail', [email.encode('utf-8')])
-            ]
+#            dn = f"uid={username},dmdName=users,{base_dn}"
+#            attributes = [
+#                ('objectClass', [b'inetOrgPerson', b'organizationalPerson', b'person']),
+#                ('uid', [username.encode('utf-8')]),
+#                ('sn', [username.encode('utf-8')]),  # Nom de famille
+#                ('cn', [username.encode('utf-8')]),  # Nom complet
+#                ('userPassword', [hashed_password.encode('utf-8')]),  # Mot de passe en clair
+#                ('mail', [email.encode('utf-8')])
+#            ]
 
             # Créer une instance de ControleurLdap et ajouter l'utilisateur
             userAdd = False
-            if ds.add_entry(dn, attributes):
-                write_log(f"Utilisateur ajouté: {username}")
-                userAdd = True
-            else:
-                write_log(f"Erreur lors de l'ajout de l'utilisateur1: {username}")
-            ds.disconnect()
+#            if ds.add_entry(dn, attributes):
+#                write_log(f"Utilisateur ajouté: {username}")
+#                userAdd = True
+#            else:
+#                write_log(f"Erreur lors de l'ajout de l'utilisateur1: {username}")
+#            ds.disconnect()
             if userAdd:
                 session['username'] = username
                 return redirect(url_for('home'))
