@@ -28,7 +28,7 @@ def get_user_rights(username):
     return None
 
 def home(app):
-    write_log(f"{session["username"]} - Affichage de la page d'accueil")
+    write_log(f"{session['username']} - Affichage de la page d'accueil")
     @app.route('/home')
     def inner_home():
         write_log("Vérification de l'utilisateur connecté")
