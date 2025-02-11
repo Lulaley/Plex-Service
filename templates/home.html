@@ -28,7 +28,7 @@
                 {% if session.show_download %}
                 <button onclick="window.location.href='{{ url_for('inner_download') }}'">Téléchargement</button>
                 {% endif %}
-                {% if sessions.show_users %}
+                {% if session.show_users %}
                 <button onclick="window.location.href='{{ url_for('manage_users') }}'">Utilisateurs</button>
                 {% endif %}
                 <button class="username">{{ session.username }}</button>
