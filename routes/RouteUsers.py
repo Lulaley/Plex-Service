@@ -27,6 +27,24 @@ def validate_user():
         return jsonify({'error': 'Informations manquantes'}), 400
 
     ldap = ControleurLdap()
+    user_entry = ldap.search_user(username)
+    if not user_entry:
+        write_log(f"Utilisateur {username} non trouvé", 'ERROR')
+        return jsonify({'error': 'Utilisateur non trouvé'}), 404
+
+    # Vérifier si l'utilisateur a déjà un attribut rightsAgreement
+    if 'rightsAgreement' in user_entry[0][1]:
+        write_log(f"L'utilisateur {username} a déjà un attribut rightsAgreement", 'ERROR')
+        return jsonify({'error': 'Utilisateur déjà validé'}), 400
+
+    # Ajouter l'objectClass otherUserInfos si nécessaire
+    if 'otherUserInfos' not in user_entry[0][1]['objectClass']:
+        ldap_object_class_added = ldap.add_attribute(username, 'objectClass', 'otherUserInfos')
+        if not ldap_object_class_added:
+            write_log("Erreur lors de l'ajout de l'objectClass otherUserInfos", 'ERROR')
+            return jsonify({'error': 'Erreur lors de la validation du compte'}), 500
+
+    # Ajouter l'attribut rightsAgreement
     ldap_attribute_added = ldap.add_attribute(username, 'rightsAgreement', 'PlexService::User')
     if not ldap_attribute_added:
         write_log("Erreur lors de l'ajout de l'attribut LDAP", 'ERROR')
