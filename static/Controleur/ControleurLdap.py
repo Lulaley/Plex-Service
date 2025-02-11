@@ -51,13 +51,13 @@ class ControleurLdap:
             result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter)
             if result:
                 write_log("Utilisateur trouvé")
-                return True
+                return result[0]
             else:
                 write_log("Utilisateur non trouvé", 'ERROR')
-                return False
+                return None
         except ldap.LDAPError as e:
             write_log("Erreur lors de la recherche de l'utilisateur: " + str(e), 'ERROR')
-            return False
+            return None
 
     def add_entry(self, dn, attributes):
         try:
@@ -121,7 +121,7 @@ class ControleurLdap:
         try:
             self.bind_as_root()
             base_dn = self.config.get_config('LDAP', 'base_dn')
-            dn = f'uid={username},dmdName=users,{base_dn}'
+            dn = f'uid={username},{base_dn}'
             self.conn.delete_s(dn)
             write_log(f"Utilisateur {username} supprimé de la base LDAP")
             return True
