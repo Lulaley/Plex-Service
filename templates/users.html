@@ -51,7 +51,9 @@
                     <td>{{ user.mail }}</td>
                     <td>{{ user.rightsAgreement }}</td>
                     <td>
+                        {% if not user.rightsAgreement %}
                         <button onclick="validateUser('{{ user.uid }}')">Valider</button>
+                        {% endif %}
                         <button onclick="deleteUser('{{ user.uid }}')">Supprimer</button>
                     </td>
                 </tr>
@@ -72,7 +74,7 @@
             .then(data => {
                 if (data.message) {
                     alert(data.message);
-                    location.reload();
+                    location.reload();  // Rafraîchir la page après validation
                 } else if (data.error) {
                     alert(data.error);
                 }
@@ -92,7 +94,7 @@
             .then(data => {
                 if (data.message) {
                     alert(data.message);
-                    location.reload();
+                    location.reload();  // Rafraîchir la page après suppression
                 } else if (data.error) {
                     alert(data.error);
                 }
