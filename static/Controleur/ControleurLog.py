@@ -3,7 +3,7 @@ import inspect
 from flask import session
 from .ControleurConf import ControleurConf
 
-def write_log(message, log_level=None):
+def write_log(message, log_level=None, username=None):
     # Get the configuration
     conf = ControleurConf()
     log_file_path = conf.get_config('LOG', 'file')
@@ -27,7 +27,6 @@ def write_log(message, log_level=None):
     caller_function = inspect.stack()[1].function
 
     # Add username to the log message if available
-    username = session.get('username')
     if username:
         message = f"{username} - {message}"
 
