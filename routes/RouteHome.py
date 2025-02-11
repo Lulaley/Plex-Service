@@ -36,8 +36,9 @@ def home(app):
             username = session['username']
             write_log(f"Utilisateur connecté: {username}")
             
-            if 'show_download' not in session or 'show_users' not in session:
+            if 'show_download' not in session or 'show_users' not in session or 'rights_agreement' not in session:
                 rights_agreement = get_user_rights(username)
+                session['rights_agreement'] = rights_agreement
                 if rights_agreement == 'PlexService::SuperAdmin':
                     write_log(f"Utilisateur {username} est SuperAdmin")
                     session['show_download'] = True
