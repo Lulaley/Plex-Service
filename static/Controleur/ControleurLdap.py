@@ -51,7 +51,7 @@ class ControleurLdap:
             result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter)
             if result:
                 write_log("Utilisateur trouvé")
-                return result[0]
+                return result
             else:
                 write_log("Utilisateur non trouvé", 'ERROR')
                 return None
