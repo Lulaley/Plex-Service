@@ -25,13 +25,13 @@
                 <button>Demandes</button>
             </div>
             <div class="right-buttons">
-                {% if show_download %}
+                {% if session.show_download %}
                 <button onclick="window.location.href='{{ url_for('inner_download') }}'">Téléchargement</button>
                 {% endif %}
-                {% if show_users %}
-                <button>Utilisateurs</button>
+                {% if sessions.show_users %}
+                <button onclick="window.location.href='{{ url_for('manage_users') }}'">Utilisateurs</button>
                 {% endif %}
-                <button class="username">{{ username }}</button>
+                <button class="username">{{ session.username }}</button>
                 <button onclick="window.location.href='{{ url_for('inner_logout') }}'">Déconnexion</button>
             </div>
         </div>

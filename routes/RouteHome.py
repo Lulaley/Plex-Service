@@ -23,28 +23,38 @@ def get_user_rights(username):
             write_log(f"Droits trouvés pour l'utilisateur {username}: {rights_agreement}")
             ds.disconnect()
             return rights_agreement
-    write_log(f"Utilisateur {username} non trouvé dans LDAP")
+    write_log(f"Utilisateur {username} non trouvé dans LDAP", 'ERROR')
     ds.disconnect()
     return None
 
 def home(app):
-    write_log(f"Affichage de la page d'accueil")
+    write_log("Affichage de la page d'accueil")
     @app.route('/home')
     def inner_home():
         write_log("Vérification de l'utilisateur connecté")
         if 'username' in session:
             username = session['username']
             write_log(f"Utilisateur connecté: {username}")
-            rights_agreement = get_user_rights(username)
-            if rights_agreement == 'PlexService::SuperAdmin':
-                write_log(f"Utilisateur {username} est SuperAdmin")
-                return render_template('home.html', show_download=True, show_users=True, username=username)
-            elif rights_agreement == 'PlexService::Admin':
-                write_log(f"Utilisateur {username} est Admin")
-                return render_template('home.html', show_download=True, show_users=False, username=username)
-            else:
-                write_log(f"Utilisateur {username} n'a pas de droits spécifiques")
-                return render_template('home.html', show_download=False, show_users=False, username=username)
+            
+            if 'show_download' not in session or 'show_users' not in session:
+                rights_agreement = get_user_rights(username)
+                if rights_agreement == 'PlexService::SuperAdmin':
+                    write_log(f"Utilisateur {username} est SuperAdmin")
+                    session['show_download'] = True
+                    session['show_users'] = True
+                elif rights_agreement == 'PlexService::Admin':
+                    write_log(f"Utilisateur {username} est Admin")
+                    session['show_download'] = True
+                    session['show_users'] = False
+                elif rights_agreement == 'PlexService::User':
+                    write_log(f"Utilisateur {username} est Utilisateur")
+                    session['show_download'] = False
+                    session['show_users'] = False
+                else:
+                    write_log(f"Utilisateur {username} n'a pas le droit de se connecter", 'ERROR')
+                    return redirect(url_for('index'))
+            
+            return render_template('home.html')
         else:
-            write_log("Aucun utilisateur connecté, redirection vers l'index")
+            write_log("Aucun utilisateur connecté, redirection vers l'index", 'ERROR')
             return redirect(url_for('index'))

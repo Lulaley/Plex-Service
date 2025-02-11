@@ -103,7 +103,7 @@ def download_torrent(torrent_file_path):
     save_path = ""
     if content_type == 'series' or content_type == 'episode':
         save_path = conf.get_config('DLT', 'series')
-        write_log(f"Le contenu du torrent est identifié comme une série")
+        write_log("Le contenu du torrent est identifié comme une série")
         search = ControleurTMDB()
         write_log(f"Recherche de la série {info.name()} dans la base de données TMDB")
         search_name = extract_title_prefix(info.name())
@@ -114,7 +114,7 @@ def download_torrent(torrent_file_path):
         name = name.replace(' ', '.')
     else:
         save_path = conf.get_config('DLT', 'movies')
-        write_log(f"Le contenu du torrent est identifié comme un film")
+        write_log("Le contenu du torrent est identifié comme un film")
     
     write_log(f"Le contenu du torrent est identifié comme: {content_type}")
     

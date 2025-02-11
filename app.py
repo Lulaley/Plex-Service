@@ -11,6 +11,7 @@ from routes.RouteRegister import register
 from routes.RouteLogout import logout
 from routes.RouteHome import home
 from routes.RouteDownload import download, upload, start_download
+from routes.RouteUsers import users
 
 # Importation des controleurs
 from static.Controleur.ControleurConf import ControleurConf
@@ -42,6 +43,7 @@ home(app)
 download(app)
 upload(app)
 start_download(app)
+users(app)
 
 if __name__ == '__main__':
     app.run(debug=True, port=conf.get_config('APP', 'port'), host='0.0.0.0')

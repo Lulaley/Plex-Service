@@ -10,7 +10,7 @@ def download(app):
         if 'username' in session:
             username = session.get('username')
             write_log(f"Affichage de la page de téléchargement pour l'utilisateur: {username}")
-            return render_template('download.html', username=username) 
+            return render_template('download.html') 
         else:
             write_log("Aucun utilisateur connecté, redirection vers l'index")
             return redirect(url_for('index'))

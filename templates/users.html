@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des utilisateurs</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/plex-icon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/homeMain.css') }}">
+</head>
+<body>
+    <div class="center-logo">
+        <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo">
+    </div>
+
+    <div class="navbar blur-background fade-in">
+        <div class="hamburger" onclick="toggleMenu()">☰</div>
+        <div class="menu">
+            <div class="left-buttons">
+                <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="window.location.href='{{ url_for('inner_home')}}'">
+                <button>Recherche</button>
+                <button>Demandes</button>
+            </div>
+            <div class="right-buttons">
+                {% if session.show_download %}
+                <button onclick="window.location.href='{{ url_for('inner_download') }}'">Téléchargement</button>
+                {% endif %}
+                {% if sessions.show_users %}
+                <button onclick="window.location.href='{{ url_for('manage_users') }}'">Utilisateurs</button>
+                {% endif %}
+                <button class="username">{{ session.username }}</button>
+                <button onclick="window.location.href='{{ url_for('inner_logout') }}'">Déconnexion</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="center-container blur-background fade-in">
+        <h1>Liste des utilisateurs</h1>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Nom d'utilisateur</th>
+                    <th>Email</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.uid }}</td>
+                    <td>{{ user.mail }}</td>
+                    <td>{{ user.rightsAgreement }}</td>
+                    <td>
+                        <form action="/users" method="post" style="display:inline;">
+                            <input type="hidden" name="username" value="{{ user.uid }}">
+                            <button type="submit">Valider</button>
+                        </form>
+                        <form action="/users" method="delete" style="display:inline;">
+                            <input type="hidden" name="username" value="{{ user.uid }}">
+                            <button type="submit">Supprimer</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+<!--    <script src="{{ url_for('static', filename='js/home.js') }}"></script> -->
+</body>
+</html>

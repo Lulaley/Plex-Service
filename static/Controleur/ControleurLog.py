@@ -1,5 +1,6 @@
 import logging
 import inspect
+from flask import session
 from .ControleurConf import ControleurConf
 
 def write_log(message, log_level=None):
@@ -24,6 +25,11 @@ def write_log(message, log_level=None):
 
     # Get the name of the calling function
     caller_function = inspect.stack()[1].function
+
+    # Add username to the log message if available
+    username = session.get('username')
+    if username:
+        message = f"{username} - {message}"
 
     # Perform the log writing logic here
     try:

@@ -30,9 +30,9 @@ def login(app):
                 # Rediriger vers la page d'accueil pour vérifier les droits
                 return redirect(url_for('inner_home'))
             else:
-                write_log(f"Échec de la connexion pour l'utilisateur: {username}")
+                write_log(f"Échec de la connexion pour l'utilisateur: {username}", 'ERROR')
                 # Affichage d'un message d'erreur en cas d'échec
-                write_log('Échec de la connexion. Veuillez vérifier vos identifiants et réessayer.')
+                flash("Échec de la connexion. Veuillez vérifier vos identifiants et réessayer.", 'error')
             ds.disconnect()
         else:
             write_log("Affichage du formulaire de connexion")

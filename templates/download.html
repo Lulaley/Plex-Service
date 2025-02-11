@@ -20,19 +20,18 @@
         <div class="hamburger" onclick="toggleMenu()">☰</div>
         <div class="menu">
             <div class="left-buttons">
-                <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo"
-                    onclick="window.location.href='{{ url_for('inner_home')}}'">
+                <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="window.location.href='{{ url_for('inner_home')}}'">
                 <button>Recherche</button>
                 <button>Demandes</button>
             </div>
             <div class="right-buttons">
-                {% if show_download %}
-                <button>Téléchargement</button>
+                {% if session.show_download %}
+                <button onclick="window.location.href='{{ url_for('inner_download') }}'">Téléchargement</button>
                 {% endif %}
-                {% if show_users %}
-                <button>Utilisateurs</button>
+                {% if sessions.show_users %}
+                <button onclick="window.location.href='{{ url_for('manage_users') }}'">Utilisateurs</button>
                 {% endif %}
-                <button class="username">{{ username }}</button>
+                <button class="username">{{ session.username }}</button>
                 <button onclick="window.location.href='{{ url_for('inner_logout') }}'">Déconnexion</button>
             </div>
         </div>

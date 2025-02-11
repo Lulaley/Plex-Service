@@ -1,6 +1,7 @@
 import ldap
 from .ControleurConf import ControleurConf
 from .ControleurLog import write_log
+
 class ControleurLdap:
     def __init__(self):
         self.config = ControleurConf()
@@ -16,7 +17,7 @@ class ControleurLdap:
             self.conn.bind_s(root_dn, root_password)
             write_log("Connexion en tant que root réussie")
         except ldap.LDAPError as e:
-            write_log("Erreur de connexion en tant que root: " + str(e))
+            write_log("Erreur de connexion en tant que root: " + str(e), 'ERROR')
 
     def authenticate_user(self, username, password):
         try:
@@ -27,7 +28,7 @@ class ControleurLdap:
             result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter)
 
             if not result:
-                write_log("Utilisateur non trouvé: " + username)
+                write_log("Utilisateur non trouvé: " + username, 'ERROR')
                 return False
 
             # Si l'utilisateur existe, tenter de l'authentifier
@@ -36,10 +37,10 @@ class ControleurLdap:
             write_log("Authentification réussie de l'utilisateur: " + username)
             return True
         except ldap.INVALID_CREDENTIALS:
-            write_log("Les informations d'identification sont incorrectes pour l'utilisateur: " + username)
+            write_log("Les informations d'identification sont incorrectes pour l'utilisateur: " + username, 'ERROR')
             return False
         except ldap.LDAPError as e:
-            write_log("Erreur d'authentification pour l'utilisateur: " + username + " - " + str(e))
+            write_log("Erreur d'authentification pour l'utilisateur: " + username + " - " + str(e), 'ERROR')
             return False
 
     def search_user(self, username):
@@ -52,10 +53,10 @@ class ControleurLdap:
                 write_log("Utilisateur trouvé")
                 return True
             else:
-                write_log("Utilisateur non trouvé")
+                write_log("Utilisateur non trouvé", 'ERROR')
                 return False
         except ldap.LDAPError as e:
-            write_log("Erreur lors de la recherche de l'utilisateur: " + str(e))
+            write_log("Erreur lors de la recherche de l'utilisateur: " + str(e), 'ERROR')
             return False
 
     def add_entry(self, dn, attributes):
@@ -65,10 +66,10 @@ class ControleurLdap:
                 write_log("Entrée " + dn + " ajoutée avec succès")
                 return True
             else:
-                write_log("Erreur lors de l'ajout de l'entrée: " + dn)
+                write_log("Erreur lors de l'ajout de l'entrée: " + dn, 'ERROR')
                 return None
         except ldap.LDAPError as e:
-            write_log("Erreur lors de l'ajout de l'entrée: " + str(e))
+            write_log("Erreur lors de l'ajout de l'entrée: " + str(e), 'ERROR')
 
     def delete_entry(self, dn):
         try:
@@ -77,7 +78,7 @@ class ControleurLdap:
             write_log("Entrée supprimée avec succès")
             return True
         except ldap.LDAPError as e:
-            write_log("Erreur lors de la suppression de l'entrée: " + str(e))
+            write_log("Erreur lors de la suppression de l'entrée: " + str(e), 'ERROR')
             return False
 
     def modify_entry(self, dn, mod_list):
@@ -87,7 +88,7 @@ class ControleurLdap:
             write_log("Entrée modifiée avec succès")
             return True
         except ldap.LDAPError as e:
-            write_log("Erreur lors de la modification de l'entrée: " + str(e))
+            write_log("Erreur lors de la modification de l'entrée: " + str(e), 'ERROR')
             return False
 
     def search_entry(self, search_base, search_filter):
@@ -98,15 +99,55 @@ class ControleurLdap:
                 write_log("Entrée trouvée")
                 return result
             else:
-                write_log("Entrée non trouvée")
+                write_log("Entrée non trouvée", 'ERROR')
                 return None
         except ldap.LDAPError as e:
-            write_log("Erreur lors de la recherche de l'entrée: " + str(e))
-    
+            write_log("Erreur lors de la recherche de l'entrée: " + str(e), 'ERROR')
+
+    def add_attribute(self, username, attribute, value):
+        try:
+            self.bind_as_root()
+            base_dn = self.config.get_config('LDAP', 'base_dn')
+            dn = f'uid={username},{base_dn}'
+            mod_attrs = [(ldap.MOD_ADD, attribute, value.encode('utf-8'))]
+            self.conn.modify_s(dn, mod_attrs)
+            write_log(f"Attribut {attribute} ajouté pour l'utilisateur {username}")
+            return True
+        except ldap.LDAPError as e:
+            write_log(f"Erreur lors de l'ajout de l'attribut LDAP: {e}", 'ERROR')
+            return False
+
+    def delete_user(self, username):
+        try:
+            self.bind_as_root()
+            base_dn = self.config.get_config('LDAP', 'base_dn')
+            dn = f'uid={username},{base_dn}'
+            self.conn.delete_s(dn)
+            write_log(f"Utilisateur {username} supprimé de la base LDAP")
+            return True
+        except ldap.LDAPError as e:
+            write_log(f"Erreur lors de la suppression de l'utilisateur LDAP: {e}", 'ERROR')
+            return False
+
+    def get_all_users(self):
+        try:
+            self.bind_as_root()
+            base_dn = self.config.get_config('LDAP', 'base_dn')
+            search_filter = "(objectClass=inetOrgPerson)"
+            result = self.conn.search_s(base_dn, ldap.SCOPE_SUBTREE, search_filter)
+            users = []
+            for dn, entry in result:
+                user = {attr: entry[attr][0].decode('utf-8') for attr in entry}
+                users.append(user)
+            write_log("Liste des utilisateurs récupérée")
+            return users
+        except ldap.LDAPError as e:
+            write_log(f"Erreur lors de la récupération des utilisateurs LDAP: {e}", 'ERROR')
+            return []
+
     def disconnect(self):
         try:
             self.conn.unbind()
             write_log("Déconnexion LDAP réussie")
         except ldap.LDAPError as e:
-            write_log("Erreur lors de la déconnexion LDAP: " + str(e))
-        
+            write_log("Erreur lors de la déconnexion LDAP: " + str(e), 'ERROR')

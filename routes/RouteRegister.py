@@ -52,7 +52,7 @@ def register(app):
 #                write_log(f"Utilisateur ajouté: {username}")
 #                userAdd = True
 #            else:
-#                write_log(f"Erreur lors de l'ajout de l'utilisateur1: {username}")
+#                write_log(f"Erreur lors de l'ajout de l'utilisateur: {username}", 'ERROR')
 #            ds.disconnect()
             if userAdd:
                 session['username'] = username
