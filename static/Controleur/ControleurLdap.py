@@ -108,7 +108,7 @@ class ControleurLdap:
         try:
             self.bind_as_root()
             base_dn = self.config.get_config('LDAP', 'base_dn')
-            dn = f'uid={username},{base_dn}'
+            dn = f'uid={username},dmdName=users,{base_dn}'
             mod_attrs = [(ldap.MOD_ADD, attribute, value.encode('utf-8'))]
             self.conn.modify_s(dn, mod_attrs)
             write_log(f"Attribut {attribute} ajouté pour l'utilisateur {username}")
@@ -121,7 +121,7 @@ class ControleurLdap:
         try:
             self.bind_as_root()
             base_dn = self.config.get_config('LDAP', 'base_dn')
-            dn = f'uid={username},{base_dn}'
+            dn = f'uid={username},dmdName=users,{base_dn}'
             self.conn.delete_s(dn)
             write_log(f"Utilisateur {username} supprimé de la base LDAP")
             return True
