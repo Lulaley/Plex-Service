@@ -51,20 +51,54 @@
                     <td>{{ user.mail }}</td>
                     <td>{{ user.rightsAgreement }}</td>
                     <td>
-                        <form action="/users" method="post" style="display:inline;">
-                            <input type="hidden" name="username" value="{{ user.uid }}">
-                            <button type="submit">Valider</button>
-                        </form>
-                        <form action="/users" method="delete" style="display:inline;">
-                            <input type="hidden" name="username" value="{{ user.uid }}">
-                            <button type="submit">Supprimer</button>
-                        </form>
+                        <button onclick="validateUser('{{ user.uid }}')">Valider</button>
+                        <button onclick="deleteUser('{{ user.uid }}')">Supprimer</button>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-<!--    <script src="{{ url_for('static', filename='js/home.js') }}"></script> -->
+    <script>
+        function validateUser(username) {
+            fetch('/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username: username })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                    location.reload();
+                } else if (data.error) {
+                    alert(data.error);
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
+        }
+
+        function deleteUser(username) {
+            fetch('/users', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username: username })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    alert(data.message);
+                    location.reload();
+                } else if (data.error) {
+                    alert(data.error);
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
+        }
+    </script>
 </body>
 </html>

@@ -17,7 +17,6 @@ def users(app):
         else:
             write_log("Aucun utilisateur connecté, redirection vers l'index")
             return redirect(url_for('index'))
-        
 
 def validate_user():
     data = request.json
