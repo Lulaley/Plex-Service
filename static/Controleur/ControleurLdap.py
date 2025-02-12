@@ -21,7 +21,6 @@ class ControleurLdap:
 
     def authenticate_user(self, username, password):
         try:
-            # Rechercher l'utilisateur dans la base LDAP
             self.bind_as_root()
             search_base = self.config.get_config('LDAP', 'base_dn')
             search_filter = f"(uid={username})"
@@ -31,7 +30,6 @@ class ControleurLdap:
                 write_log("Utilisateur non trouvé: " + username, 'ERROR')
                 return False
 
-            # Si l'utilisateur existe, tenter de l'authentifier
             user_dn = result[0][0]
             self.conn.bind_s(user_dn, password)
             write_log("Authentification réussie de l'utilisateur: " + username)
@@ -115,6 +113,19 @@ class ControleurLdap:
             return True
         except ldap.LDAPError as e:
             write_log(f"Erreur lors de l'ajout de l'attribut LDAP: {e}", 'ERROR')
+            return False
+
+    def replace_attribute(self, username, attribute, value):
+        try:
+            self.bind_as_root()
+            base_dn = self.config.get_config('LDAP', 'base_dn')
+            dn = f'uid={username},dmdName=users,{base_dn}'
+            mod_attrs = [(ldap.MOD_REPLACE, attribute, value.encode('utf-8'))]
+            self.conn.modify_s(dn, mod_attrs)
+            write_log(f"Attribut {attribute} remplacé pour l'utilisateur {username}")
+            return True
+        except ldap.LDAPError as e:
+            write_log(f"Erreur lors du remplacement de l'attribut LDAP: {e}", 'ERROR')
             return False
 
     def delete_user(self, username):

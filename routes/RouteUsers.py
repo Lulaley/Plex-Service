@@ -52,10 +52,10 @@ def make_admin():
         write_log(f"L'utilisateur {username} est déjà admin", 'ERROR')
         return jsonify({'error': 'Utilisateur déjà admin'}), 400
 
-    # Ajouter l'attribut rightsAgreement avec la valeur PlexService::Admin
-    ldap_attribute_added = ldap.add_attribute(username, 'rightsAgreement', 'PlexService::Admin')
-    if not ldap_attribute_added:
-        write_log("Erreur lors de l'ajout de l'attribut LDAP", 'ERROR')
+    # Remplacer l'attribut rightsAgreement avec la valeur PlexService::Admin
+    ldap_attribute_replaced = ldap.replace_attribute(username, 'rightsAgreement', 'PlexService::Admin')
+    if not ldap_attribute_replaced:
+        write_log("Erreur lors de la mise à jour de l'attribut LDAP", 'ERROR')
         return jsonify({'error': 'Erreur lors de la mise à jour du compte'}), 500
 
     write_log(f"Utilisateur {username} est maintenant admin")
