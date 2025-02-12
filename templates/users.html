@@ -35,8 +35,14 @@
                         {% if not user.rightsAgreement %}
                         <button onclick="validateUser('{{ user.uid }}')">Valider</button>
                         {% endif %}
-                        {% if (session.rights_agreement == 'PlexService::Admin' and ( user.rightsAgreement != 'PlexService::Admin' or user.rightsAgreement != 'PlexService::SuperAdmin' ) ) or  session.rights_agreement == 'PlexService::SuperAdmin' %}
-                        <button onclick="deleteUser('{{ user.uid }}')">Supprimer</button>
+                        {% if session.rights_agreement == 'PlexService::SuperAdmin' %}
+                            {% if user.rightsAgreement != 'PlexService::SuperAdmin' %}
+                            <button onclick="deleteUser('{{ user.uid }}')">Supprimer</button>
+                            {% endif %}
+                        {% elif session.rights_agreement == 'PlexService::Admin' %}
+                            {% if user.rightsAgreement == 'PlexService::User' %}
+                            <button onclick="deleteUser('{{ user.uid }}')">Supprimer</button>
+                            {% endif %}
                         {% endif %}
                     </td>
                 </tr>
