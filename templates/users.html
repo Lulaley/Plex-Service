@@ -39,7 +39,7 @@
                             {% if user.rightsAgreement != 'PlexService::SuperAdmin' %}
                             <button onclick="deleteUser('{{ user.uid }}')">Supprimer</button>
                             {% endif %}
-                            {% if user.rightsAgreement != 'PlexService::Admin' %}
+                            {% if user.rightsAgreement != 'PlexService::Admin' and user.rightsAgreement != 'PlexService::SuperAdmin' %}
                             <button onclick="makeAdmin('{{ user.uid }}')">Rendre Admin</button>
                             {% endif %}
                         {% elif session.rights_agreement == 'PlexService::Admin' %}

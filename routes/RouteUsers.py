@@ -5,22 +5,29 @@ from static.Controleur.ControleurLog import write_log
 def users(app):
     @app.route('/users', methods=['GET', 'DELETE', 'POST'])
     def manage_users():
-        if 'username' in session:
-            username = session.get('username')
-            write_log(f"Affichage de la page de gestion des utilisateurs pour l'utilisateur: {username}")
-            if request.method == 'GET':
-                return list_users()
-            elif request.method == 'DELETE':
-                return delete_user()
-            elif request.method == 'POST':
-                action = request.json.get('action')
-                if action == 'validate':
-                    return validate_user()
-                elif action == 'make_admin':
-                    return make_admin()
-        else:
+        if 'username' not in session:
             write_log("Aucun utilisateur connecté, redirection vers l'index")
             return redirect(url_for('index'))
+
+        username = session.get('username')
+        rights_agreement = session.get('rights_agreement')
+
+        if rights_agreement != 'PlexService::SuperAdmin':
+            write_log(f"Accès refusé pour l'utilisateur {username} avec droits {rights_agreement}, redirection vers /home", 'ERROR')
+            return redirect(url_for('home'))
+
+        write_log(f"Affichage de la page de gestion des utilisateurs pour l'utilisateur: {username}")
+
+        if request.method == 'GET':
+            return list_users()
+        elif request.method == 'DELETE':
+            return delete_user()
+        elif request.method == 'POST':
+            action = request.json.get('action')
+            if action == 'validate':
+                return validate_user()
+            elif action == 'make_admin':
+                return make_admin()
 
 def make_admin():
     if 'username' not in session or session.get('rights_agreement') != 'PlexService::SuperAdmin':
