@@ -16,26 +16,7 @@
         <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo">
     </div>
 
-    <div class="navbar blur-background fade-in">
-        <div class="hamburger" onclick="toggleMenu()">☰</div>
-        <div class="menu">
-            <div class="left-buttons">
-                <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo">
-                <button>Recherche</button>
-                <button>Demandes</button>
-            </div>
-            <div class="right-buttons">
-                {% if session.show_download %}
-                <button onclick="window.location.href='{{ url_for('inner_download') }}'">Téléchargement</button>
-                {% endif %}
-                {% if session.show_users %}
-                <button onclick="window.location.href='{{ url_for('manage_users') }}'">Utilisateurs</button>
-                {% endif %}
-                <button class="username">{{ session.username }}</button>
-                <button onclick="window.location.href='{{ url_for('inner_logout') }}'">Déconnexion</button>
-            </div>
-        </div>
-    </div>
+    {% include 'navbar.html' %}
 
     <div class="center-container blur-background fade-in">
         <div class="text-info">
@@ -48,17 +29,17 @@
         <div class="loadingContainer">
             <div class="loadingAnimation">
                 <svg class="spinner40 spinner-red">
-                    <circle cx="40" cy="40" r="36" stroke-width="3" fill="none"></circle> <!-- Adjusted for new size -->
+                    <circle cx="40" cy="40" r="36" stroke-width="3" fill="none"></circle>
                 </svg>
             </div>
             <div class="loadingAnimation">
                 <svg class="spinner40 spinner-green">
-                    <circle cx="40" cy="40" r="36" stroke-width="3" fill="none"></circle> <!-- Adjusted for new size -->
+                    <circle cx="40" cy="40" r="36" stroke-width="3" fill="none"></circle>
                 </svg>
             </div>
             <div class="loadingAnimation">
                 <svg class="spinner40 spinner-blue">
-                    <circle cx="40" cy="40" r="36" stroke-width="3" fill="none"></circle> <!-- Adjusted for new size -->
+                    <circle cx="40" cy="40" r="36" stroke-width="3" fill="none"></circle>
                 </svg>
             </div>
         </div>

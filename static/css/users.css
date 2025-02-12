@@ -22,20 +22,6 @@ body {
     height: 90vh;
 }
 
-input[type="text"],
-input[type="uploader"],
-label[for="category"],
-label[for="subcategory"] {
-    display: block;
-    margin-bottom: 10px;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    opacity: 1;
-    width: 100%;
-    box-sizing: border-box;
-}
-
 button {
     background-color: #ff9900;
     color: white;

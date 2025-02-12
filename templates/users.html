@@ -5,33 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Liste des utilisateurs</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/plex-icon.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/homeMain.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/users.css') }}">
 </head>
 <body>
     <div class="center-logo">
         <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo">
     </div>
 
-    <div class="navbar blur-background fade-in">
-        <div class="hamburger" onclick="toggleMenu()">☰</div>
-        <div class="menu">
-            <div class="left-buttons">
-                <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="window.location.href='{{ url_for('inner_home')}}'">
-                <button>Recherche</button>
-                <button>Demandes</button>
-            </div>
-            <div class="right-buttons">
-                {% if session.show_download %}
-                <button onclick="window.location.href='{{ url_for('inner_download') }}'">Téléchargement</button>
-                {% endif %}
-                {% if session.show_users %}
-                <button onclick="window.location.href='{{ url_for('manage_users') }}'">Utilisateurs</button>
-                {% endif %}
-                <button class="username">{{ session.username }}</button>
-                <button onclick="window.location.href='{{ url_for('inner_logout') }}'">Déconnexion</button>
-            </div>
-        </div>
-    </div>
+    {% include 'navbar.html' %}
 
     <div class="center-container blur-background fade-in">
         <h1>Liste des utilisateurs</h1>
