@@ -13,10 +13,47 @@ def users(app):
             elif request.method == 'DELETE':
                 return delete_user()
             elif request.method == 'POST':
-                return validate_user()
+                action = request.json.get('action')
+                if action == 'validate':
+                    return validate_user()
+                elif action == 'make_admin':
+                    return make_admin()
         else:
             write_log("Aucun utilisateur connecté, redirection vers l'index")
             return redirect(url_for('index'))
+
+def make_admin():
+    if 'username' not in session or session.get('rights_agreement') != 'PlexService::SuperAdmin':
+        write_log("Accès refusé: l'utilisateur n'est pas SuperAdmin", 'ERROR')
+        return jsonify({'error': 'Accès refusé'}), 403
+
+    data = request.json
+    username = data.get('username')
+
+    if not username:
+        write_log("Informations manquantes pour rendre l'utilisateur admin", 'ERROR')
+        return jsonify({'error': 'Informations manquantes'}), 400
+
+    ldap = ControleurLdap()
+    user_entry = ldap.search_user(username)
+    if not user_entry:
+        write_log(f"Utilisateur {username} non trouvé", 'ERROR')
+        return jsonify({'error': 'Utilisateur non trouvé'}), 404
+
+    # Vérifier si l'utilisateur est déjà admin
+    if 'rightsAgreement' in user_entry[0][1] and user_entry[0][1]['rightsAgreement'][0].decode('utf-8') == 'PlexService::Admin':
+        write_log(f"L'utilisateur {username} est déjà admin", 'ERROR')
+        return jsonify({'error': 'Utilisateur déjà admin'}), 400
+
+    # Ajouter l'attribut rightsAgreement avec la valeur PlexService::Admin
+    ldap_attribute_added = ldap.add_attribute(username, 'rightsAgreement', 'PlexService::Admin')
+    if not ldap_attribute_added:
+        write_log("Erreur lors de l'ajout de l'attribut LDAP", 'ERROR')
+        return jsonify({'error': 'Erreur lors de la mise à jour du compte'}), 500
+
+    write_log(f"Utilisateur {username} est maintenant admin")
+    ldap.disconnect()
+    return jsonify({'message': 'Utilisateur promu admin avec succès'}), 200
 
 def validate_user():
     data = request.json
@@ -69,6 +106,24 @@ def delete_user():
         return jsonify({'error': 'Informations manquantes'}), 400
 
     ldap = ControleurLdap()
+    user_entry = ldap.search_user(username)
+    if not user_entry:
+        write_log(f"Utilisateur {username} non trouvé", 'ERROR')
+        return jsonify({'error': 'Utilisateur non trouvé'}), 404
+
+    # Vérifier les droits de l'utilisateur connecté
+    current_user_rights = session.get('rights_agreement')
+    user_rights = user_entry[0][1].get('rightsAgreement', [b''])[0].decode('utf-8')
+
+    if current_user_rights == 'PlexService::SuperAdmin':
+        if user_rights == 'PlexService::SuperAdmin':
+            write_log(f"Impossible de supprimer l'utilisateur {username} car il est SuperAdmin", 'ERROR')
+            return jsonify({'error': 'Impossible de supprimer un SuperAdmin'}), 403
+    elif current_user_rights == 'PlexService::Admin':
+        if user_rights in ['PlexService::Admin', 'PlexService::SuperAdmin']:
+            write_log(f"Impossible de supprimer l'utilisateur {username} car il a des droits égaux ou supérieurs", 'ERROR')
+            return jsonify({'error': 'Impossible de supprimer cet utilisateur'}), 403
+
     user_deleted = ldap.delete_user(username)
     if not user_deleted:
         write_log("Erreur lors de la suppression de l'utilisateur dans la base LDAP", 'ERROR')
