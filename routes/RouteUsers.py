@@ -14,7 +14,6 @@ def users(app):
 
         if rights_agreement != 'PlexService::SuperAdmin':
             write_log(f"Accès refusé pour l'utilisateur {username} avec droits {rights_agreement}, redirection vers /home", 'ERROR')
-            session['from_index'] = False
             return redirect(url_for('home'))
 
         write_log(f"Affichage de la page de gestion des utilisateurs pour l'utilisateur: {username}")
@@ -40,6 +39,16 @@ def users(app):
         new_users_count = sum(1 for user in users if not user.get('rightsAgreement'))
         ldap.disconnect()
         return jsonify({'new_users_count': new_users_count})
+
+    @app.route('/home', methods=['GET'])
+    def home():
+        session['from_index'] = True
+        return render_template('home.html')
+
+    @app.route('/inner_home', methods=['GET'])
+    def inner_home():
+        session.pop('from_index', None)
+        return render_template('inner_home.html')
 
 def make_admin():
     if 'username' not in session or session.get('rights_agreement') != 'PlexService::SuperAdmin':
