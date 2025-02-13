@@ -20,7 +20,7 @@
 
     {% include 'navbar.html' %}
 
-    <div class="center-container {% if session.get('from_index') %}blur-background{% endif %} fade-in">
+    <div class="center-container {% if session.get('from_index') %}blur-background fade-in{% endif %}">
         <div class="text-info">
             <p>Bienvenue sur le service de demandes d'accès à des films ou séries pour le Plex de {owner-plex}.</p>
             <p> - Vous pouvez rechercher des films ou séries et demander l'accès à ceux-ci.</p>
