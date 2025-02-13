@@ -12,9 +12,11 @@
 </head>
 
 <body>
-    <div class="center-logo {% if session.get('from_index') %}animate-logo{% endif %}">
+    {% if session.get('from_index') %}
+    <div class="center-logo animate-logo">
         <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo">
     </div>
+    {% endif %}
 
     {% include 'navbar.html' %}
 
