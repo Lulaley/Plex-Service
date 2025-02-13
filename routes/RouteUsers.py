@@ -14,6 +14,7 @@ def users(app):
 
         if rights_agreement != 'PlexService::SuperAdmin':
             write_log(f"Accès refusé pour l'utilisateur {username} avec droits {rights_agreement}, redirection vers /home", 'ERROR')
+            session['from_index'] = False
             return redirect(url_for('home'))
 
         write_log(f"Affichage de la page de gestion des utilisateurs pour l'utilisateur: {username}")

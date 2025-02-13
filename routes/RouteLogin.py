@@ -28,6 +28,7 @@ def login(app):
                 if remember_me:
                     app.permanent_session_lifetime = timedelta(days=7)  # Durée de la session
                 # Rediriger vers la page d'accueil pour vérifier les droits
+                session['from_index'] = True
                 return redirect(url_for('inner_home'))
             else:
                 write_log(f"Échec de la connexion pour l'utilisateur: {username}", 'ERROR')

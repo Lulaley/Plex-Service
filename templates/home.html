@@ -12,7 +12,7 @@
 </head>
 
 <body>
-    <div class="center-logo">
+    <div class="center-logo {% if session.get('from_index') %}animate-logo{% endif %}">
         <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo">
     </div>
 

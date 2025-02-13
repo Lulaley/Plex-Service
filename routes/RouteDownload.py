@@ -7,13 +7,20 @@ import os
 def download(app):
     @app.route('/download')
     def inner_download():
-        if 'username' in session:
-            username = session.get('username')
-            write_log(f"Affichage de la page de téléchargement pour l'utilisateur: {username}")
-            return render_template('download.html') 
-        else:
+        if 'username' not in session:
             write_log("Aucun utilisateur connecté, redirection vers l'index")
             return redirect(url_for('index'))
+
+        username = session.get('username')
+        rights_agreement = session.get('rights_agreement')
+
+        if rights_agreement != 'PlexService::SuperAdmin':
+            write_log(f"Accès refusé pour l'utilisateur {username} avec droits {rights_agreement}, redirection vers /home", 'ERROR')
+            session['from_index'] = False
+            return redirect(url_for('home'))
+
+        write_log(f"Affichage de la page de téléchargement pour l'utilisateur: {username}")
+        return render_template('download.html')
 
 def upload(app):
     @app.route('/upload', methods=['POST'])

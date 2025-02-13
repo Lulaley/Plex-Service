@@ -11,6 +11,9 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 1000;
+}
+
+.animate-logo {
     animation: moveLogo 3s forwards;
 }
 
