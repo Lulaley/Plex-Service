@@ -40,15 +40,10 @@ def users(app):
         ldap.disconnect()
         return jsonify({'new_users_count': new_users_count})
 
-    @app.route('/home', methods=['GET'])
+    @app.route('/home')
     def home():
         session['from_index'] = True
         return render_template('home.html')
-
-    @app.route('/inner_home', methods=['GET'])
-    def inner_home():
-        session.pop('from_index', None)
-        return render_template('inner_home.html')
 
 def make_admin():
     if 'username' not in session or session.get('rights_agreement') != 'PlexService::SuperAdmin':
