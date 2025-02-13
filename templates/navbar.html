@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
 
-<div class="navbar blur-background fade-in">
+<div class="navbar {% if session.get('from_index') %}blur-background fade-in{% endif %}">
     <div class="hamburger" onclick="toggleMenu()">☰</div>
     <div class="menu">
         <div class="left-buttons">
