@@ -20,6 +20,7 @@ def download(app):
             return redirect(url_for('home'))
 
         write_log(f"Affichage de la page de téléchargement pour l'utilisateur: {username}")
+        session['from_index'] = False
         return render_template('download.html')
 
 def upload(app):
