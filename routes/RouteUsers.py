@@ -29,6 +29,17 @@ def users(app):
             elif action == 'make_admin':
                 return make_admin()
 
+    @app.route('/check_new_users', methods=['GET'])
+    def check_new_users():
+        if 'username' not in session:
+            return jsonify({'new_users_count': 0})
+
+        ldap = ControleurLdap()
+        users = ldap.get_all_users()
+        new_users_count = sum(1 for user in users if not user.get('rightsAgreement'))
+        ldap.disconnect()
+        return jsonify({'new_users_count': new_users_count})
+
 def make_admin():
     if 'username' not in session or session.get('rights_agreement') != 'PlexService::SuperAdmin':
         write_log("Accès refusé: l'utilisateur n'est pas SuperAdmin", 'ERROR')
