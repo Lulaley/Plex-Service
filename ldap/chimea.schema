@@ -124,6 +124,25 @@ attributetype ( 1.2.250.1.49.5.19 NAME 'totalEpisodesInSeason'
   ORDERING integerOrderingMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 )
 
+# define the requestDate attribute
+attributetype ( 1.2.250.1.49.5.20 NAME 'requestDate'
+  DESC 'Date of the request'
+  EQUALITY generalizedTimeMatch
+  ORDERING generalizedTimeOrderingMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.24 )
+
+# define the status attribute
+attributetype ( 1.2.250.1.49.5.21 NAME 'status'
+  DESC 'Status of the request'
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
+
+# define the comments attribute
+attributetype ( 1.2.250.1.49.5.22 NAME 'comments'
+  DESC 'Additional comments for the request'
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
+
 # define the otherUserInfos objectclass
 objectclass ( 1.2.250.1.49.6.1 NAME 'otherUserInfos'
   DESC 'Object class for additional user information'
@@ -142,7 +161,7 @@ objectclass ( 1.2.250.1.49.6.3 NAME 'series'
   DESC 'Object class for series'
   SUP top STRUCTURAL
   MUST ( cn $ plexTitle $ releaseDate )
-  MAY ( PlexDescription $ genre $ director $ duration $ quality $ languages $ subtitles $ actors $ seasonNumber $ episodeNumber $ seasons $ totalSeasons $ totalEpisodes ) )
+  MAY ( plexDescription $ genre $ director $ duration $ quality $ languages $ subtitles $ actors $ seasonNumber $ episodeNumber $ seasons $ totalSeasons $ totalEpisodes ) )
 
 # define the season objectclass
 objectclass ( 1.2.250.1.49.6.4 NAME 'season'
@@ -157,3 +176,10 @@ objectclass ( 1.2.250.1.49.6.5 NAME 'episode'
   SUP top AUXILIARY
   MUST ( cn $ plexTitle $ releaseDate $ seasonNumber $ episodeNumber )
   MAY ( plexDescription $ genre $ director $ duration $ quality $ languages $ subtitles $ actors ) )
+
+# define the wish objectclass
+objectclass ( 1.2.250.1.49.6.6 NAME 'wish'
+  DESC 'Object class for user movie requests'
+  SUP top AUXILIARY
+  MUST ( uid $ plexTitle $ requestDate )
+  MAY ( status $ comments ) )
