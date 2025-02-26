@@ -3,6 +3,14 @@ from static.Controleur.ControleurWish import ControleurWish
 from static.Controleur.ControleurLog import write_log
 from static.Controleur.ControleurTMDB import ControleurTMDB
 
+def extract_uid_from_dn(dn):
+    # Assuming the DN is in the format "uid=<username>,..."
+    parts = dn.split(',')
+    for part in parts:
+        if part.startswith('uid='):
+            return part.split('=')[1]
+    return dn
+
 def wishes(app):
     @app.route('/demande', methods=['GET'])
     def manage_wishes():
@@ -55,7 +63,7 @@ def wishes(app):
         details['status'] = wish['status']
         details['wishId'] = wish['wishId']
         details['requestDate'] = wish['requestDate']
-        details['wishOwner'] = wish['wishOwner']
+        details['wishOwner'] = extract_uid_from_dn(wish['wishOwner'])
 
         return jsonify(details)
 
@@ -78,7 +86,7 @@ def list_wishes(username, rights_agreement):
         details['poster_path'] = details.get('poster_path', '')
         details['title'] = details.get('title', wish['plexTitle'])
         details['requestDate'] = wish['requestDate']
-        details['wishOwner'] = wish['wishOwner']
+        details['wishOwner'] = extract_uid_from_dn(wish['wishOwner'])
         wish_details.append(details)
     
     session['from_index'] = False
