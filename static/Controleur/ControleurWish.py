@@ -9,7 +9,6 @@ class ControleurWish:
 
     def create_wish(self, username, title, wish_type):
         try:
-            self.ldap.bind_as_root()
             # Vérifier s'il existe déjà une demande pour le titre
             search_base = self.ldap.config.get_config('LDAP', 'base_dn')
             search_filter = f"(&(objectClass=wish)(plexTitle={title}))"
@@ -41,7 +40,6 @@ class ControleurWish:
 
     def modify_wish(self, username, wish_id, new_title=None, new_status=None, new_comments=None):
         try:
-            self.ldap.bind_as_root()
             search_base = self.ldap.config.get_config('LDAP', 'base_dn')
             dn = f'wishId={wish_id},dmdName=wishes,{search_base}'
             mod_attrs = []
@@ -62,7 +60,6 @@ class ControleurWish:
 
     def delete_wish(self, username, wish_id):
         try:
-            self.ldap.bind_as_root()
             search_base = self.ldap.config.get_config('LDAP', 'base_dn')
             dn = f'wishId={wish_id},dmdName=wishes,{search_base}'
             self.ldap.delete_entry(dn)
@@ -76,10 +73,10 @@ class ControleurWish:
 
     def validate_wish(self, username, wish_id):
         try:
-            self.ldap.bind_as_root()
             search_base = self.ldap.config.get_config('LDAP', 'base_dn')
             dn = f'wishId={wish_id},dmdName=wishes,{search_base}'
             mod_attrs = [('status', b'validated')]
+            write_log(f"Validation de la demande pour l'utilisateur {username} avec l'ID {wish_id}")
             self.ldap.modify_entry(dn, mod_attrs)
             write_log(f"Demande validée pour l'utilisateur {username} avec l'ID {wish_id}")
             return True
@@ -91,7 +88,6 @@ class ControleurWish:
 
     def get_user_wishes(self, username):
         try:
-            self.ldap.bind_as_root()
             search_base = self.ldap.config.get_config('LDAP', 'base_dn')
             user_dn = f'uid={username},dmdName=users,{search_base}'
             search_filter = f"(&(objectClass=wish)(wishOwner={user_dn}))"
@@ -111,7 +107,6 @@ class ControleurWish:
 
     def get_all_wishes(self):
         try:
-            self.ldap.bind_as_root()
             search_base = self.ldap.config.get_config('LDAP', 'base_dn')
             search_filter = "(objectClass=wish)"
             result = self.ldap.search_entry(search_base, search_filter)
@@ -130,7 +125,6 @@ class ControleurWish:
 
     def get_wish_by_id(self, wish_id):
         try:
-            self.ldap.bind_as_root()
             search_base = self.ldap.config.get_config('LDAP', 'base_dn')
             search_filter = f"(wishId={wish_id})"
             result = self.ldap.search_entry(search_base, search_filter)
