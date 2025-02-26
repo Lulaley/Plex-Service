@@ -35,7 +35,7 @@ def is_movie_or_series(torrent_info):
 def extract_title_prefix(filename):
     # Liste des motifs à rechercher
     patterns = [
-        r'S\d{2}', r'S\d{2}E\d{5}', r'Integral', r'Complete', r'season', r'episode', r'Episode\s\d+', r'Season\s\d+', r'Saison\s\d', r'Saison \s\d',
+        r'S\d{2}', r'S\d{2}E\d{5}', r'Integral', r'Complete', r'season', r'episode', r'Saison',
         r'S\.\d{2}', r'S\.\d{2}E\.\d{5}', r'S\.\d{2}\.E\.\d{5}'
     ]
     
