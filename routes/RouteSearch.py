@@ -17,8 +17,8 @@ def search_routes(app):
             return jsonify([])
 
         tmdb_controller = ControleurTMDB()
-        movie_results = tmdb_controller.search_movie_name(query)
-        tv_results = tmdb_controller.search_serie_name(query)
+        movie_results = tmdb_controller.search_all_movies(query)
+        tv_results = tmdb_controller.search_all_series(query)
 
         results = {
             'movies': movie_results,
