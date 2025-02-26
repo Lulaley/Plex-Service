@@ -74,6 +74,20 @@ def wishes(app):
 
         return jsonify(details)
 
+    @app.route('/validate_wish/<wish_id>', methods=['POST'])
+    def validate_wish(wish_id):
+        if 'username' not in session:
+            return jsonify({'success': False, 'message': 'Utilisateur non connecté'})
+
+        rights_agreement = session.get('rights_agreement')
+        if rights_agreement not in ['PlexService::Admin', 'PlexService::SuperAdmin']:
+            return jsonify({'success': False, 'message': 'Droits insuffisants'})
+
+        wish_controller = ControleurWish()
+        success = wish_controller.validate_wish(session.get('username'), wish_id)
+
+        return jsonify({'success': success})
+
 def list_wishes(username, rights_agreement):
     wish_controller = ControleurWish()
     if rights_agreement in ['PlexService::Admin', 'PlexService::SuperAdmin']:

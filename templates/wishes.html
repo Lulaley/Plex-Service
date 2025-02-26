@@ -17,7 +17,7 @@
         <h2>Demandes en attente</h2>
         <div class="wishes-grid">
             {% for wish in wishes if wish.status == 'pending' %}
-            <div class="wish-item" onclick="toggleDetails(this)" data-id="{{ wish.wishId }}">
+            <div class="wish-item" onmouseover="showDetails(this)" onclick="validateWish(this)" data-id="{{ wish.wishId }}">
                 <img src="https://image.tmdb.org/t/p/w500{{ wish.poster_path }}" alt="{{ wish.title }}">
                 <p>{{ wish.title }}</p>
                 <div class="wish-details" id="details-{{ wish.wishId }}">
@@ -30,7 +30,7 @@
         <h2>Demandes validées</h2>
         <div class="wishes-grid">
             {% for wish in wishes if wish.status == 'validated' %}
-            <div class="wish-item" onclick="toggleDetails(this)" data-id="{{ wish.wishId }}">
+            <div class="wish-item" onmouseover="showDetails(this)" data-id="{{ wish.wishId }}">
                 <img src="https://image.tmdb.org/t/p/w500{{ wish.poster_path }}" alt="{{ wish.title }}">
                 <p>{{ wish.title }}</p>
                 <div class="wish-details" id="details-{{ wish.wishId }}">
@@ -42,26 +42,39 @@
     </div>
 
     <script>
-        function toggleDetails(element) {
+        function showDetails(element) {
             const details = element.querySelector('.wish-details');
-            if (details.style.display === 'block') {
-                details.style.display = 'none';
-                element.classList.remove('active');
-            } else {
-                details.style.display = 'block';
-                element.classList.add('active');
-                const id = element.getAttribute('data-id');
-                fetch(`/wish_details/${id}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        details.innerHTML = `
-                            <p><strong>Date de sortie:</strong> ${data.release_date}</p>
-                            <p><strong>Utilisateur:</strong> ${data.wishOwner}</p>
-                            <p><strong>Date de la demande:</strong> ${data.requestDate}</p>
-                        `;
-                    })
-                    .catch(error => console.error('Erreur:', error));
-            }
+            const id = element.getAttribute('data-id');
+            fetch(`/wish_details/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    details.innerHTML = `
+                        <p><strong>Date de sortie:</strong> ${data.release_date}</p>
+                        <p><strong>Utilisateur:</strong> ${data.wishOwner}</p>
+                        <p><strong>Date de la demande:</strong> ${data.requestDate}</p>
+                    `;
+                })
+                .catch(error => console.error('Erreur:', error));
+        }
+
+        function validateWish(element) {
+            const id = element.getAttribute('data-id');
+            fetch(`/validate_wish/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Demande validée avec succès');
+                    location.reload();
+                } else {
+                    alert('Erreur lors de la validation de la demande: ' + data.message);
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
         }
     </script>
 </body>
