@@ -36,9 +36,13 @@
                         moviesDiv.innerHTML = '<h2>Films</h2>';
                         data.movies.forEach(movie => {
                             const movieDiv = document.createElement('div');
+                            movieDiv.classList.add('result-item');
                             movieDiv.innerHTML = `
-                                <p><strong>${movie.title}</strong> (${movie.release_date})</p>
-                                <p>${movie.overview}</p>
+                                <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
+                                <div>
+                                    <p><strong>${movie.title}</strong> (${movie.release_date})</p>
+                                    <p>${movie.overview}</p>
+                                </div>
                             `;
                             moviesDiv.appendChild(movieDiv);
                         });
@@ -50,9 +54,13 @@
                         tvShowsDiv.innerHTML = '<h2>Séries</h2>';
                         data.tv_shows.forEach(tvShow => {
                             const tvShowDiv = document.createElement('div');
+                            tvShowDiv.classList.add('result-item');
                             tvShowDiv.innerHTML = `
-                                <p><strong>${tvShow.name}</strong> (${tvShow.first_air_date})</p>
-                                <p>${tvShow.overview}</p>
+                                <img src="https://image.tmdb.org/t/p/w500${tvShow.poster_path}" alt="${tvShow.name}">
+                                <div>
+                                    <p><strong>${tvShow.name}</strong> (${tvShow.first_air_date})</p>
+                                    <p>${tvShow.overview}</p>
+                                </div>
                             `;
                             tvShowsDiv.appendChild(tvShowDiv);
                         });
