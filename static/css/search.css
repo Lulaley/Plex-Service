@@ -19,7 +19,6 @@ body {
     margin: 0 auto;
     padding: 20px;
     background-color: #313B45;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 h1, h2 {
@@ -32,6 +31,7 @@ input[type="text"] {
     padding: 10px;
     border: none;
     border-radius: 5px;
+    background-color: white;
     opacity: 0;
     transition: opacity 0.5s ease-in-out;
     width: 100%;
@@ -47,7 +47,7 @@ input[type="text"] {
     align-items: flex-start;
     margin-bottom: 20px;
     padding: 10px;
-    background-color: #f9f9f9;
+    background-color: #313B45;
     border-radius: 5px;
     position: relative;
 }
