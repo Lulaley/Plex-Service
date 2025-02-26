@@ -1,5 +1,6 @@
 body {
     background-color: #313B45; /* Fond plus sombre pour contraster avec le texte blanc */
+    color: white; /* Texte blanc */
     font-family: Arial, sans-serif; /* Arial comme alternative à Helvetica Neue */
     margin: 0;
     padding: 0;
@@ -62,6 +63,7 @@ button {
     display: none;
     transition: max-height 0.3s ease-out;
     overflow: hidden;
+    color: black;
     background-color: #f9f9f9;
     padding: 10px;
     border-radius: 5px;
