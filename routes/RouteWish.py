@@ -84,7 +84,12 @@ def wishes(app):
             return jsonify({'success': False, 'message': 'Droits insuffisants'})
 
         wish_controller = ControleurWish()
-        success = wish_controller.validate_wish(session.get('username'), wish_id)
+        wish = wish_controller.get_wish_by_id(wish_id)
+
+        if not wish:
+            return jsonify({'success': False, 'message': 'Demande non trouvée'})
+
+        success = wish_controller.validate_wish(extract_uid_from_dn(wish['wishOwner']), wish_id)
 
         return jsonify({'success': success})
 
