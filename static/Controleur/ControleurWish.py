@@ -77,6 +77,7 @@ class ControleurWish:
             dn = f'wishId={wish_id},dmdName=wishes,{search_base}'
             mod_attrs = [('status', b'validated')]
             write_log(f"Validation de la demande pour l'utilisateur {username} avec l'ID {wish_id}")
+            write_log(f"Modification de l'entrée {dn} avec les attributs {mod_attrs}")
             self.ldap.modify_entry(dn, mod_attrs)
             write_log(f"Demande validée pour l'utilisateur {username} avec l'ID {wish_id}")
             return True
