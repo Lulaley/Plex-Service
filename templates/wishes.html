@@ -20,7 +20,7 @@
             <div class="wish-item" onclick="toggleDetails(this)">
                 <img src="https://image.tmdb.org/t/p/w500{{ wish.poster_path }}" alt="{{ wish.title }}">
                 <p>{{ wish.title }}</p>
-                <div class="wish-details" id="details-{{ wish.id }}">
+                <div class="wish-details" id="details-{{ wish.wishId }}">
                     <!-- Les détails seront chargés ici -->
                 </div>
             </div>
@@ -33,7 +33,7 @@
             <div class="wish-item" onclick="toggleDetails(this)">
                 <img src="https://image.tmdb.org/t/p/w500{{ wish.poster_path }}" alt="{{ wish.title }}">
                 <p>{{ wish.title }}</p>
-                <div class="wish-details" id="details-{{ wish.id }}">
+                <div class="wish-details" id="details-{{ wish.wishId }}">
                     <!-- Les détails seront chargés ici -->
                 </div>
             </div>

@@ -18,8 +18,7 @@ def wishes(app):
             write_log(f"Utilisateur {username} n'a pas les droits nécessaires pour accéder à cette page", 'ERROR')
             return redirect(url_for('index'))
 
-        if request.method == 'GET':
-            return list_wishes(username, rights_agreement)
+        return list_wishes(username, rights_agreement)
 
     @app.route('/create_wish', methods=['POST'])
     def create_wish():
@@ -50,6 +49,8 @@ def list_wishes(username, rights_agreement):
             details = tmdb.search_movie(wish['plexTitle'])
         elif wish['wishType'] == 'series':
             details = tmdb.search_serie(wish['plexTitle'])
+        details['status'] = wish['status']
+        details['wishId'] = wish['wishId']
         wish_details.append(details)
     
     session['from_index'] = False
