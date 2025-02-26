@@ -2,6 +2,7 @@ from .ControleurLdap import ControleurLdap
 from .ControleurLog import write_log
 from datetime import datetime
 import uuid
+import ldap
 
 class ControleurWish:
     def __init__(self):
@@ -44,11 +45,11 @@ class ControleurWish:
             dn = f'wishId={wish_id},dmdName=wishes,{search_base}'
             mod_attrs = []
             if new_title:
-                mod_attrs.append(('plexTitle', new_title.encode('utf-8')))
+                mod_attrs.append((ldap.MOD_REPLACE, 'plexTitle', new_title.encode('utf-8')))
             if new_status:
-                mod_attrs.append(('status', new_status.encode('utf-8')))
+                mod_attrs.append((ldap.MOD_REPLACE, 'status', new_status.encode('utf-8')))
             if new_comments:
-                mod_attrs.append(('comments', new_comments.encode('utf-8')))
+                mod_attrs.append((ldap.MOD_REPLACE, 'comments', new_comments.encode('utf-8')))
             self.ldap.modify_entry(dn, mod_attrs)
             write_log(f"Demande modifiée pour l'utilisateur {username} avec le titre {new_title}")
             return True
@@ -75,7 +76,7 @@ class ControleurWish:
         try:
             search_base = self.ldap.config.get_config('LDAP', 'base_dn')
             dn = f'wishId={wish_id},dmdName=wishes,{search_base}'
-            mod_attrs = [('status', b'validated')]
+            mod_attrs = [(ldap.MOD_REPLACE, 'status', b'validated')]
             write_log(f"Validation de la demande pour l'utilisateur {username} avec l'ID {wish_id}")
             write_log(f"Modification de l'entrée {dn} avec les attributs {mod_attrs}")
             self.ldap.modify_entry(dn, mod_attrs)
