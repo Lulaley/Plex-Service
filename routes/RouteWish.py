@@ -40,6 +40,7 @@ def wishes(app):
         if 'username' not in session:
             return jsonify({'success': False, 'message': 'Utilisateur non connecté'})
 
+        write_log(f"Récupération des détails de la demande {wish_id}")
         wish_controller = ControleurWish()
         wish = wish_controller.get_wish_by_id(wish_id)
 
