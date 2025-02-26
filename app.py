@@ -13,6 +13,7 @@ from routes.RouteHome import home
 from routes.RouteDownload import download, upload, start_download
 from routes.RouteUsers import users
 from routes.RouteWish import wishes
+from routes.RouteSearch import search_routes
 
 # Importation des controleurs
 from static.Controleur.ControleurConf import ControleurConf
@@ -46,6 +47,7 @@ upload(app)
 start_download(app)
 users(app)
 wishes(app)
+search_routes(app)
 
 if __name__ == '__main__':
     app.run(debug=True, port=conf.get_config('APP', 'port'), host='0.0.0.0')
