@@ -75,6 +75,8 @@ def list_wishes(username, rights_agreement):
         details['wishId'] = wish['wishId']
         details['poster_path'] = details.get('poster_path', '')
         details['title'] = details.get('title', wish['plexTitle'])
+        details['overview'] = details.get('overview', 'Aucune description disponible.')
+        details['release_date'] = details.get('release_date', 'Date de sortie inconnue.')
         wish_details.append(details)
     
     session['from_index'] = False
