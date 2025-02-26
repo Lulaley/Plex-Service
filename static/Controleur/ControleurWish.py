@@ -14,7 +14,7 @@ class ControleurWish:
             search_base = self.ldap.config.get_config('LDAP', 'base_dn')
             search_filter = f"(&(objectClass=wish)(plexTitle={title}))"
             existing_wishes = self.ldap.search_entry(search_base, search_filter)
-            if existing_wishes:
+            if (existing_wishes):
                 write_log(f"Une demande pour le titre {title} existe déjà", 'ERROR')
                 return False
 
@@ -125,5 +125,22 @@ class ControleurWish:
         except Exception as e:
             write_log(f"Erreur lors de la récupération de toutes les demandes: {str(e)}", 'ERROR')
             return []
+        finally:
+            self.ldap.disconnect()
+
+    def get_wish_by_id(self, wish_id):
+        try:
+            self.ldap.bind_as_root()
+            search_base = self.ldap.config.get_config('LDAP', 'base_dn')
+            search_filter = f"(wishId={wish_id})"
+            result = self.ldap.search_entry(search_base, search_filter)
+            if result:
+                dn, entry = result[0]
+                wish = {attr: entry[attr][0].decode('utf-8') for attr in entry}
+                return wish
+            return None
+        except Exception as e:
+            write_log(f"Erreur lors de la récupération de la demande: {str(e)}", 'ERROR')
+            return None
         finally:
             self.ldap.disconnect()
