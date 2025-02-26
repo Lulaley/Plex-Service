@@ -109,7 +109,7 @@ def download_torrent(torrent_file_path):
         search_name = extract_title_prefix(info.name())
         search_name = search_name.replace('.', ' ')
         write_log(f"Nom de la série extrait: {search_name}")
-        series_info = search.search_serie_name(search_name)
+        series_info = search.search_serie(search_name)
         name = series_info['name']
         write_log(f"Nom de la série: {name}")
         name = name.replace(' ', '.')

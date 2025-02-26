@@ -33,9 +33,9 @@ def list_wishes(username, rights_agreement):
     wish_details = []
     for wish in wishes:
         if wish['wishType'] == 'movie':
-            details = tmdb.search_movie_name(wish['plexTitle'])
+            details = tmdb.search_movie(wish['plexTitle'])
         elif wish['wishType'] == 'series':
-            details = tmdb.search_serie_name(wish['plexTitle'])
+            details = tmdb.search_serie(wish['plexTitle'])
         wish_details.append(details)
 
     return render_template('wishes.html', wishes=wish_details)
