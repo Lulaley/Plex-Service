@@ -55,9 +55,9 @@
                     .then(response => response.json())
                     .then(data => {
                         details.innerHTML = `
-                            <p><strong>Titre:</strong> ${data.title}</p>
-                            <p><strong>Description:</strong> ${data.overview}</p>
                             <p><strong>Date de sortie:</strong> ${data.release_date}</p>
+                            <p><strong>Utilisateur:</strong> ${data.wishOwner}</p>
+                            <p><strong>Date de la demande:</strong> ${data.requestDate}</p>
                         `;
                     })
                     .catch(error => console.error('Erreur:', error));

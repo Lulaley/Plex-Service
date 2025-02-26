@@ -40,7 +40,6 @@ def wishes(app):
         if 'username' not in session:
             return jsonify({'success': False, 'message': 'Utilisateur non connecté'})
 
-        write_log(f"Récupération des détails de la demande {wish_id}")
         wish_controller = ControleurWish()
         wish = wish_controller.get_wish_by_id(wish_id)
 
@@ -55,6 +54,8 @@ def wishes(app):
 
         details['status'] = wish['status']
         details['wishId'] = wish['wishId']
+        details['requestDate'] = wish['requestDate']
+        details['wishOwner'] = wish['wishOwner']
 
         return jsonify(details)
 
@@ -76,8 +77,8 @@ def list_wishes(username, rights_agreement):
         details['wishId'] = wish['wishId']
         details['poster_path'] = details.get('poster_path', '')
         details['title'] = details.get('title', wish['plexTitle'])
-        details['overview'] = details.get('overview', 'Aucune description disponible.')
-        details['release_date'] = details.get('release_date', 'Date de sortie inconnue.')
+        details['requestDate'] = wish['requestDate']
+        details['wishOwner'] = wish['wishOwner']
         wish_details.append(details)
     
     session['from_index'] = False
