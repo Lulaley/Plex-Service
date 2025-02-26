@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recherche TMDB</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}">
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="container">
+        <h1>Recherche TMDB</h1>
+        <input type="text" id="search-input" placeholder="Rechercher un film ou une série...">
+        <div id="results"></div>
+    </div>
+
+    <script>
+        document.getElementById('search-input').addEventListener('input', function() {
+            const query = this.value;
+            if (query.length < 3) {
+                document.getElementById('results').innerHTML = '';
+                return;
+            }
+
+            fetch(`/search_tmdb?query=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById('results');
+                    resultsDiv.innerHTML = '';
+
+                    if (data.movies.length > 0) {
+                        const moviesDiv = document.createElement('div');
+                        moviesDiv.innerHTML = '<h2>Films</h2>';
+                        data.movies.forEach(movie => {
+                            const movieDiv = document.createElement('div');
+                            movieDiv.innerHTML = `
+                                <p><strong>${movie.title}</strong> (${movie.release_date})</p>
+                                <p>${movie.overview}</p>
+                            `;
+                            moviesDiv.appendChild(movieDiv);
+                        });
+                        resultsDiv.appendChild(moviesDiv);
+                    }
+
+                    if (data.tv_shows.length > 0) {
+                        const tvShowsDiv = document.createElement('div');
+                        tvShowsDiv.innerHTML = '<h2>Séries</h2>';
+                        data.tv_shows.forEach(tvShow => {
+                            const tvShowDiv = document.createElement('div');
+                            tvShowDiv.innerHTML = `
+                                <p><strong>${tvShow.name}</strong> (${tvShow.first_air_date})</p>
+                                <p>${tvShow.overview}</p>
+                            `;
+                            tvShowsDiv.appendChild(tvShowDiv);
+                        });
+                        resultsDiv.appendChild(tvShowsDiv);
+                    }
+                })
+                .catch(error => console.error('Erreur:', error));
+        });
+    </script>
+</body>
+
+</html>

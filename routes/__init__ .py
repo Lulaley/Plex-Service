@@ -4,4 +4,6 @@ from .RouteRegister import register
 from .RouteLogout import logout
 from .RouteHome import home
 from .RouteDownload import download, upload, start_download
+from .RouteUsers import users
+from .RouteWish import wishes
 # Cela permet d'importer auth et posts directement depuis routes

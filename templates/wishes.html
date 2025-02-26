@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Demandes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/wishes.css') }}">
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="container">
+        <h1>Mes Demandes</h1>
+
+        <h2>Demandes en attente</h2>
+        <div class="wishes-grid">
+            {% for wish in wishes if wish.status == 'pending' %}
+            <div class="wish-item" onclick="toggleDetails(this)">
+                <img src="https://image.tmdb.org/t/p/w500{{ wish.poster_path }}" alt="{{ wish.title }}">
+                <p>{{ wish.title }}</p>
+                <div class="wish-details" id="details-{{ wish.id }}">
+                    <!-- Les détails seront chargés ici -->
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <h2>Demandes validées</h2>
+        <div class="wishes-grid">
+            {% for wish in wishes if wish.status == 'validated' %}
+            <div class="wish-item" onclick="toggleDetails(this)">
+                <img src="https://image.tmdb.org/t/p/w500{{ wish.poster_path }}" alt="{{ wish.title }}">
+                <p>{{ wish.title }}</p>
+                <div class="wish-details" id="details-{{ wish.id }}">
+                    <!-- Les détails seront chargés ici -->
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function toggleDetails(element) {
+            const details = element.querySelector('.wish-details');
+            if (details.style.display === 'block') {
+                details.style.display = 'none';
+                element.classList.remove('active');
+            } else {
+                details.style.display = 'block';
+                element.classList.add('active');
+                const id = element.querySelector('.wish-details').id.split('-')[1];
+                fetch(`/wish_details/${id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        details.innerHTML = `
+                            <p><strong>Titre:</strong> ${data.title}</p>
+                            <p><strong>Description:</strong> ${data.overview}</p>
+                            <p><strong>Date de sortie:</strong> ${data.release_date}</p>
+                        `;
+                    })
+                    .catch(error => console.error('Erreur:', error));
+            }
+        }
+    </script>
+</body>
+
+</html>

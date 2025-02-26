@@ -12,10 +12,10 @@ class ControleurTMDB:
         search = tmdb.Search()
         write_log(f"Recherche de la série {title} dans la base de données TMDB")
         search.tv(query=title)
-        return search.results[0]['name']
+        return search.results[0]
     
     def search_movie_name(self, title):
         search = tmdb.Search()
+        write_log(f"Recherche du film {title} dans la base de données TMDB")
         search.movie(query=title)
-        for s in search.results:
-            print(s['title'])
+        return search.results[0]
