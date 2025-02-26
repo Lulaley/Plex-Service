@@ -17,7 +17,7 @@
         <h2>Demandes en attente</h2>
         <div class="wishes-grid">
             {% for wish in wishes if wish.status == 'pending' %}
-            <div class="wish-item" onclick="toggleDetails(this)">
+            <div class="wish-item" onclick="toggleDetails(this)" data-id="{{ wish.wishId }}">
                 <img src="https://image.tmdb.org/t/p/w500{{ wish.poster_path }}" alt="{{ wish.title }}">
                 <p>{{ wish.title }}</p>
                 <div class="wish-details" id="details-{{ wish.wishId }}">
@@ -30,7 +30,7 @@
         <h2>Demandes validées</h2>
         <div class="wishes-grid">
             {% for wish in wishes if wish.status == 'validated' %}
-            <div class="wish-item" onclick="toggleDetails(this)">
+            <div class="wish-item" onclick="toggleDetails(this)" data-id="{{ wish.wishId }}">
                 <img src="https://image.tmdb.org/t/p/w500{{ wish.poster_path }}" alt="{{ wish.title }}">
                 <p>{{ wish.title }}</p>
                 <div class="wish-details" id="details-{{ wish.wishId }}">
@@ -50,7 +50,7 @@
             } else {
                 details.style.display = 'block';
                 element.classList.add('active');
-                const id = element.querySelector('.wish-details').id.split('-')[1];
+                const id = element.getAttribute('data-id');
                 fetch(`/wish_details/${id}`)
                     .then(response => response.json())
                     .then(data => {

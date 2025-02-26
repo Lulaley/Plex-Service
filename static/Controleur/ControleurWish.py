@@ -14,7 +14,7 @@ class ControleurWish:
             search_base = self.ldap.config.get_config('LDAP', 'base_dn')
             search_filter = f"(&(objectClass=wish)(plexTitle={title}))"
             existing_wishes = self.ldap.search_entry(search_base, search_filter)
-            if (existing_wishes):
+            if existing_wishes:
                 write_log(f"Une demande pour le titre {title} existe déjà", 'ERROR')
                 return False
 
