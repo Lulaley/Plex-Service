@@ -8,6 +8,8 @@ def search_routes(app):
         if 'username' not in session:
             write_log("Aucun utilisateur connecté, redirection vers l'index")
             return redirect(url_for('index'))
+        
+        session['from_index'] = False
         return render_template('search.html')
 
     @app.route('/search_tmdb', methods=['GET'])

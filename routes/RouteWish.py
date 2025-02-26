@@ -51,5 +51,6 @@ def list_wishes(username, rights_agreement):
         elif wish['wishType'] == 'series':
             details = tmdb.search_serie(wish['plexTitle'])
         wish_details.append(details)
-
+    
+    session['from_index'] = False
     return render_template('wishes.html', wishes=wish_details)
