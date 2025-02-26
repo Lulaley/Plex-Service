@@ -12,6 +12,24 @@ attributetype ( 1.2.250.1.49.5.2 NAME 'userInfos'
   SUBSTR caseIgnoreSubstringsMatch
   SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
 
+# define the owner attribute
+attributetype ( 1.2.250.1.49.5.3 NAME 'owner'
+  DESC 'DN of the owner of the entry'
+  EQUALITY distinguishedNameMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.12 )
+
+# define the wishType attribute
+attributetype ( 1.2.250.1.49.5.4 NAME 'wishType'
+  DESC 'Type of the wish (movie or series)'
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
+
+# define the wishId attribute
+attributetype ( 1.2.250.1.49.5.5 NAME 'wishId'
+  DESC 'Unique identifier for the wish'
+  EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
+
 # define the title attribute
 attributetype ( 1.2.250.1.49.5.3 NAME 'plexTitle'
   DESC 'Title of the movie, series, or episode'
@@ -181,5 +199,5 @@ objectclass ( 1.2.250.1.49.6.5 NAME 'episode'
 objectclass ( 1.2.250.1.49.6.6 NAME 'wish'
   DESC 'Object class for user movie requests'
   SUP top AUXILIARY
-  MUST ( uid $ plexTitle $ requestDate )
-  MAY ( status $ comments ) )
+  MUST ( owner $ plexTitle $ requestDate )
+  MAY ( status $ comments $ wishType $ wishId ) )

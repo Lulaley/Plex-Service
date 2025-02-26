@@ -19,10 +19,11 @@ class ControleurWish:
                 return False
 
             wish_id = str(uuid.uuid4())
+            user_dn = f'uid={username},dmdName=users,{search_base}'
             dn = f'wishId={wish_id},dmdName=wishes,{search_base}'
             attributes = [
                 ('objectClass', [b'top', b'wish']),
-                ('uid', [username.encode('utf-8')]),
+                ('owner', [user_dn.encode('utf-8')]),
                 ('plexTitle', [title.encode('utf-8')]),
                 ('requestDate', [datetime.now().strftime('%Y%m%d%H%M%SZ').encode('utf-8')]),
                 ('status', [b'pending']),
@@ -92,7 +93,8 @@ class ControleurWish:
         try:
             self.ldap.bind_as_root()
             search_base = self.ldap.config.get_config('LDAP', 'base_dn')
-            search_filter = f"(&(objectClass=wish)(uid={username}))"
+            user_dn = f'uid={username},dmdName=users,{search_base}'
+            search_filter = f"(&(objectClass=wish)(owner={user_dn}))"
             result = self.ldap.search_entry(search_base, search_filter)
             wishes = []
             if result:
