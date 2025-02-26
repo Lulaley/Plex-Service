@@ -5,8 +5,8 @@
     <div class="menu">
         <div class="left-buttons">
             <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="window.location.href='{{ url_for('inner_home')}}'">
-            <button>Recherche</button>
-            <button>Demandes</button>
+            <button onclick="window.location.href='{{ url_for('search_page') }}'">Recherche</button>
+            <button onclick="window.location.href='{{ url_for('manage_wishes') }}'">Demandes</button>
         </div>
         <div class="right-buttons">
             {% if session.show_download %}
