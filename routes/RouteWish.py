@@ -42,7 +42,6 @@ def list_wishes(username, rights_agreement):
         wishes = wish_controller.get_all_wishes()
     else:
         wishes = wish_controller.get_user_wishes(username)
-    wish_controller.disconnect()
 
     tmdb = ControleurTMDB()
     wish_details = []
