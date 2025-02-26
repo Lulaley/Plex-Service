@@ -21,6 +21,21 @@ def wishes(app):
         if request.method == 'GET':
             return list_wishes(username, rights_agreement)
 
+    @app.route('/create_wish', methods=['POST'])
+    def create_wish():
+        if 'username' not in session:
+            return jsonify({'success': False, 'message': 'Utilisateur non connecté'})
+
+        data = request.get_json()
+        title = data.get('title')
+        wish_type = data.get('type')
+        username = session.get('username')
+
+        wish_controller = ControleurWish()
+        success = wish_controller.create_wish(username, title, wish_type)
+
+        return jsonify({'success': success})
+
 def list_wishes(username, rights_agreement):
     wish_controller = ControleurWish()
     if rights_agreement in ['PlexService::Admin', 'PlexService::SuperAdmin']:

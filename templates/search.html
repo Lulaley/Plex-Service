@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recherche TMDB</title>
+    <title>Recherche</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}">
 </head>
 
@@ -12,14 +12,14 @@
     {% include 'navbar.html' %}
 
     <div class="container">
-        <h1>Recherche TMDB</h1>
+        <h1>Recherche</h1>
         <input type="text" id="search-input" placeholder="Rechercher un film ou une série...">
         <div id="results"></div>
     </div>
 
     <script>
         document.getElementById('search-input').addEventListener('input', function() {
-            const query = this.value;
+            const query = this.value.trim();
             if (query.length < 3) {
                 document.getElementById('results').innerHTML = '';
                 return;
@@ -42,6 +42,7 @@
                                 <div>
                                     <p><strong>${movie.title}</strong> (${movie.release_date})</p>
                                     <p>${movie.overview}</p>
+                                    <button class="request-button" onclick="createWish('${movie.title}', 'movie')">Demander</button>
                                 </div>
                             `;
                             moviesDiv.appendChild(movieDiv);
@@ -60,6 +61,7 @@
                                 <div>
                                     <p><strong>${tvShow.name}</strong> (${tvShow.first_air_date})</p>
                                     <p>${tvShow.overview}</p>
+                                    <button class="request-button" onclick="createWish('${tvShow.name}', 'series')">Demander</button>
                                 </div>
                             `;
                             tvShowsDiv.appendChild(tvShowDiv);
@@ -69,6 +71,25 @@
                 })
                 .catch(error => console.error('Erreur:', error));
         });
+
+        function createWish(title, type) {
+            fetch('/create_wish', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title: title, type: type })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Demande créée avec succès');
+                } else {
+                    alert('Erreur lors de la création de la demande');
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
+        }
     </script>
 </body>
 
