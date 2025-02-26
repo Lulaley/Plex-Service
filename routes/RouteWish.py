@@ -35,6 +35,28 @@ def wishes(app):
 
         return jsonify({'success': success})
 
+    @app.route('/wish_details/<wish_id>', methods=['GET'])
+    def wish_details(wish_id):
+        if 'username' not in session:
+            return jsonify({'success': False, 'message': 'Utilisateur non connecté'})
+
+        wish_controller = ControleurWish()
+        wish = wish_controller.get_wish_by_id(wish_id)
+
+        if not wish:
+            return jsonify({'success': False, 'message': 'Demande non trouvée'})
+
+        tmdb = ControleurTMDB()
+        if wish['wishType'] == 'movie':
+            details = tmdb.search_movie(wish['plexTitle'])
+        elif wish['wishType'] == 'series':
+            details = tmdb.search_serie(wish['plexTitle'])
+
+        details['status'] = wish['status']
+        details['wishId'] = wish['wishId']
+
+        return jsonify(details)
+
 def list_wishes(username, rights_agreement):
     wish_controller = ControleurWish()
     if rights_agreement in ['PlexService::Admin', 'PlexService::SuperAdmin']:
@@ -51,6 +73,8 @@ def list_wishes(username, rights_agreement):
             details = tmdb.search_serie(wish['plexTitle'])
         details['status'] = wish['status']
         details['wishId'] = wish['wishId']
+        details['poster_path'] = details.get('poster_path', '')
+        details['title'] = details.get('title', wish['plexTitle'])
         wish_details.append(details)
     
     session['from_index'] = False
