@@ -170,7 +170,7 @@ objectclass ( 1.2.250.1.49.6.1 NAME 'otherUserInfos'
 # define the movie objectclass
 objectclass ( 1.2.250.1.49.6.2 NAME 'movie'
   DESC 'Object class for movies'
-  SUP top AUXILIARY
+  SUP top STRUCTURAL
   MUST ( cn $ plexTitle $ releaseDate )
   MAY ( plexDescription $ genre $ director $ duration $ quality $ languages $ subtitles $ actors ) )
 
@@ -191,13 +191,13 @@ objectclass ( 1.2.250.1.49.6.4 NAME 'season'
 # define the episode objectclass
 objectclass ( 1.2.250.1.49.6.5 NAME 'episode'
   DESC 'Object class for episodes'
-  SUP top AUXILIARY
+  SUP top STRUCTURAL
   MUST ( cn $ plexTitle $ releaseDate $ seasonNumber $ episodeNumber )
   MAY ( plexDescription $ genre $ director $ duration $ quality $ languages $ subtitles $ actors ) )
 
 # define the wish objectclass
 objectclass ( 1.2.250.1.49.6.6 NAME 'wish'
   DESC 'Object class for user movie requests'
-  SUP top AUXILIARY
+  SUP top STRUCTURAL
   MUST ( wishOwner $ plexTitle $ requestDate )
   MAY ( status $ comments $ wishType $ wishId ) )
