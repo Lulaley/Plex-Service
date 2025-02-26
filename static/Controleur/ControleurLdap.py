@@ -82,6 +82,7 @@ class ControleurLdap:
     def modify_entry(self, dn, mod_list):
         try:
             self.bind_as_root()
+            write_log(f"Modification de l'entrée {dn} avec les attributs {mod_list}")
             self.conn.modify_s(dn, mod_list)
             write_log("Entrée modifiée avec succès")
             return True
