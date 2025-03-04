@@ -76,12 +76,13 @@ class ControleurWish:
         try:
             search_base = self.ldap.config.get_config('LDAP', 'base_dn')
             dn = f'wishId={wish_id},dmdName=wishes,{search_base}'
-            mod_attrs = [(ldap.MOD_REPLACE, 'status', b'validated')]
-            write_log(f"Validation de la demande pour l'utilisateur {username} avec l'ID {wish_id}")
-            write_log(f"Modification de l'entrée {dn} avec les attributs {mod_attrs}")
-            self.ldap.modify_entry(dn, mod_attrs)
-            write_log(f"Demande validée pour l'utilisateur {username} avec l'ID {wish_id}")
-            return True
+            success = self.ldap.validate_wish(dn)
+            if success:
+                write_log(f"Demande validée pour l'utilisateur {username} avec l'ID {wish_id}")
+                return True
+            else:
+                write_log(f"Erreur lors de la validation de la demande pour l'utilisateur {username} avec l'ID {wish_id}", 'ERROR')
+                return False
         except Exception as e:
             write_log(f"Erreur lors de la validation de la demande: {str(e)}", 'ERROR')
             return False

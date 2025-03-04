@@ -123,10 +123,21 @@ class ControleurLdap:
             dn = f'uid={username},dmdName=users,{base_dn}'
             mod_attrs = [(ldap.MOD_REPLACE, attribute, value.encode('utf-8'))]
             self.conn.modify_s(dn, mod_attrs)
-            write_log(f"Attribut {attribute} remplacé pour l'utilisateur {username}")
+            write_log(f"Attribut {attribute} remplacer pour l'utilisateur {username}")
             return True
         except ldap.LDAPError as e:
             write_log(f"Erreur lors du remplacement de l'attribut LDAP: {e}", 'ERROR')
+            return False
+
+    def validate_wish(self, dn):
+        try:
+            self.bind_as_root()
+            mod_attrs = [(ldap.MOD_REPLACE, 'status', b'validated')]
+            self.conn.modify_s(dn, mod_attrs)
+            write_log(f"Demande validée pour l'entrée {dn}")
+            return True
+        except ldap.LDAPError as e:
+            write_log(f"Erreur lors de la validation de la demande: {e}", 'ERROR')
             return False
 
     def delete_user(self, username):
