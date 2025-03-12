@@ -9,10 +9,10 @@
             <button onclick="window.location.href='{{ url_for('manage_wishes') }}'">Demandes</button>
         </div>
         <div class="right-buttons">
-            {% if session.show_download %}
+            {% if session.rights_agreement in ['PlexService::SuperAdmin', 'PlexService::Admin'] %}
             <button onclick="window.location.href='{{ url_for('inner_download') }}'">Téléchargement</button>
             {% endif %}
-            {% if session.show_users %}
+            {% if session.rights_agreement == 'PlexService::SuperAdmin' %}
             <button class="notification-bubble" id="user-button" onclick="window.location.href='{{ url_for('manage_users') }}'">Utilisateurs</button>
             {% endif %}
             <button class="username">{{ session.username }}</button>

@@ -36,22 +36,10 @@ def home(app):
             username = session['username']
             write_log(f"Utilisateur connecté: {username}")
             
-            if 'show_download' not in session or 'show_users' not in session or 'rights_agreement' not in session:
+            if 'rights_agreement' not in session:
                 rights_agreement = get_user_rights(username)
                 session['rights_agreement'] = rights_agreement
-                if rights_agreement == 'PlexService::SuperAdmin':
-                    write_log(f"Utilisateur {username} est SuperAdmin")
-                    session['show_download'] = True
-                    session['show_users'] = True
-                elif rights_agreement == 'PlexService::Admin':
-                    write_log(f"Utilisateur {username} est Admin")
-                    session['show_download'] = True
-                    session['show_users'] = False
-                elif rights_agreement == 'PlexService::User':
-                    write_log(f"Utilisateur {username} est Utilisateur")
-                    session['show_download'] = False
-                    session['show_users'] = False
-                else:
+                if rights_agreement not in ['PlexService::SuperAdmin', 'PlexService::Admin', 'PlexService::User']:
                     write_log(f"Utilisateur {username} n'a pas le droit de se connecter", 'ERROR')
                     return redirect(url_for('index'))
             
