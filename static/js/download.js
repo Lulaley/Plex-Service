@@ -4,8 +4,19 @@ document.getElementById('torrent-file').addEventListener('change', function (eve
     fileInfo.textContent = 'Nom du fichier: ' + fileName;
 });
 
+let isDownloading = false;
+
 document.getElementById('torrent-form').addEventListener('submit', function (event) {
-    event.preventDefault(); // Empêche le comportement par défaut du formulaire
+    event.preventDefault();
+
+    if (isDownloading) {
+        return;
+    }
+
+    isDownloading = true;
+    document.getElementById('download-button').disabled = true;
+    document.getElementById('download-button').style.backgroundColor = "#ffb74a";
+    document.getElementById('download-button').style.cursor = "not-allowed";
 
     var formData = new FormData();
     var fileInput = document.getElementById('torrent-file');
@@ -23,9 +34,25 @@ document.getElementById('torrent-form').addEventListener('submit', function (eve
             var elapsedTimeElem = document.getElementById('elapsed-time');
             var remainingTimeElem = document.getElementById('remaining-time');
             var startTime = Date.now();
+            var lastProgress = 0;
 
             eventSource.onmessage = function (event) {
                 var logMessage = event.data;
+
+                if (logMessage === 'done') {
+                    progressBar.style.width = '100%';
+                    progressBar.textContent = '100%';
+                    speedInfo.textContent = 'Vitesse de téléchargement: 0 kB/s';
+                    uploadSpeedInfo.textContent = 'Vitesse d\'upload: 0 kB/s';
+                    remainingTimeElem.textContent = 'Temps restant: 0s';
+                    eventSource.close();
+                    isDownloading = false;
+                    document.getElementById('download-button').disabled = false;
+                    document.getElementById('download-button').style.backgroundColor = "";
+                    document.getElementById('download-button').style.cursor = "";
+                    return;
+                }
+
                 var progressMatch = logMessage.match(/(\d+\.\d+)% complete/);
                 var downloadSpeedMatch = logMessage.match(/down: (\d+\.\d+ kB\/s)/);
                 var uploadSpeedMatch = logMessage.match(/up: (\d+\.\d+ kB\/s)/);
@@ -48,22 +75,39 @@ document.getElementById('torrent-form').addEventListener('submit', function (eve
                         uploadSpeedInfo.textContent = 'Vitesse d\'upload: ' + formatSpeed(uploadSpeed);
                     }
 
-                    var remainingTime = (100 - progress) / (progress / elapsedTime);
-                    remainingTimeElem.textContent = 'Temps restant estimé: ' + formatTime(remainingTime);
+                    if (progress > lastProgress) {
+                        var remainingTime = (elapsedTime / progress) * (100 - progress);
+                        remainingTimeElem.textContent = 'Temps restant: ' + formatTime(remainingTime);
+                        lastProgress = progress;
+                    }
                 }
             };
 
-            eventSource.onerror = function (error) {
-                console.error('Erreur de l\'EventSource:', error);
+            eventSource.onopen = function () {
+                console.log('Connection opened');
+            };
+
+            eventSource.onerror = function () {
+                console.log('Connection closed');
                 eventSource.close();
-                alert('Erreur lors du téléchargement du fichier .torrent. Veuillez vérifier les logs du serveur pour plus de détails.');
+                isDownloading = false;
+                document.getElementById('download-button').disabled = false;
+                document.getElementById('download-button').style.backgroundColor = "";
+                document.getElementById('download-button').style.cursor = "";
             };
         } else {
-            alert('Erreur lors du téléchargement du fichier .torrent. Réponse du serveur non OK.');
+            console.error('Erreur lors du téléchargement du fichier');
+            isDownloading = false;
+            document.getElementById('download-button').disabled = false;
+            document.getElementById('download-button').style.backgroundColor = "";
+            document.getElementById('download-button').style.cursor = "";
         }
     }).catch(error => {
-        console.error('Erreur:', error);
-        alert('Erreur lors du téléchargement du fichier .torrent. Veuillez vérifier votre connexion réseau et réessayer.');
+        console.error('Erreur réseau ou autre:', error);
+        isDownloading = false;
+        document.getElementById('download-button').disabled = false;
+        document.getElementById('download-button').style.backgroundColor = "";
+        document.getElementById('download-button').style.cursor = "";
     });
 });
 
@@ -83,3 +127,9 @@ function formatTime(seconds) {
     var secs = Math.floor(seconds % 60);
     return (hours > 0 ? hours + 'h ' : '') + (minutes > 0 ? minutes + 'm ' : '') + secs + 's';
 }
+
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter' && isDownloading) {
+        event.preventDefault();
+    }
+});
