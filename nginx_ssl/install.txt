@@ -26,32 +26,41 @@ sudo apt-get install nginx
 sudo nano /etc/nginx/sites-available/myapp
 
 server {
-    listen 80;
-    server_name your_domain_or_IP;
-
-    location / {
-        proxy_pass http://127.0.0.1:5000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-
-server {
     listen 443 ssl;
-    server_name your_domain_or_IP;
-
-    ssl_certificate /path/to/cert.pem;
-    ssl_certificate_key /path/to/key.pem;
+    server_name domaine1 domaine2;
+    ssl_certificate /chemin/vers/le/certificat; # managed by Certbot
+    ssl_certificate_key /chemin/vers/la/clef; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 
     location / {
-        proxy_pass http://127.0.0.1:5000;
+        proxy_pass http://127.0.0.1:5001;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
+        # Désactiver le buffering pour les connexions EventSource
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_set_header Connection '';
+        chunked_transfer_encoding off;
+
+}
+server {
+    if ($host = domaine2) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    if ($host = domaine1) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name domaine1 domaine2;
+    return 404; # managed by Certbot
 }
 
 sudo ln -s /etc/nginx/sites-available/myapp /etc/nginx/sites-enabled/
