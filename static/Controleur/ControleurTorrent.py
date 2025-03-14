@@ -91,22 +91,23 @@ def get_directory_size_gb(directory):
     return total_size / (1024 ** 3)
 
 def stop_download():
+    write_log("Appel de la fonction stop_download")
     if download_status['is_downloading'] and download_status['handle']:
         download_status['handle'].pause()
         download_status['handle'].clear_error()
         download_status['is_downloading'] = False
         write_log("Téléchargement annulé par l'utilisateur.")
         
-        # Supprimer les fichiers téléchargés
+        # Supprimer les fichiers téléchargés (commenté pour le test)
         for file_path in download_status['downloaded_files']:
             if os.path.exists(file_path):
-                #os.remove(file_path)
-                write_log(f"Fichier téléchargé supprimé : {file_path}")
+                # os.remove(file_path)
+                write_log(f"[TEST] Fichier téléchargé qui aurait été supprimé : {file_path}")
         
-        # Supprimer le fichier .torrent
+        # Supprimer le fichier .torrent (commenté pour le test)
         if download_status['torrent_file_path'] and os.path.exists(download_status['torrent_file_path']):
-            os.remove(download_status['torrent_file_path'])
-            write_log(f"Fichier .torrent supprimé : {download_status['torrent_file_path']}")
+            # os.remove(download_status['torrent_file_path'])
+            write_log(f"[TEST] Fichier .torrent qui aurait été supprimé : {download_status['torrent_file_path']}")
         
         # Réinitialiser la liste des fichiers téléchargés
         download_status['downloaded_files'] = []

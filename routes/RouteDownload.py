@@ -88,8 +88,11 @@ def start_download(app):
 def stop_download_route(app):
     @app.route('/stop_download', methods=['POST'])
     def inner_stop_download():
+        write_log("Requête d'annulation de téléchargement reçue")
         if stop_download():
             session['is_downloading'] = False
+            write_log("Téléchargement annulé avec succès")
             return jsonify(success=True)
         else:
+            write_log("Erreur lors de l'annulation du téléchargement")
             return jsonify(success=False)
