@@ -7,6 +7,9 @@ import os
 # Créer un verrou pour synchroniser l'accès à la session
 session_lock = threading.Lock()
 
+# Stocker les handles de téléchargement dans une variable globale
+download_handles = {}
+
 def download(app):
     @app.route('/download')
     def inner_download():
@@ -71,8 +74,10 @@ def start_download(app):
                         'is_downloading': True,
                         'handle': None,
                         'save_path': save_path,
-                        'torrent_file_path': torrent_file_path
+                        'torrent_file_path': torrent_file_path,
+                        'downloaded_files': []
                     }
+                    download_handles[username] = handle  # Stocker le handle dans la variable globale
                     try:
                         write_log(f"Téléchargement du fichier .torrent pour {username}")
                         for status in download_torrent(torrent_file_path, save_path, handle):
@@ -93,11 +98,16 @@ def stop_download_route(app):
     def inner_stop_download():
         with session_lock:
             write_log("Requête d'annulation de téléchargement reçue")
-            handle = request.json.get('handle')
-            write_log(f"Annulation du téléchargement pour le handle: {handle}")
-            if stop_download(handle):
-                write_log("Téléchargement annulé avec succès")
-                return jsonify(success=True)
+            username = session.get('username')
+            handle = download_handles.get(username)
+            if handle:
+                write_log(f"Annulation du téléchargement pour l'utilisateur: {username}")
+                if stop_download(handle):
+                    write_log("Téléchargement annulé avec succès")
+                    return jsonify(success=True)
+                else:
+                    write_log("Erreur lors de l'annulation du téléchargement")
+                    return jsonify(success=False)
             else:
-                write_log("Erreur lors de l'annulation du téléchargement")
+                write_log("Aucun téléchargement en cours pour cet utilisateur")
                 return jsonify(success=False)

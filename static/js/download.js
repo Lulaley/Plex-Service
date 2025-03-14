@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const downloadedFilesInput = document.getElementById('downloaded-files');
 
     let isDownloading = false;
+    let eventSource = null;
 
     torrentForm.addEventListener('submit', function (event) {
         event.preventDefault();
@@ -44,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (response.ok) {
                 response.json().then(data => {
                     if (data.success) {
-                        var eventSource = new EventSource(data.redirect_url);
+                        eventSource = new EventSource(data.redirect_url);
                         var progressBar = document.getElementById('progress-bar');
                         var speedInfo = document.getElementById('speed-info');
                         var uploadSpeedInfo = document.getElementById('upload-speed-info');
@@ -65,9 +66,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                 eventSource.close();
                                 isDownloading = false;
                                 isDownloadingInput.value = "false";
-                                downloadButton.disabled = false;
-                                downloadButton.style.backgroundColor = "";
-                                downloadButton.style.cursor = "";
+                                downloadButton.textContent = 'Lancer le téléchargement';
+                                torrentFileInput.disabled = false;
                                 return;
                             }
 
@@ -116,34 +116,30 @@ document.addEventListener('DOMContentLoaded', function () {
                             eventSource.close();
                             isDownloading = false;
                             isDownloadingInput.value = "false";
-                            downloadButton.disabled = false;
-                            downloadButton.style.backgroundColor = "";
-                            downloadButton.style.cursor = "";
+                            downloadButton.textContent = 'Lancer le téléchargement';
+                            torrentFileInput.disabled = false;
                         };
                     } else {
                         console.error('Erreur lors du téléchargement du fichier');
                         isDownloading = false;
                         isDownloadingInput.value = "false";
-                        downloadButton.disabled = false;
-                        downloadButton.style.backgroundColor = "";
-                        downloadButton.style.cursor = "";
+                        downloadButton.textContent = 'Lancer le téléchargement';
+                        torrentFileInput.disabled = false;
                     }
                 });
             } else {
                 console.error('Erreur lors du téléchargement du fichier');
                 isDownloading = false;
                 isDownloadingInput.value = "false";
-                downloadButton.disabled = false;
-                downloadButton.style.backgroundColor = "";
-                downloadButton.style.cursor = "";
+                downloadButton.textContent = 'Lancer le téléchargement';
+                torrentFileInput.disabled = false;
             }
         }).catch(error => {
             console.error('Erreur réseau ou autre:', error);
             isDownloading = false;
             isDownloadingInput.value = "false";
-            downloadButton.disabled = false;
-            downloadButton.style.backgroundColor = "";
-            downloadButton.style.cursor = "";
+            downloadButton.textContent = 'Lancer le téléchargement';
+            torrentFileInput.disabled = false;
         });
     }
 
@@ -172,6 +168,9 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(result => {
             if (result.success) {
                 console.log('Téléchargement annulé avec succès');
+                if (eventSource) {
+                    eventSource.close();
+                }
             } else {
                 console.error('Erreur lors de l\'annulation du téléchargement');
             }
