@@ -92,6 +92,16 @@ def get_directory_size_gb(directory):
 
 def stop_download():
     write_log("Appel de la fonction stop_download")
+    if download_status['is_downloading']:
+        write_log("Téléchargement en cours détecté")
+    else:
+        write_log("Aucun téléchargement en cours détecté")
+        
+    if download_status['handle']:
+        write_log("Handle de téléchargement détecté")
+    else:
+        write_log("Aucun handle de téléchargement détecté")
+        
     if download_status['is_downloading'] and download_status['handle']:
         download_status['handle'].pause()
         download_status['handle'].clear_error()
