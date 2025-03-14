@@ -80,7 +80,7 @@ def start_download(app):
                         'torrent_file_path': torrent_file_path,
                         'downloaded_files': []
                     }
-                    download_handles[download_id] = handle  # Stocker le handle dans la variable globale
+                    downloads[download_id] = handle  # Stocker le handle dans le dictionnaire global downloads
                     try:
                         write_log(f"Téléchargement du fichier .torrent pour {username}")
                         for status in download_torrent(torrent_file_path, save_path, handle):
@@ -103,7 +103,7 @@ def stop_download_route(app):
             write_log("Requête d'annulation de téléchargement reçue")
             data = request.get_json()
             download_id = data.get('download_id')  # Récupérer l'identifiant du téléchargement
-            handle = download_handles.get(download_id)
+            handle = downloads.get(download_id)  # Utiliser le dictionnaire global downloads
             if handle:
                 write_log(f"Annulation du téléchargement pour l'utilisateur: {handle['username']}")
                 if stop_download(handle):
