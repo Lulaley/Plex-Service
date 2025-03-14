@@ -3,6 +3,7 @@ from static.Controleur.ControleurLog import write_log
 from static.Controleur.ControleurTorrent import download_torrent, stop_download, downloads, downloads_lock
 import threading
 import uuid
+import os
 
 # Créer un verrou pour synchroniser l'accès à la session
 session_lock = threading.Lock()
