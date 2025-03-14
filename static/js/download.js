@@ -133,25 +133,23 @@ document.addEventListener('DOMContentLoaded', function () {
         isDownloading = false;
         torrentFileInput.disabled = false;
         downloadButton.textContent = 'Lancer le téléchargement';
-        fetch('/get_session_state')
-            .then(response => response.json())
-            .then(data => {
-                fetch('/stop_download', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        console.log('Téléchargement annulé avec succès');
-                    } else {
-                        console.error('Erreur lors de l\'annulation du téléchargement');
-                    }
-                });
-            });
+        fetch('/stop_download', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                console.log('Téléchargement annulé avec succès');
+            } else {
+                console.error('Erreur lors de l\'annulation du téléchargement');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur réseau ou autre:', error);
+        });
     }
 });
 
