@@ -211,6 +211,7 @@ def download_torrent(torrent_file_path):
     download_status['torrent_file_path'] = torrent_file_path
 
     write_log(f"Téléchargement de {info.name()}")
+    write_log(f"État de download_status après démarrage: {download_status}")
     while not h.is_seed():
         if not download_status['is_downloading']:
             write_log("Téléchargement annulé.")
