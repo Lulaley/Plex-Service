@@ -7,6 +7,15 @@ import os
 # Créer un verrou pour synchroniser l'accès à la session
 session_lock = threading.Lock()
 
+# Variable globale pour stocker l'état du téléchargement
+download_state = {
+    'is_downloading': False,
+    'handle': None,
+    'save_path': None,
+    'torrent_file_path': None,
+    'downloaded_files': []
+}
+
 def download(app):
     @app.route('/download')
     def inner_download():
@@ -32,8 +41,7 @@ def upload(app):
     def inner_upload():
         with session_lock:
             username = session.get('username')
-            session['is_downloading'] = False
-            session.modified = True  # Forcer la mise à jour de la session
+            download_state['is_downloading'] = False
             write_log(f"Affichage de la page d'upload pour l'utilisateur: {username}")
             
             if 'torrent-file' not in request.files:
@@ -48,8 +56,7 @@ def upload(app):
             if file and file.filename.endswith('.torrent'):
                 filename = file.filename.replace(' ', '_')
                 file_path = os.path.join("/var/www/public/Plex-Service/tmp/", filename)
-                session['torrent_file_path'] = file_path
-                session.modified = True  # Forcer la mise à jour de la session
+                download_state['torrent_file_path'] = file_path
                 file.save(file_path)
                 write_log(f"Fichier .torrent déposé par {username} : {file_path}")
                 return jsonify({'success': True, 'message': 'Fichier téléchargé avec succès', 'redirect_url': url_for('inner_start_download')})
@@ -68,20 +75,19 @@ def start_download(app):
                 with session_lock:
                     write_log(f"Envoi d'une requête de téléchargement pour l'utilisateur: {username}")
                     
-                    if session.get('is_downloading'):
+                    if download_state['is_downloading']:
                         write_log(f"Téléchargement déjà en cours pour {username}")
                         flash('Un téléchargement est déjà en cours')
                         return redirect(url_for('inner_download'))
                     
-                    torrent_file_path = session.get('torrent_file_path')
+                    torrent_file_path = download_state['torrent_file_path']
                     if not torrent_file_path:
-                        raise Exception("Chemin du fichier .torrent non trouvé dans la session")
+                        raise Exception("Chemin du fichier .torrent non trouvé dans l'état de téléchargement")
                     
-                    session['is_downloading'] = True
-                    session.modified = True  # Forcer la mise à jour de la session
+                    download_state['is_downloading'] = True
                     try:
                         write_log(f"Téléchargement du fichier .torrent pour {username}")
-                        for status in download_torrent(torrent_file_path):
+                        for status in download_torrent(torrent_file_path, download_state):
                             yield status
                     except Exception as e:
                         write_log(f"Erreur lors du téléchargement du fichier .torrent pour {username}: {str(e)}")
@@ -99,23 +105,16 @@ def stop_download_route(app):
     def inner_stop_download():
         with session_lock:
             write_log("Requête d'annulation de téléchargement reçue")
-            write_log(f"État de session avant annulation: {session}")
-            if stop_download():
-                session['is_downloading'] = False
-                session.modified = True  # Forcer la mise à jour de la session
+            write_log(f"État de l'état de téléchargement avant annulation: {download_state}")
+            if stop_download(download_state):
+                download_state['is_downloading'] = False
                 write_log("Téléchargement annulé avec succès")
                 return jsonify(success=True)
             else:
                 write_log("Erreur lors de l'annulation du téléchargement")
                 return jsonify(success=False)
 
-    @app.route('/get_session_state', methods=['GET'])
-    def get_session_state():
+    @app.route('/get_download_state', methods=['GET'])
+    def get_download_state():
         with session_lock:
-            return jsonify({
-                'is_downloading': session.get('is_downloading', False),
-                'handle': session.get('handle'),
-                'save_path': session.get('save_path'),
-                'torrent_file_path': session.get('torrent_file_path'),
-                'downloaded_files': session.get('downloaded_files', [])
-            })
+            return jsonify(download_state)

@@ -1,7 +1,6 @@
 from .ControleurLog import write_log
 from .ControleurConf import ControleurConf
 from .ControleurTMDB import ControleurTMDB
-from flask import flash, get_flashed_messages, render_template, Response, session
 import libtorrent as lt
 import time
 import re
@@ -81,45 +80,43 @@ def get_directory_size_gb(directory):
             total_size += os.path.getsize(fp)
     return total_size / (1024 ** 3)
 
-def stop_download():
+def stop_download(download_state):
     write_log("Appel de la fonction stop_download")
-    write_log(f"État actuel de session: {session}")
-    if session.get('is_downloading'):
+    write_log(f"État actuel de l'état de téléchargement: {download_state}")
+    if download_state['is_downloading']:
         write_log("Téléchargement en cours détecté")
     else:
         write_log("Aucun téléchargement en cours détecté")
         
-    if session.get('handle'):
+    if download_state['handle']:
         write_log("Handle de téléchargement détecté")
     else:
         write_log("Aucun handle de téléchargement détecté")
         
-    if session.get('is_downloading') and session.get('handle'):
-        session['handle'].pause()
-        session['handle'].clear_error()
-        session['is_downloading'] = False
-        session.modified = True  # Forcer la mise à jour de la session
+    if download_state['is_downloading'] and download_state['handle']:
+        download_state['handle'].pause()
+        download_state['handle'].clear_error()
+        download_state['is_downloading'] = False
         write_log("Téléchargement annulé par l'utilisateur.")
         
         # Supprimer les fichiers téléchargés (commenté pour le test)
-        for file_path in session.get('downloaded_files', []):
+        for file_path in download_state['downloaded_files']:
             if os.path.exists(file_path):
                 # os.remove(file_path)
                 write_log(f"[TEST] Fichier téléchargé qui aurait été supprimé : {file_path}")
         
         # Supprimer le fichier .torrent (commenté pour le test)
-        if session.get('torrent_file_path') and os.path.exists(session['torrent_file_path']):
-            # os.remove(session['torrent_file_path'])
-            write_log(f"[TEST] Fichier .torrent qui aurait été supprimé : {session['torrent_file_path']}")
+        if download_state['torrent_file_path'] and os.path.exists(download_state['torrent_file_path']):
+            # os.remove(download_state['torrent_file_path'])
+            write_log(f"[TEST] Fichier .torrent qui aurait été supprimé : {download_state['torrent_file_path']}")
         
         # Réinitialiser la liste des fichiers téléchargés
-        session['downloaded_files'] = []
-        session.modified = True  # Forcer la mise à jour de la session
+        download_state['downloaded_files'] = []
         
         return True
     return False
 
-def download_torrent(torrent_file_path):
+def download_torrent(torrent_file_path, download_state):
     write_log(f"Début de la fonction download_torrent avec le chemin : {torrent_file_path}")
     conf = ControleurConf()
     ses = lt.session()
@@ -198,17 +195,16 @@ def download_torrent(torrent_file_path):
         write_log(f"Chemin de sauvegarde: {save_path}")
     
     h = ses.add_torrent({'ti': info, 'save_path': save_path})
-    session['is_downloading'] = True
-    session['handle'] = h
-    session['save_path'] = save_path
-    session['torrent_file_path'] = torrent_file_path
-    session['downloaded_files'] = []
-    session.modified = True  # Forcer la mise à jour de la session
+    download_state['is_downloading'] = True
+    download_state['handle'] = h
+    download_state['save_path'] = save_path
+    download_state['torrent_file_path'] = torrent_file_path
+    download_state['downloaded_files'] = []
 
     write_log(f"Téléchargement de {info.name()}")
-    write_log(f"État de session après démarrage: {session}")
+    write_log(f"État de l'état de téléchargement après démarrage: {download_state}")
     while not h.is_seed():
-        if not session.get('is_downloading'):
+        if not download_state['is_downloading']:
             write_log("Téléchargement annulé.")
             ses.remove_torrent(h)
             yield "data: cancelled\n\n"
@@ -223,9 +219,8 @@ def download_torrent(torrent_file_path):
         # Ajouter les fichiers téléchargés à la liste
         for file in h.get_torrent_info().files():
             file_path = os.path.join(save_path, file.path)
-            if file_path not in session.get('downloaded_files', []):
-                session['downloaded_files'].append(file_path)
-                session.modified = True  # Forcer la mise à jour de la session
+            if file_path not in download_state['downloaded_files']:
+                download_state['downloaded_files'].append(file_path)
         
         yield f"data: {log_message}\n\n"
         sys.stdout.flush()  # Force l'envoi des données
@@ -240,9 +235,8 @@ def download_torrent(torrent_file_path):
         os.remove(torrent_file_path)
         write_log(f"Fichier .torrent supprimé : {torrent_file_path}")
     
-    session['is_downloading'] = False
-    session['handle'] = None
-    session['save_path'] = None
-    session['torrent_file_path'] = None
-    session['downloaded_files'] = []
-    session.modified = True  # Forcer la mise à jour de la session
+    download_state['is_downloading'] = False
+    download_state['handle'] = None
+    download_state['save_path'] = None
+    download_state['torrent_file_path'] = None
+    download_state['downloaded_files'] = []
