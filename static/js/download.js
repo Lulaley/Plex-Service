@@ -45,6 +45,12 @@ document.addEventListener('DOMContentLoaded', function () {
             if (response.ok) {
                 response.json().then(data => {
                     if (data.success) {
+                        // Mettre à jour les éléments HTML cachés avec les valeurs correctes
+                        torrentFilePathInput.value = data.torrent_file_path;
+                        handleInput.value = data.handle;
+                        savePathInput.value = data.save_path;
+                        downloadedFilesInput.value = JSON.stringify(data.downloaded_files);
+
                         eventSource = new EventSource(data.redirect_url);
                         var progressBar = document.getElementById('progress-bar');
                         var speedInfo = document.getElementById('speed-info');
@@ -99,12 +105,6 @@ document.addEventListener('DOMContentLoaded', function () {
                                     lastProgress = progress;
                                 }
                             }
-
-                            // Mettre à jour les éléments HTML cachés
-                            torrentFilePathInput.value = data.torrent_file_path;
-                            handleInput.value = data.handle;
-                            savePathInput.value = data.save_path;
-                            downloadedFilesInput.value = JSON.stringify(data.downloaded_files);
                         };
 
                         eventSource.onopen = function () {
