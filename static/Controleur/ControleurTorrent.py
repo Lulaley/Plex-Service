@@ -200,6 +200,7 @@ def download_torrent(torrent_file_path):
     session['handle'] = h
     session['save_path'] = save_path
     session['torrent_file_path'] = torrent_file_path
+    session['downloaded_files'] = []
 
     write_log(f"Téléchargement de {info.name()}")
     write_log(f"État de session après démarrage: {session}")
