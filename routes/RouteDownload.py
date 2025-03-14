@@ -4,6 +4,15 @@ from static.Controleur.ControleurLog import write_log
 from static.Controleur.ControleurTorrent import download_torrent, stop_download
 import os
 
+# Variable globale pour stocker l'état du téléchargement
+download_status = {
+    'is_downloading': False,
+    'handle': None,
+    'save_path': None,
+    'torrent_file_path': None,
+    'downloaded_files': []  # Liste des fichiers téléchargés
+}
+
 def download(app):
     @app.route('/download')
     def inner_download():
@@ -27,7 +36,7 @@ def upload(app):
     @app.route('/upload', methods=['POST'])
     def inner_upload():
         username = session.get('username')
-        session['is_downloading'] = False
+        download_status['is_downloading'] = False
         write_log(f"Affichage de la page d'upload pour l'utilisateur: {username}")
         
         if 'torrent-file' not in request.files:
@@ -42,7 +51,7 @@ def upload(app):
         if file and file.filename.endswith('.torrent'):
             filename = file.filename.replace(' ', '_')
             file_path = os.path.join("/var/www/public/Plex-Service/tmp/", filename)
-            session['torrent_file_path'] = file_path
+            download_status['torrent_file_path'] = file_path
             file.save(file_path)
             write_log(f"Fichier .torrent déposé par {username} : {file_path}")
             return jsonify({'success': True, 'message': 'Fichier téléchargé avec succès', 'redirect_url': url_for('inner_start_download')})
@@ -60,16 +69,16 @@ def start_download(app):
             def generate():
                 write_log(f"Envoi d'une requête de téléchargement pour l'utilisateur: {username}")
                 
-                if session.get('is_downloading'):
+                if download_status['is_downloading']:
                     write_log(f"Téléchargement déjà en cours pour {username}")
                     flash('Un téléchargement est déjà en cours')
                     return redirect(url_for('inner_download'))
                 
-                torrent_file_path = session.get('torrent_file_path')
+                torrent_file_path = download_status['torrent_file_path']
                 if not torrent_file_path:
                     raise Exception("Chemin du fichier .torrent non trouvé dans la session")
                 
-                session['is_downloading'] = True
+                download_status['is_downloading'] = True
                 try:
                     write_log(f"Téléchargement du fichier .torrent pour {username}")
                     for status in download_torrent(torrent_file_path):
@@ -90,7 +99,7 @@ def stop_download_route(app):
     def inner_stop_download():
         write_log("Requête d'annulation de téléchargement reçue")
         if stop_download():
-            session['is_downloading'] = False
+            download_status['is_downloading'] = False
             write_log("Téléchargement annulé avec succès")
             return jsonify(success=True)
         else:
