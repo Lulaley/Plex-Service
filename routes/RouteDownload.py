@@ -108,3 +108,14 @@ def stop_download_route(app):
             else:
                 write_log("Erreur lors de l'annulation du téléchargement")
                 return jsonify(success=False)
+
+    @app.route('/get_session_state', methods=['GET'])
+    def get_session_state():
+        with session_lock:
+            return jsonify({
+                'is_downloading': session.get('is_downloading', False),
+                'handle': session.get('handle'),
+                'save_path': session.get('save_path'),
+                'torrent_file_path': session.get('torrent_file_path'),
+                'downloaded_files': session.get('downloaded_files', [])
+            })

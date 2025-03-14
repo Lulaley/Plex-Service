@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const torrentForm = document.getElementById('torrent-form');
     const torrentFileInput = document.getElementById('torrent-file');
     const downloadButton = document.getElementById('download-button');
+    const stopDownloadButton = document.getElementById('stop-download-button');
 
     let isDownloading = false;
 
@@ -14,6 +15,10 @@ document.addEventListener('DOMContentLoaded', function () {
             // Démarrer le téléchargement
             startDownload();
         }
+    });
+
+    stopDownloadButton.addEventListener('click', function () {
+        stopDownload();
     });
 
     function startDownload() {
@@ -128,14 +133,24 @@ document.addEventListener('DOMContentLoaded', function () {
         isDownloading = false;
         torrentFileInput.disabled = false;
         downloadButton.textContent = 'Lancer le téléchargement';
-        fetch('/stop_download', { method: 'POST' })
+        fetch('/get_session_state')
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    console.log('Téléchargement annulé avec succès');
-                } else {
-                    console.error('Erreur lors de l\'annulation du téléchargement');
-                }
+                fetch('/stop_download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        console.log('Téléchargement annulé avec succès');
+                    } else {
+                        console.error('Erreur lors de l\'annulation du téléchargement');
+                    }
+                });
             });
     }
 });
