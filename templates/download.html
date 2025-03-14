@@ -19,6 +19,7 @@
             <label for="torrent-file">Télécharger un fichier .torrent :</label>
             <input type="file" name="torrent-file" id="torrent-file" accept=".torrent" required>
             <button type="submit" id="download-button">Lancer le téléchargement</button>
+            <button type="button" id="stop-download-button">Arrêter le téléchargement</button>
         </form>
 
         <div class="status-info">
@@ -32,6 +33,13 @@
         <div class="progress-container">
             <div class="progress-bar" id="progress-bar">0%</div>
         </div>
+
+        <!-- Éléments cachés pour stocker les informations de l'état du téléchargement -->
+        <input type="hidden" id="is-downloading" value="false">
+        <input type="hidden" id="torrent-file-path" value="">
+        <input type="hidden" id="handle" value="">
+        <input type="hidden" id="save-path" value="">
+        <input type="hidden" id="downloaded-files" value="">
 
         {% with messages = get_flashed_messages() %}
         {% if messages %}

@@ -4,6 +4,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const downloadButton = document.getElementById('download-button');
     const stopDownloadButton = document.getElementById('stop-download-button');
 
+    const isDownloadingInput = document.getElementById('is-downloading');
+    const torrentFilePathInput = document.getElementById('torrent-file-path');
+    const handleInput = document.getElementById('handle');
+    const savePathInput = document.getElementById('save-path');
+    const downloadedFilesInput = document.getElementById('downloaded-files');
+
     let isDownloading = false;
 
     torrentForm.addEventListener('submit', function (event) {
@@ -23,6 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function startDownload() {
         isDownloading = true;
+        isDownloadingInput.value = "true";
         torrentFileInput.disabled = true;
         downloadButton.textContent = 'Annuler le téléchargement';
 
@@ -57,6 +64,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 remainingTimeElem.textContent = 'Temps restant: 0s';
                                 eventSource.close();
                                 isDownloading = false;
+                                isDownloadingInput.value = "false";
                                 downloadButton.disabled = false;
                                 downloadButton.style.backgroundColor = "";
                                 downloadButton.style.cursor = "";
@@ -91,6 +99,12 @@ document.addEventListener('DOMContentLoaded', function () {
                                     lastProgress = progress;
                                 }
                             }
+
+                            // Mettre à jour les éléments HTML cachés
+                            torrentFilePathInput.value = data.torrent_file_path;
+                            handleInput.value = data.handle;
+                            savePathInput.value = data.save_path;
+                            downloadedFilesInput.value = JSON.stringify(data.downloaded_files);
                         };
 
                         eventSource.onopen = function () {
@@ -101,6 +115,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             console.log('Connection closed');
                             eventSource.close();
                             isDownloading = false;
+                            isDownloadingInput.value = "false";
                             downloadButton.disabled = false;
                             downloadButton.style.backgroundColor = "";
                             downloadButton.style.cursor = "";
@@ -108,6 +123,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     } else {
                         console.error('Erreur lors du téléchargement du fichier');
                         isDownloading = false;
+                        isDownloadingInput.value = "false";
                         downloadButton.disabled = false;
                         downloadButton.style.backgroundColor = "";
                         downloadButton.style.cursor = "";
@@ -116,6 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 console.error('Erreur lors du téléchargement du fichier');
                 isDownloading = false;
+                isDownloadingInput.value = "false";
                 downloadButton.disabled = false;
                 downloadButton.style.backgroundColor = "";
                 downloadButton.style.cursor = "";
@@ -123,6 +140,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }).catch(error => {
             console.error('Erreur réseau ou autre:', error);
             isDownloading = false;
+            isDownloadingInput.value = "false";
             downloadButton.disabled = false;
             downloadButton.style.backgroundColor = "";
             downloadButton.style.cursor = "";
@@ -131,13 +149,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function stopDownload() {
         isDownloading = false;
+        isDownloadingInput.value = "false";
         torrentFileInput.disabled = false;
         downloadButton.textContent = 'Lancer le téléchargement';
+
+        const downloadState = {
+            is_downloading: isDownloadingInput.value,
+            torrent_file_path: torrentFilePathInput.value,
+            handle: handleInput.value,
+            save_path: savePathInput.value,
+            downloaded_files: downloadedFilesInput.value
+        };
+
         fetch('/stop_download', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            body: JSON.stringify(downloadState)
         })
         .then(response => response.json())
         .then(result => {
