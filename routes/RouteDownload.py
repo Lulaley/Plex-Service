@@ -2,16 +2,8 @@ from flask import render_template, request, session, jsonify, redirect, url_for,
 import threading
 from static.Controleur.ControleurLog import write_log
 from static.Controleur.ControleurTorrent import download_torrent, stop_download
+from static.Controleur.DownloadSession import download_session
 import os
-
-# Variable globale pour stocker l'état du téléchargement
-download_session = {
-    'is_downloading': False,
-    'handle': None,
-    'save_path': None,
-    'torrent_file_path': None,
-    'downloaded_files': []  # Liste des fichiers téléchargés
-}
 
 def download(app):
     @app.route('/download')

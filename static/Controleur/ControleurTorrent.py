@@ -9,7 +9,7 @@ import os
 import sys
 
 # Importer la session globale de téléchargement
-from routes.RouteDownload import download_session
+from .DownloadSession import download_session
 
 def is_movie_or_series(torrent_info):
     """
