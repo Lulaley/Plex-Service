@@ -10,7 +10,7 @@ from routes.RouteLogin import login
 from routes.RouteRegister import register
 from routes.RouteLogout import logout
 from routes.RouteHome import home
-from routes.RouteDownload import download, upload, start_download
+from routes.RouteDownload import download, upload, start_download, stop_download_route
 from routes.RouteUsers import users
 from routes.RouteWish import wishes
 from routes.RouteSearch import search_routes
@@ -45,6 +45,7 @@ home(app)
 download(app)
 upload(app)
 start_download(app)
+stop_download_route(app)
 users(app)
 wishes(app)
 search_routes(app)

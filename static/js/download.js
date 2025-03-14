@@ -1,10 +1,49 @@
+document.addEventListener('DOMContentLoaded', function () {
+    const torrentForm = document.getElementById('torrent-form');
+    const torrentFileInput = document.getElementById('torrent-file');
+    const downloadButton = document.getElementById('download-button');
+
+    let isDownloading = false;
+
+    torrentForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        if (isDownloading) {
+            // Arrêter le téléchargement
+            stopDownload();
+        } else {
+            // Démarrer le téléchargement
+            startDownload();
+        }
+    });
+
+    function startDownload() {
+        isDownloading = true;
+        torrentFileInput.disabled = true;
+        downloadButton.textContent = 'Annuler le téléchargement';
+        // Ajoutez ici le code pour démarrer le téléchargement
+    }
+
+    function stopDownload() {
+        isDownloading = false;
+        torrentFileInput.disabled = false;
+        downloadButton.textContent = 'Lancer le téléchargement';
+        fetch('/stop_download', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Téléchargement annulé avec succès');
+                } else {
+                    console.error('Erreur lors de l\'annulation du téléchargement');
+                }
+            });
+    }
+});
+
 document.getElementById('torrent-file').addEventListener('change', function (event) {
     var fileInfo = document.getElementById('file-info');
     var fileName = event.target.files[0] ? event.target.files[0].name : 'Aucun fichier sélectionné';
     fileInfo.textContent = 'Nom du fichier: ' + fileName;
 });
-
-let isDownloading = false;
 
 document.getElementById('torrent-form').addEventListener('submit', function (event) {
     event.preventDefault();

@@ -9,7 +9,13 @@ import os
 import sys
 
 # Variable globale pour stocker l'état du téléchargement
-download_status = {}
+download_status = {
+    'is_downloading': False,
+    'handle': None,
+    'save_path': None,
+    'torrent_file_path': None,
+    'downloaded_files': []  # Liste des fichiers téléchargés
+}
 
 def is_movie_or_series(torrent_info):
     """
@@ -83,6 +89,30 @@ def get_directory_size_gb(directory):
             fp = os.path.join(dirpath, f)
             total_size += os.path.getsize(fp)
     return total_size / (1024 ** 3)
+
+def stop_download():
+    if download_status['is_downloading'] and download_status['handle']:
+        download_status['handle'].pause()
+        download_status['handle'].clear_error()
+        download_status['is_downloading'] = False
+        write_log("Téléchargement annulé par l'utilisateur.")
+        
+        # Supprimer les fichiers téléchargés
+        for file_path in download_status['downloaded_files']:
+            if os.path.exists(file_path):
+                #os.remove(file_path)
+                write_log(f"Fichier téléchargé supprimé : {file_path}")
+        
+        # Supprimer le fichier .torrent
+        if download_status['torrent_file_path'] and os.path.exists(download_status['torrent_file_path']):
+            os.remove(download_status['torrent_file_path'])
+            write_log(f"Fichier .torrent supprimé : {download_status['torrent_file_path']}")
+        
+        # Réinitialiser la liste des fichiers téléchargés
+        download_status['downloaded_files'] = []
+        
+        return True
+    return False
 
 def download_torrent(torrent_file_path):
     write_log(f"Début de la fonction download_torrent avec le chemin : {torrent_file_path}")
@@ -163,14 +193,31 @@ def download_torrent(torrent_file_path):
         write_log(f"Chemin de sauvegarde: {save_path}")
     
     h = ses.add_torrent({'ti': info, 'save_path': save_path})
+    download_status['is_downloading'] = True
+    download_status['handle'] = h
+    download_status['save_path'] = save_path
+    download_status['torrent_file_path'] = torrent_file_path
 
     write_log(f"Téléchargement de {info.name()}")
     while not h.is_seed():
+        if not download_status['is_downloading']:
+            write_log("Téléchargement annulé.")
+            ses.remove_torrent(h)
+            yield "data: cancelled\n\n"
+            return
+
         s = h.status()
         log_message = '%.2f%% complete (down: %.1f kB/s up: %.1f kB/s peers: %d) %s' % (
             s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000,
             s.num_peers, s.state)
         write_log(log_message)
+        
+        # Ajouter les fichiers téléchargés à la liste
+        for file in h.get_torrent_info().files():
+            file_path = os.path.join(save_path, file.path)
+            if file_path not in download_status['downloaded_files']:
+                download_status['downloaded_files'].append(file_path)
+        
         yield f"data: {log_message}\n\n"
         sys.stdout.flush()  # Force l'envoi des données
         time.sleep(1)
@@ -183,3 +230,9 @@ def download_torrent(torrent_file_path):
     if os.path.exists(torrent_file_path):
         os.remove(torrent_file_path)
         write_log(f"Fichier .torrent supprimé : {torrent_file_path}")
+    
+    download_status['is_downloading'] = False
+    download_status['handle'] = None
+    download_status['save_path'] = None
+    download_status['torrent_file_path'] = None
+    download_status['downloaded_files'] = []
