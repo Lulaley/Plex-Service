@@ -28,6 +28,7 @@ def upload(app):
     def inner_upload():
         username = session.get('username')
         session['is_downloading'] = False
+        session.modified = True  # Forcer la mise à jour de la session
         write_log(f"Affichage de la page d'upload pour l'utilisateur: {username}")
         
         if 'torrent-file' not in request.files:
@@ -43,6 +44,7 @@ def upload(app):
             filename = file.filename.replace(' ', '_')
             file_path = os.path.join("/var/www/public/Plex-Service/tmp/", filename)
             session['torrent_file_path'] = file_path
+            session.modified = True  # Forcer la mise à jour de la session
             file.save(file_path)
             write_log(f"Fichier .torrent déposé par {username} : {file_path}")
             return jsonify({'success': True, 'message': 'Fichier téléchargé avec succès', 'redirect_url': url_for('inner_start_download')})
@@ -70,6 +72,7 @@ def start_download(app):
                     raise Exception("Chemin du fichier .torrent non trouvé dans la session")
                 
                 session['is_downloading'] = True
+                session.modified = True  # Forcer la mise à jour de la session
                 try:
                     write_log(f"Téléchargement du fichier .torrent pour {username}")
                     for status in download_torrent(torrent_file_path):
@@ -92,6 +95,7 @@ def stop_download_route(app):
         write_log(f"État de session avant annulation: {session}")
         if stop_download():
             session['is_downloading'] = False
+            session.modified = True  # Forcer la mise à jour de la session
             write_log("Téléchargement annulé avec succès")
             return jsonify(success=True)
         else:

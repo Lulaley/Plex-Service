@@ -98,6 +98,7 @@ def stop_download():
         session['handle'].pause()
         session['handle'].clear_error()
         session['is_downloading'] = False
+        session.modified = True  # Forcer la mise à jour de la session
         write_log("Téléchargement annulé par l'utilisateur.")
         
         # Supprimer les fichiers téléchargés (commenté pour le test)
@@ -113,6 +114,7 @@ def stop_download():
         
         # Réinitialiser la liste des fichiers téléchargés
         session['downloaded_files'] = []
+        session.modified = True  # Forcer la mise à jour de la session
         
         return True
     return False
@@ -201,6 +203,7 @@ def download_torrent(torrent_file_path):
     session['save_path'] = save_path
     session['torrent_file_path'] = torrent_file_path
     session['downloaded_files'] = []
+    session.modified = True  # Forcer la mise à jour de la session
 
     write_log(f"Téléchargement de {info.name()}")
     write_log(f"État de session après démarrage: {session}")
@@ -222,6 +225,7 @@ def download_torrent(torrent_file_path):
             file_path = os.path.join(save_path, file.path)
             if file_path not in session.get('downloaded_files', []):
                 session['downloaded_files'].append(file_path)
+                session.modified = True  # Forcer la mise à jour de la session
         
         yield f"data: {log_message}\n\n"
         sys.stdout.flush()  # Force l'envoi des données
@@ -241,3 +245,4 @@ def download_torrent(torrent_file_path):
     session['save_path'] = None
     session['torrent_file_path'] = None
     session['downloaded_files'] = []
+    session.modified = True  # Forcer la mise à jour de la session
