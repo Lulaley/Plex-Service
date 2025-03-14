@@ -8,8 +8,14 @@ import re
 import os
 import sys
 
-# Importer la session globale de téléchargement
-from .DownloadSession import download_session
+# Variable globale pour stocker l'état du téléchargement
+download_session = {
+    'is_downloading': False,
+    'handle': None,
+    'save_path': None,
+    'torrent_file_path': None,
+    'downloaded_files': []  # Liste des fichiers téléchargés
+}
 
 def is_movie_or_series(torrent_info):
     """
