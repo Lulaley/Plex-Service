@@ -49,6 +49,7 @@ def upload(app):
                 file.save(file_path)
                 write_log(f"Fichier .torrent déposé par {username} : {file_path}")
                 return jsonify({'success': True, 'message': 'Fichier téléchargé avec succès', 'redirect_url': url_for('inner_start_download', torrent_file_path=file_path)})
+
             else:
                 write_log(f"Format de fichier non supporté par {username}")
                 return jsonify({'success': False, 'message': 'Format de fichier non supporté'}), 400
@@ -93,6 +94,7 @@ def stop_download_route(app):
         with session_lock:
             write_log("Requête d'annulation de téléchargement reçue")
             handle = request.json.get('handle')
+            write_log(f"Annulation du téléchargement pour le handle: {handle}")
             if stop_download(handle):
                 write_log("Téléchargement annulé avec succès")
                 return jsonify(success=True)
