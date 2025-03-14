@@ -89,6 +89,7 @@ def stop_download_route(app):
     @app.route('/stop_download', methods=['POST'])
     def inner_stop_download():
         write_log("Requête d'annulation de téléchargement reçue")
+        write_log(f"État de session avant annulation: {session}")
         if stop_download():
             session['is_downloading'] = False
             write_log("Téléchargement annulé avec succès")
