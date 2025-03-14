@@ -2,13 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const torrentForm = document.getElementById('torrent-form');
     const torrentFileInput = document.getElementById('torrent-file');
     const downloadButton = document.getElementById('download-button');
-    const stopDownloadButton = document.getElementById('stop-download-button');
-
-    const isDownloadingInput = document.getElementById('is-downloading');
-    const torrentFilePathInput = document.getElementById('torrent-file-path');
-    const handleInput = document.getElementById('handle');
-    const savePathInput = document.getElementById('save-path');
-    const downloadedFilesInput = document.getElementById('downloaded-files');
+    const downloadIdInput = document.getElementById('download-id'); // Champ caché pour l'identifiant du téléchargement
 
     let isDownloading = false;
     let eventSource = null;
@@ -24,13 +18,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    stopDownloadButton.addEventListener('click', function () {
-        stopDownload();
-    });
-
     function startDownload() {
         isDownloading = true;
-        isDownloadingInput.value = "true";
         torrentFileInput.disabled = true;
         downloadButton.textContent = 'Annuler le téléchargement';
 
@@ -45,11 +34,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (response.ok) {
                 response.json().then(data => {
                     if (data.success) {
-                        // Mettre à jour les éléments HTML cachés avec les valeurs correctes
-                        torrentFilePathInput.value = data.torrent_file_path;
-                        handleInput.value = data.handle;
-                        savePathInput.value = data.save_path;
-                        downloadedFilesInput.value = JSON.stringify(data.downloaded_files);
+                        // Mettre à jour le champ caché avec l'identifiant du téléchargement
+                        downloadIdInput.value = data.download_id;
 
                         eventSource = new EventSource(data.redirect_url);
                         var progressBar = document.getElementById('progress-bar');
@@ -71,7 +57,6 @@ document.addEventListener('DOMContentLoaded', function () {
                                 remainingTimeElem.textContent = 'Temps restant: 0s';
                                 eventSource.close();
                                 isDownloading = false;
-                                isDownloadingInput.value = "false";
                                 downloadButton.textContent = 'Lancer le téléchargement';
                                 torrentFileInput.disabled = false;
                                 return;
@@ -115,14 +100,12 @@ document.addEventListener('DOMContentLoaded', function () {
                             console.log('Connection closed');
                             eventSource.close();
                             isDownloading = false;
-                            isDownloadingInput.value = "false";
                             downloadButton.textContent = 'Lancer le téléchargement';
                             torrentFileInput.disabled = false;
                         };
                     } else {
                         console.error('Erreur lors du téléchargement du fichier');
                         isDownloading = false;
-                        isDownloadingInput.value = "false";
                         downloadButton.textContent = 'Lancer le téléchargement';
                         torrentFileInput.disabled = false;
                     }
@@ -130,14 +113,12 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 console.error('Erreur lors du téléchargement du fichier');
                 isDownloading = false;
-                isDownloadingInput.value = "false";
                 downloadButton.textContent = 'Lancer le téléchargement';
                 torrentFileInput.disabled = false;
             }
         }).catch(error => {
             console.error('Erreur réseau ou autre:', error);
             isDownloading = false;
-            isDownloadingInput.value = "false";
             downloadButton.textContent = 'Lancer le téléchargement';
             torrentFileInput.disabled = false;
         });
@@ -145,16 +126,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function stopDownload() {
         isDownloading = false;
-        isDownloadingInput.value = "false";
         torrentFileInput.disabled = false;
         downloadButton.textContent = 'Lancer le téléchargement';
 
         const downloadState = {
-            is_downloading: isDownloadingInput.value,
-            torrent_file_path: torrentFilePathInput.value,
-            handle: handleInput.value,
-            save_path: savePathInput.value,
-            downloaded_files: downloadedFilesInput.value
+            download_id: downloadIdInput.value // Inclure l'identifiant du téléchargement
         };
 
         fetch('/stop_download', {

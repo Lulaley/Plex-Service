@@ -6,6 +6,11 @@ import time
 import re
 import os
 import sys
+import threading
+
+# Dictionnaire global pour stocker les informations des téléchargements en cours
+downloads = {}
+downloads_lock = threading.Lock()
 
 def is_movie_or_series(torrent_info):
     """
@@ -192,11 +197,16 @@ def download_torrent(torrent_file_path, save_path, handle):
     handle['torrent_file_path'] = torrent_file_path
     handle['downloaded_files'] = []
 
+    with downloads_lock:
+        downloads[handle['id']] = handle
+
     write_log(f"Téléchargement de {info.name()}")
     while not h.is_seed():
         if not handle['is_downloading']:
             write_log("Téléchargement annulé.")
             ses.remove_torrent(h)
+            with downloads_lock:
+                del downloads[handle['id']]
             yield "data: cancelled\n\n"
             return
 
@@ -218,6 +228,8 @@ def download_torrent(torrent_file_path, save_path, handle):
 
     write_log(f"Téléchargement de {info.name()} Fini")
     ses.remove_torrent(h)
+    with downloads_lock:
+        del downloads[handle['id']]
     yield "data: done\n\n"
     sys.stdout.flush()  # Force l'envoi des données
     
