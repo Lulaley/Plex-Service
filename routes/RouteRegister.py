@@ -38,12 +38,13 @@ def register(app):
             # Construire le DN et les attributs de l'utilisateur
             dn = f"uid={username},dmdName=users,{base_dn}"
             attributes = [
-                ('objectClass', [b'inetOrgPerson', b'organizationalPerson', b'person']),
+                ('objectClass', [b'inetOrgPerson', b'organizationalPerson', b'person', b'otherUserInfos']),
                 ('uid', [username.encode('utf-8')]),
                 ('sn', [username.encode('utf-8')]),  # Nom de famille
                 ('cn', [username.encode('utf-8')]),  # Nom complet
                 ('userPassword', [hashed_password.encode('utf-8')]),  # Mot de passe en clair
-                ('mail', [email.encode('utf-8')])
+                ('mail', [email.encode('utf-8')]),
+                ('rightsAgreement', [b'PlexService::New']),  # Accord de droits par défaut
             ]
 
             # Créer une instance de ControleurLdap et ajouter l'utilisateur

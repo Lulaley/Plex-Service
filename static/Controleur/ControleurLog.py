@@ -1,20 +1,30 @@
 import logging
-import inspect
+import os
 from flask import session
 from .ControleurConf import ControleurConf
+from logging.handlers import WatchedFileHandler
+
+# Récupérer le chemin du fichier de log via ControleurConf
+conf = ControleurConf()
+log_file_path = conf.get_config('LOG', 'file')
+log_level_limit = conf.get_config('LOG', 'level').upper()
+if not log_file_path:
+    log_file_path = "/var/log/plex-service/plex-service.log"
+log_file_path = os.path.abspath(log_file_path)
+log_dir = os.path.dirname(log_file_path)
+
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
 
 def write_log(message, log_level=None, username=None):
-    # Get the configuration
-    conf = ControleurConf()
-    log_file_path = conf.get_config('LOG', 'file')
-    
-    # Use the provided log_level or fall back to the default from the configuration
+    import inspect
+    caller_function = inspect.stack()[1].function
+
     if log_level is None:
-        log_level = conf.get_config('LOG', 'level').upper()
+        log_level = "INFO"
     else:
         log_level = log_level.upper()
 
-    # Map string log levels to logging module constants
     log_levels = {
         'DEBUG': logging.DEBUG,
         'INFO': logging.INFO,
@@ -23,38 +33,23 @@ def write_log(message, log_level=None, username=None):
         'CRITICAL': logging.CRITICAL
     }
 
-    # Get the name of the calling function
-    caller_function = inspect.stack()[1].function
-
-    # Add username to the log message if available
     if username:
         message = f"{username} - {message}"
 
-    # Perform the log writing logic here
+    # Ajoute le nom de la fonction appelante au message
+    message = f"[{caller_function}] {message}"
+
     try:
-        # Ensure the log level is valid
-        if log_level not in log_levels:
-            raise ValueError(f"Invalid log level: {log_level}")
-
-        # Create a logger
-        logger = logging.getLogger(caller_function)
-        logger.setLevel(log_levels[log_level])
-
-        # Check if the logger already has handlers
+        logger = logging.getLogger("PlexServiceLogger")
+        logger.setLevel(log_levels[log_level_limit])
         if not logger.handlers:
-            # Create file handler
-            fh = logging.FileHandler(log_file_path)
-            fh.setLevel(log_levels[log_level])
-
-            # Create formatter and add it to the handler
-            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            fh = WatchedFileHandler(log_file_path)
+            fh.setLevel(log_levels[log_level_limit])
+            formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
             fh.setFormatter(formatter)
-
-            # Add the handler to the logger
             logger.addHandler(fh)
-
-        # Log the message with the caller function
-        logger.log(log_levels[log_level], f"{message}")
-
+        logger.log(log_levels[log_level], message)
     except Exception as e:
         print(f"Failed to write log: {e}")
+        with open("/var/log/plex-service/error.log", "a") as error_log:
+            error_log.write(f"Failed to write log: {e}\n")
