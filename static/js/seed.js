@@ -73,13 +73,16 @@ document.addEventListener('DOMContentLoaded', function () {
             if (result.success) {
                 console.log('Seed démarré avec succès:', result.seed_id);
                 loadActiveSeeds();
+                alert('Seed démarré avec succès !');
             } else {
-                alert('Erreur lors du démarrage du seed: ' + result.message);
+                const errorMsg = result.message || 'Erreur inconnue';
+                alert('Erreur lors du démarrage du seed: ' + errorMsg);
+                console.error('Erreur détaillée:', result);
             }
         })
         .catch(error => {
             console.error('Erreur réseau:', error);
-            alert('Erreur réseau lors du démarrage du seed');
+            alert('Erreur réseau lors du démarrage du seed: ' + error.message);
         });
     }
 
@@ -100,20 +103,31 @@ document.addEventListener('DOMContentLoaded', function () {
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
+        .then(response => {
+            // Vérifier le status HTTP
+            if (!response.ok) {
+                return response.json().then(err => {
+                    throw new Error(err.message || `Erreur HTTP ${response.status}`);
+                });
+            }
+            return response.json();
+        })
         .then(result => {
             if (result.success) {
                 console.log('Torrent uploadé et seed démarré:', result.seed_id);
                 document.getElementById('data-path-input').value = '';
                 document.getElementById('torrent-file-input').value = '';
                 loadActiveSeeds();
+                alert('Seed démarré avec succès !');
             } else {
-                alert('Erreur: ' + result.message);
+                const errorMsg = result.message || 'Erreur inconnue';
+                alert('Erreur: ' + errorMsg);
+                console.error('Erreur détaillée:', result);
             }
         })
         .catch(error => {
-            console.error('Erreur réseau:', error);
-            alert('Erreur réseau lors de l\'upload');
+            console.error('Erreur complète:', error);
+            alert('Erreur lors de l\'upload: ' + error.message);
         });
     }
 
