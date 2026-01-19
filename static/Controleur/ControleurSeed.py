@@ -135,8 +135,7 @@ def start_seed(seed_id, torrent_file_path, data_path):
         
         h = ses.add_torrent({
             'ti': info,
-            'save_path': save_path,
-            'seed_mode': True  # Mode seed uniquement
+            'save_path': save_path
         })
         
         with seeds_lock:
