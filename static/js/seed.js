@@ -106,11 +106,19 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => {
             // Vérifier le status HTTP
             if (!response.ok) {
-                return response.json().then(err => {
-                    throw new Error(err.message || `Erreur HTTP ${response.status}`);
+                return response.text().then(text => {
+                    console.error('Réponse du serveur:', text);
+                    throw new Error(`Erreur HTTP ${response.status}: Le serveur a retourné une erreur`);
                 });
             }
-            return response.json();
+            return response.text().then(text => {
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    console.error('Réponse non-JSON du serveur:', text);
+                    throw new Error('Le serveur a retourné une réponse invalide');
+                }
+            });
         })
         .then(result => {
             if (result.success) {
