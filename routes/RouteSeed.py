@@ -160,12 +160,10 @@ def upload_torrent_for_seed(app):
                 write_log(f"Erreur lors de l'upload du torrent: {str(e)}", "ERROR")
                 return jsonify({'success': False, 'message': str(e)}), 500
 
-def restore_seeds_route(app):
-    """Route pour restaurer les seeds au démarrage de l'application."""
-    @app.before_first_request
-    def inner_restore_seeds():
-        write_log("Restauration des seeds au démarrage de l'application")
-        try:
-            restore_seeds()
-        except Exception as e:
-            write_log(f"Erreur lors de la restauration des seeds: {str(e)}", "ERROR")
+def restore_seeds_on_startup():
+    """Fonction pour restaurer les seeds au démarrage de l'application."""
+    write_log("Restauration des seeds au démarrage de l'application")
+    try:
+        restore_seeds()
+    except Exception as e:
+        write_log(f"Erreur lors de la restauration des seeds: {str(e)}", "ERROR")
