@@ -128,6 +128,10 @@ def start_seed(seed_id, torrent_file_path, data_path):
         info = lt.torrent_info(torrent_file_path)
         write_log(f"Torrent info chargé: {info.name()}")
         
+        # Nettoyer le data_path (enlever les / finaux)
+        data_path = data_path.rstrip('/')
+        write_log(f"data_path nettoyé: {data_path}")
+        
         # Déterminer le chemin de sauvegarde
         # Le save_path doit être le dossier PARENT du contenu du torrent
         torrent_name = info.name()
@@ -140,9 +144,11 @@ def start_seed(seed_id, torrent_file_path, data_path):
             if os.path.basename(data_path) == torrent_name:
                 # Le save_path est le dossier parent
                 save_path = os.path.dirname(data_path)
+                write_log(f"Le dossier correspond au nom du torrent, utilisation du parent")
             else:
                 # Le save_path est data_path lui-même
                 save_path = data_path
+                write_log(f"Le dossier ne correspond pas au nom du torrent, utilisation de data_path")
         else:
             save_path = data_path
         
@@ -155,6 +161,8 @@ def start_seed(seed_id, torrent_file_path, data_path):
         if not os.path.exists(expected_path):
             write_log(f"ATTENTION: Le chemin {expected_path} n'existe pas!", "WARNING")
             write_log(f"data_path fourni: {data_path}", "WARNING")
+        else:
+            write_log(f"Le chemin {expected_path} existe bien!")
         
         h = ses.add_torrent({
             'ti': info,
