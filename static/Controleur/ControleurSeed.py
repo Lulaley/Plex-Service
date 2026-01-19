@@ -1,0 +1,266 @@
+from .ControleurLog import write_log
+from .ControleurConf import ControleurConf
+import libtorrent as lt
+import time
+import threading
+import json
+import os
+
+# Dictionnaire global pour stocker les seeds actifs
+active_seeds = {}
+seeds_lock = threading.Lock()
+
+# Fichier de persistance
+SEEDS_PERSISTENCE_FILE = "/var/www/public/Plex-Service/tmp/active_seeds.json"
+
+def load_persisted_seeds():
+    """Charge les seeds persistés depuis le fichier JSON."""
+    try:
+        if os.path.exists(SEEDS_PERSISTENCE_FILE):
+            with open(SEEDS_PERSISTENCE_FILE, 'r') as f:
+                data = json.load(f)
+                write_log(f"Seeds persistés chargés: {len(data)} seeds trouvés")
+                return data
+    except Exception as e:
+        write_log(f"Erreur lors du chargement des seeds persistés: {str(e)}", "ERROR")
+    return {}
+
+def save_persisted_seeds():
+    """Sauvegarde les seeds actifs dans le fichier JSON."""
+    try:
+        # Créer une version sérialisable des seeds (sans les objets libtorrent)
+        serializable_seeds = {}
+        with seeds_lock:
+            for seed_id, seed_data in active_seeds.items():
+                serializable_seeds[seed_id] = {
+                    'id': seed_data['id'],
+                    'torrent_file_path': seed_data['torrent_file_path'],
+                    'data_path': seed_data['data_path'],
+                    'name': seed_data['name'],
+                    'is_active': seed_data['is_active']
+                }
+        
+        with open(SEEDS_PERSISTENCE_FILE, 'w') as f:
+            json.dump(serializable_seeds, f, indent=4)
+        write_log(f"Seeds sauvegardés: {len(serializable_seeds)} seeds")
+    except Exception as e:
+        write_log(f"Erreur lors de la sauvegarde des seeds: {str(e)}", "ERROR")
+
+def find_torrent_file(data_path):
+    """Recherche un fichier .torrent dans le répertoire ou crée-en un."""
+    write_log(f"Recherche d'un fichier .torrent pour: {data_path}")
+    
+    # Vérifier si le chemin existe
+    if not os.path.exists(data_path):
+        write_log(f"Le chemin {data_path} n'existe pas", "ERROR")
+        return None
+    
+    # Si c'est un répertoire, chercher un fichier .torrent dedans
+    if os.path.isdir(data_path):
+        for file in os.listdir(data_path):
+            if file.endswith('.torrent'):
+                torrent_path = os.path.join(data_path, file)
+                write_log(f"Fichier .torrent trouvé: {torrent_path}")
+                return torrent_path
+    
+    # Si c'est un fichier, chercher un .torrent avec le même nom
+    if os.path.isfile(data_path):
+        base_name = os.path.splitext(os.path.basename(data_path))[0]
+        dir_path = os.path.dirname(data_path)
+        torrent_path = os.path.join(dir_path, f"{base_name}.torrent")
+        if os.path.exists(torrent_path):
+            write_log(f"Fichier .torrent trouvé: {torrent_path}")
+            return torrent_path
+    
+    write_log(f"Aucun fichier .torrent trouvé pour {data_path}", "WARNING")
+    return None
+
+def get_all_media_paths():
+    """Retourne la liste de tous les fichiers/dossiers disponibles pour le seed."""
+    conf = ControleurConf()
+    media_paths = []
+    
+    try:
+        # Récupérer les chemins des films et séries
+        movies_path = conf.get_config('DLT', 'movies')
+        series_path = conf.get_config('DLT', 'series')
+        
+        # Ajouter les films
+        if os.path.exists(movies_path):
+            for item in os.listdir(movies_path):
+                item_path = os.path.join(movies_path, item)
+                if os.path.isfile(item_path) and item.endswith(('.mp4', '.mkv', '.avi')):
+                    media_paths.append({
+                        'path': item_path,
+                        'name': item,
+                        'type': 'movie'
+                    })
+        
+        # Ajouter les séries
+        if os.path.exists(series_path):
+            for series_folder in os.listdir(series_path):
+                series_folder_path = os.path.join(series_path, series_folder)
+                if os.path.isdir(series_folder_path):
+                    media_paths.append({
+                        'path': series_folder_path,
+                        'name': series_folder,
+                        'type': 'series'
+                    })
+        
+        write_log(f"Chemins médias trouvés: {len(media_paths)}")
+    except Exception as e:
+        write_log(f"Erreur lors de la récupération des chemins médias: {str(e)}", "ERROR")
+    
+    return media_paths
+
+def start_seed(seed_id, torrent_file_path, data_path):
+    """Démarre un seed pour un fichier torrent donné."""
+    write_log(f"Démarrage du seed {seed_id} pour {torrent_file_path}")
+    
+    try:
+        ses = lt.session()
+        settings = {
+            'download_rate_limit': 0,  # Pas de téléchargement
+            'upload_rate_limit': -1,   # Upload illimité
+        }
+        ses.apply_settings(settings)
+        
+        info = lt.torrent_info(torrent_file_path)
+        
+        # Déterminer le chemin de sauvegarde
+        if os.path.isfile(data_path):
+            save_path = os.path.dirname(data_path)
+        else:
+            save_path = data_path
+        
+        h = ses.add_torrent({
+            'ti': info,
+            'save_path': save_path,
+            'seed_mode': True  # Mode seed uniquement
+        })
+        
+        with seeds_lock:
+            active_seeds[seed_id] = {
+                'id': seed_id,
+                'handle': h,
+                'session': ses,
+                'torrent_file_path': torrent_file_path,
+                'data_path': data_path,
+                'name': info.name(),
+                'is_active': True,
+                'stats': {
+                    'uploaded': 0,
+                    'upload_rate': 0,
+                    'peers': 0,
+                    'seeds': 0
+                }
+            }
+        
+        save_persisted_seeds()
+        write_log(f"Seed {seed_id} démarré avec succès")
+        
+        # Lancer le thread de monitoring
+        monitor_thread = threading.Thread(target=monitor_seed, args=(seed_id,), daemon=True)
+        monitor_thread.start()
+        
+        return True
+    except Exception as e:
+        write_log(f"Erreur lors du démarrage du seed {seed_id}: {str(e)}", "ERROR")
+        return False
+
+def monitor_seed(seed_id):
+    """Monitore un seed et met à jour ses statistiques."""
+    write_log(f"Démarrage du monitoring pour le seed {seed_id}")
+    
+    while True:
+        try:
+            with seeds_lock:
+                if seed_id not in active_seeds:
+                    write_log(f"Seed {seed_id} n'existe plus, arrêt du monitoring")
+                    break
+                
+                seed_data = active_seeds[seed_id]
+                if not seed_data['is_active']:
+                    write_log(f"Seed {seed_id} n'est plus actif, arrêt du monitoring")
+                    break
+                
+                h = seed_data['handle']
+                s = h.status()
+                
+                # Mettre à jour les statistiques
+                seed_data['stats'] = {
+                    'uploaded': s.total_upload,
+                    'upload_rate': s.upload_rate / 1000,  # en kB/s
+                    'peers': s.num_peers,
+                    'seeds': s.num_seeds,
+                    'progress': s.progress * 100
+                }
+            
+            time.sleep(2)  # Mettre à jour toutes les 2 secondes
+        except Exception as e:
+            write_log(f"Erreur dans le monitoring du seed {seed_id}: {str(e)}", "ERROR")
+            time.sleep(5)
+
+def stop_seed(seed_id):
+    """Arrête un seed."""
+    write_log(f"Arrêt du seed {seed_id}")
+    
+    try:
+        with seeds_lock:
+            if seed_id not in active_seeds:
+                write_log(f"Seed {seed_id} introuvable", "WARNING")
+                return False
+            
+            seed_data = active_seeds[seed_id]
+            seed_data['is_active'] = False
+            
+            # Arrêter la session libtorrent
+            if 'session' in seed_data and seed_data['session']:
+                seed_data['session'].remove_torrent(seed_data['handle'])
+            
+            # Supprimer du dictionnaire
+            del active_seeds[seed_id]
+        
+        save_persisted_seeds()
+        write_log(f"Seed {seed_id} arrêté avec succès")
+        return True
+    except Exception as e:
+        write_log(f"Erreur lors de l'arrêt du seed {seed_id}: {str(e)}", "ERROR")
+        return False
+
+def get_seed_stats(seed_id):
+    """Retourne les statistiques d'un seed."""
+    with seeds_lock:
+        if seed_id in active_seeds:
+            return active_seeds[seed_id]['stats']
+    return None
+
+def get_all_seeds():
+    """Retourne la liste de tous les seeds actifs."""
+    with seeds_lock:
+        seeds_list = []
+        for seed_id, seed_data in active_seeds.items():
+            seeds_list.append({
+                'id': seed_data['id'],
+                'name': seed_data['name'],
+                'data_path': seed_data['data_path'],
+                'is_active': seed_data['is_active'],
+                'stats': seed_data['stats']
+            })
+        return seeds_list
+
+def restore_seeds():
+    """Restaure les seeds persistés au démarrage."""
+    write_log("Restauration des seeds persistés")
+    persisted_seeds = load_persisted_seeds()
+    
+    for seed_id, seed_info in persisted_seeds.items():
+        try:
+            write_log(f"Restauration du seed {seed_id}")
+            start_seed(
+                seed_id,
+                seed_info['torrent_file_path'],
+                seed_info['data_path']
+            )
+        except Exception as e:
+            write_log(f"Erreur lors de la restauration du seed {seed_id}: {str(e)}", "ERROR")

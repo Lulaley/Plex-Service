@@ -13,6 +13,7 @@
             <button onclick="window.location.href='{{ url_for('inner_download') }}'">Téléchargement</button>
             {% endif %}
             {% if session.rights_agreement == 'PlexService::SuperAdmin' %}
+            <button onclick="window.location.href='{{ url_for('inner_seed') }}'">Seed</button>
             <button class="notification-bubble" id="user-button" onclick="window.location.href='{{ url_for('manage_users') }}'">Utilisateurs</button>
             {% endif %}
             <button class="username">{{ session.username }}</button>

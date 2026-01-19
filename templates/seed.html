@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plex Service - Seed</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/plex-icon.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/homeMain.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/seed.css') }}">
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="center-container blur-background fade-in">
+        <h1>Gestion des Seeds</h1>
+
+        <!-- Formulaire pour ajouter un nouveau seed -->
+        <div class="add-seed-section">
+            <h2>Ajouter un nouveau seed</h2>
+            
+            <!-- Option 1: Sélectionner depuis les médias disponibles -->
+            <div class="seed-option">
+                <h3>Option 1: Sélectionner depuis les médias</h3>
+                <select id="media-select" class="media-select">
+                    <option value="">-- Sélectionner un média --</option>
+                </select>
+                <button id="start-seed-from-media" class="btn-primary">Démarrer le seed</button>
+            </div>
+
+            <!-- Option 2: Upload d'un fichier .torrent -->
+            <div class="seed-option">
+                <h3>Option 2: Upload d'un fichier .torrent</h3>
+                <form id="torrent-upload-form">
+                    <input type="text" id="data-path-input" placeholder="Chemin des données (/path/to/data)" required>
+                    <input type="file" id="torrent-file-input" accept=".torrent" required>
+                    <button type="submit" class="btn-primary">Upload et démarrer</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Liste des seeds actifs -->
+        <div class="seeds-list-section">
+            <h2>Seeds actifs (<span id="seeds-count">0</span>)</h2>
+            <div id="seeds-container">
+                <!-- Les seeds seront ajoutés dynamiquement ici -->
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul class="flashes">
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+    </div>
+    <script src="{{ url_for('static', filename='js/seed.js') }}"></script>
+</body>
+
+</html>
