@@ -129,17 +129,42 @@ def start_seed(seed_id, torrent_file_path, data_path):
         write_log(f"Torrent info chargé: {info.name()}")
         
         # Déterminer le chemin de sauvegarde
+        # Le save_path doit être le dossier PARENT du contenu du torrent
+        torrent_name = info.name()
+        
         if os.path.isfile(data_path):
+            # Si data_path est un fichier, le save_path est son dossier parent
             save_path = os.path.dirname(data_path)
+        elif os.path.isdir(data_path):
+            # Si data_path est un dossier et que son nom correspond au torrent
+            if os.path.basename(data_path) == torrent_name:
+                # Le save_path est le dossier parent
+                save_path = os.path.dirname(data_path)
+            else:
+                # Le save_path est data_path lui-même
+                save_path = data_path
         else:
             save_path = data_path
         
-        write_log(f"Chemin de sauvegarde: {save_path}")
+        write_log(f"Chemin de sauvegarde déterminé: {save_path}")
+        write_log(f"Nom du torrent: {torrent_name}")
+        write_log(f"Chemin complet attendu: {os.path.join(save_path, torrent_name)}")
+        
+        # Vérifier que les fichiers existent
+        expected_path = os.path.join(save_path, torrent_name)
+        if not os.path.exists(expected_path):
+            write_log(f"ATTENTION: Le chemin {expected_path} n'existe pas!", "WARNING")
+            write_log(f"data_path fourni: {data_path}", "WARNING")
         
         h = ses.add_torrent({
             'ti': info,
-            'save_path': save_path
+            'save_path': save_path,
+            'flags': lt.torrent_flags.upload_mode  # Mode upload uniquement (pas de download)
         })
+        
+        # Forcer la vérification des fichiers
+        h.force_recheck()
+        write_log(f"Force recheck lancé pour {seed_id}")
         
         write_log(f"Torrent ajouté à la session, état initial: {h.status().state}")
         
