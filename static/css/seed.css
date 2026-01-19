@@ -210,6 +210,17 @@
     border: 1px solid #dc3545;
 }
 
+.state-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: bold;
+    background: rgba(229, 160, 13, 0.3);
+    color: #e5a00d;
+    border: 1px solid #e5a00d;
+}
+
 /* Statistiques du seed */
 .seed-stats {
     display: grid;

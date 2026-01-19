@@ -126,6 +126,7 @@ def start_seed(seed_id, torrent_file_path, data_path):
         ses.apply_settings(settings)
         
         info = lt.torrent_info(torrent_file_path)
+        write_log(f"Torrent info chargé: {info.name()}")
         
         # Déterminer le chemin de sauvegarde
         if os.path.isfile(data_path):
@@ -133,10 +134,14 @@ def start_seed(seed_id, torrent_file_path, data_path):
         else:
             save_path = data_path
         
+        write_log(f"Chemin de sauvegarde: {save_path}")
+        
         h = ses.add_torrent({
             'ti': info,
             'save_path': save_path
         })
+        
+        write_log(f"Torrent ajouté à la session, état initial: {h.status().state}")
         
         with seeds_lock:
             active_seeds[seed_id] = {
@@ -147,24 +152,31 @@ def start_seed(seed_id, torrent_file_path, data_path):
                 'data_path': data_path,
                 'name': info.name(),
                 'is_active': True,
+                'state': 'starting',
                 'stats': {
                     'uploaded': 0,
                     'upload_rate': 0,
                     'peers': 0,
-                    'seeds': 0
+                    'seeds': 0,
+                    'progress': 0
                 }
             }
         
         save_persisted_seeds()
-        write_log(f"Seed {seed_id} démarré avec succès")
+        write_log(f"Seed {seed_id} ajouté au dictionnaire et sauvegardé")
         
         # Lancer le thread de monitoring
         monitor_thread = threading.Thread(target=monitor_seed, args=(seed_id,), daemon=True)
         monitor_thread.start()
+        write_log(f"Thread de monitoring démarré pour le seed {seed_id}")
         
         return True
     except Exception as e:
         write_log(f"Erreur lors du démarrage du seed {seed_id}: {str(e)}", "ERROR")
+        # Nettoyer en cas d'erreur
+        with seeds_lock:
+            if seed_id in active_seeds:
+                del active_seeds[seed_id]
         return False
 
 def monitor_seed(seed_id):
@@ -186,13 +198,20 @@ def monitor_seed(seed_id):
                 h = seed_data['handle']
                 s = h.status()
                 
+                # Log de l'état actuel
+                state_str = str(s.state)
+                if seed_data.get('state') != state_str:
+                    write_log(f"Seed {seed_id} - Changement d'état: {state_str}")
+                    seed_data['state'] = state_str
+                
                 # Mettre à jour les statistiques
                 seed_data['stats'] = {
                     'uploaded': s.total_upload,
                     'upload_rate': s.upload_rate / 1000,  # en kB/s
                     'peers': s.num_peers,
                     'seeds': s.num_seeds,
-                    'progress': s.progress * 100
+                    'progress': s.progress * 100,
+                    'state': state_str
                 }
             
             time.sleep(2)  # Mettre à jour toutes les 2 secondes
@@ -244,6 +263,7 @@ def get_all_seeds():
                 'name': seed_data['name'],
                 'data_path': seed_data['data_path'],
                 'is_active': seed_data['is_active'],
+                'state': seed_data.get('state', 'unknown'),
                 'stats': seed_data['stats']
             })
         return seeds_list

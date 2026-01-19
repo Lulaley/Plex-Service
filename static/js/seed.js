@@ -157,6 +157,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const peers = seed.stats.peers || 0;
         const seedsCount = seed.stats.seeds || 0;
         const progress = seed.stats.progress ? seed.stats.progress.toFixed(1) : '0.0';
+        const state = seed.stats.state || seed.state || 'unknown';
 
         card.innerHTML = `
             <div class="seed-header">
@@ -166,6 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="seed-info">
                 <p><strong>Chemin:</strong> ${seed.data_path}</p>
                 <p><strong>Statut:</strong> <span class="status-badge ${seed.is_active ? 'active' : 'inactive'}">${seed.is_active ? 'Actif' : 'Inactif'}</span></p>
+                <p><strong>État:</strong> <span class="state-badge">${state}</span></p>
             </div>
             <div class="seed-stats">
                 <div class="stat-item">
