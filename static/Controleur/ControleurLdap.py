@@ -9,6 +9,7 @@ class ControleurLdap:
         self.conn = ldap.initialize(self.server)
         self.conn.start_tls_s()
         self.conn.set_option(ldap.OPT_PROTOCOL_VERSION, 3)
+        write_log(f"Initialisation de la connexion LDAP avec le serveur: {self.server}")
 
     def bind_as_root(self):
         try:
@@ -24,21 +25,24 @@ class ControleurLdap:
             self.bind_as_root()
             search_base = self.config.get_config('LDAP', 'base_dn')
             search_filter = f"(uid={username})"
+            write_log(f"Recherche de l'utilisateur {username} dans LDAP avec le filtre: {search_filter}")
             result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter)
 
             if not result:
-                write_log("Utilisateur non trouvé: " + username, 'ERROR')
+                write_log(f"Utilisateur non trouvé: {username}", 'ERROR')
                 return False
 
             user_dn = result[0][0]
-            self.conn.bind_s(user_dn, password)
-            write_log("Authentification réussie de l'utilisateur: " + username)
-            return True
-        except ldap.INVALID_CREDENTIALS:
-            write_log("Les informations d'identification sont incorrectes pour l'utilisateur: " + username, 'ERROR')
-            return False
+            write_log(f"Utilisateur trouvé: {user_dn}. Tentative de connexion avec le mot de passe fourni.")
+            try:
+                self.conn.bind_s(user_dn, password)
+                write_log(f"Authentification réussie de l'utilisateur: {username}")
+                return True
+            except ldap.INVALID_CREDENTIALS:
+                write_log(f"Mot de passe incorrect pour l'utilisateur: {username}", 'ERROR')
+                return False
         except ldap.LDAPError as e:
-            write_log("Erreur d'authentification pour l'utilisateur: " + username + " - " + str(e), 'ERROR')
+            write_log(f"Erreur d'authentification pour l'utilisateur: {username} - {str(e)}", 'ERROR')
             return False
 
     def search_user(self, username):
@@ -123,7 +127,7 @@ class ControleurLdap:
             dn = f'uid={username},dmdName=users,{base_dn}'
             mod_attrs = [(ldap.MOD_REPLACE, attribute, value.encode('utf-8'))]
             self.conn.modify_s(dn, mod_attrs)
-            write_log(f"Attribut {attribute} remplacer pour l'utilisateur {username}")
+            write_log(f"Attribut {attribute} remplacé pour l'utilisateur {username}")
             return True
         except ldap.LDAPError as e:
             write_log(f"Erreur lors du remplacement de l'attribut LDAP: {e}", 'ERROR')
