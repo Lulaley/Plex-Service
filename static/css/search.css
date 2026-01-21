@@ -11,10 +11,12 @@ body {
 }
 
 .search-wrapper {
-    max-width: 1200px;
+    max-width: 1400px;
+    width: 100%;
     margin: 80px auto 40px;
     padding: 20px;
     animation: fadeInUp 0.6s ease;
+    box-sizing: border-box;
 }
 
 @keyframes fadeInUp {
@@ -53,6 +55,8 @@ body {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .search-card:hover {
@@ -64,6 +68,7 @@ body {
     position: relative;
     display: flex;
     align-items: center;
+    width: 100%;
 }
 
 .search-icon {
@@ -103,9 +108,11 @@ input[type="text"]::placeholder {
 
 /* Ancienne structure container */
 .container {
-    max-width: 1200px;
+    max-width: 1400px;
+    width: 100%;
     margin: 80px auto 40px;
     padding: 20px;
+    box-sizing: border-box;
 }
 
 .container h1,
@@ -119,6 +126,8 @@ input[type="text"]::placeholder {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 24px;
     margin-top: 30px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .result-card,
