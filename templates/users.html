@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#313B45">
     <title>Liste des utilisateurs</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/plex-icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/users.css') }}">
@@ -11,44 +13,64 @@
 
     {% include 'navbar.html' %}
 
-    <div class="center-container blur-background fade-in">
-        <h1>Liste des utilisateurs</h1>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Nom d'utilisateur</th>
-                    <th>Email</th>
-                    <th>Statut</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                <tr>
-                    <td>{{ user.uid }}</td>
-                    <td>{{ user.mail }}</td>
-                    <td>{{ user.rightsAgreement }}</td>
-                    <td>
-                        {% if not user.rightsAgreement %}
-                        <button onclick="validateUser('{{ user.uid }}')">Valider</button>
-                        {% endif %}
-                        {% if session.rights_agreement == 'PlexService::SuperAdmin' %}
-                            {% if user.rightsAgreement != 'PlexService::SuperAdmin' %}
-                            <button onclick="deleteUser('{{ user.uid }}')">Supprimer</button>
-                            {% endif %}
-                            {% if user.rightsAgreement != 'PlexService::Admin' and user.rightsAgreement != 'PlexService::SuperAdmin' %}
-                            <button onclick="makeAdmin('{{ user.uid }}')">Rendre Admin</button>
-                            {% endif %}
-                        {% elif session.rights_agreement == 'PlexService::Admin' %}
-                            {% if user.rightsAgreement == 'PlexService::User' %}
-                            <button onclick="deleteUser('{{ user.uid }}')">Supprimer</button>
-                            {% endif %}
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="users-wrapper">
+        <div class="users-header">
+            <h1>👥 Gestion des Utilisateurs</h1>
+            <p class="subtitle">Gérez les droits et les accès de vos utilisateurs</p>
+        </div>
+
+        <div class="users-table-card">
+            <div class="table-responsive">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>Nom d'utilisateur</th>
+                            <th>Email</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td><span class="username">{{ user.uid }}</span></td>
+                            <td><span class="email">{{ user.mail }}</span></td>
+                            <td>
+                                {% if user.rightsAgreement == 'PlexService::SuperAdmin' %}
+                                    <span class="status-badge super-admin">Super Admin</span>
+                                {% elif user.rightsAgreement == 'PlexService::Admin' %}
+                                    <span class="status-badge admin">Admin</span>
+                                {% elif user.rightsAgreement == 'PlexService::User' %}
+                                    <span class="status-badge user">Utilisateur</span>
+                                {% else %}
+                                    <span class="status-badge pending">En attente</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    {% if not user.rightsAgreement %}
+                                    <button class="btn btn-validate" onclick="validateUser('{{ user.uid }}')">✓ Valider</button>
+                                    {% endif %}
+                                    {% if session.rights_agreement == 'PlexService::SuperAdmin' %}
+                                        {% if user.rightsAgreement != 'PlexService::SuperAdmin' %}
+                                        <button class="btn btn-delete" onclick="deleteUser('{{ user.uid }}')">🗑 Supprimer</button>
+                                        {% endif %}
+                                        {% if user.rightsAgreement != 'PlexService::Admin' and user.rightsAgreement != 'PlexService::SuperAdmin' %}
+                                        <button class="btn btn-admin" onclick="makeAdmin('{{ user.uid }}')">⭐ Admin</button>
+                                        {% endif %}
+                                    {% elif session.rights_agreement == 'PlexService::Admin' %}
+                                        {% if user.rightsAgreement == 'PlexService::User' %}
+                                        <button class="btn btn-delete" onclick="deleteUser('{{ user.uid }}')">🗑 Supprimer</button>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
     <script src="{{ url_for('static', filename='js/users.js') }}"></script>
 </body>

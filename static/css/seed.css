@@ -1,307 +1,286 @@
-/* Styles pour la page de seeding */
+body {
+    background-color: #313B45;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+}
 
-.center-container h1 {
+.seed-wrapper {
+    max-width: 1400px;
+    width: 100%;
+    margin: 80px auto 40px;
+    padding: 20px;
+    animation: fadeInUp 0.6s ease;
+    box-sizing: border-box;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.seed-header {
     text-align: center;
-    color: #e5a00d;
-    margin-bottom: 30px;
-    font-size: 2.5em;
-}
-
-.center-container h2 {
-    color: #e5a00d;
-    margin-bottom: 20px;
-    font-size: 1.8em;
-    border-bottom: 2px solid #e5a00d;
-    padding-bottom: 10px;
-}
-
-.center-container h3 {
-    color: #f0ad4e;
-    margin-bottom: 15px;
-    font-size: 1.3em;
-}
-
-/* Section d'ajout de seed */
-.add-seed-section {
-    background: rgba(0, 0, 0, 0.6);
-    padding: 25px;
-    border-radius: 10px;
     margin-bottom: 40px;
 }
 
+.seed-header h1 {
+    font-size: 2.5em;
+    margin: 0 0 10px 0;
+    color: #ff9900;
+}
+
+.subtitle {
+    color: #94a3b8;
+    font-size: 1.1em;
+    margin: 0;
+}
+
+.add-seed-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.add-seed-card h2 {
+    color: #333;
+    font-size: 1.5em;
+    margin: 0 0 25px 0;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(255, 153, 0, 0.3);
+}
+
 .seed-option {
-    background: rgba(255, 255, 255, 0.05);
+    margin-bottom: 30px;
     padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .seed-option:last-child {
     margin-bottom: 0;
 }
 
-/* Sélecteur de média */
-.media-select {
-    width: 100%;
-    padding: 12px;
-    font-size: 16px;
-    border: 2px solid #e5a00d;
-    border-radius: 5px;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    margin-bottom: 15px;
+.seed-option h3 {
+    color: #ff9900;
+    font-size: 1.1em;
+    margin: 0 0 15px 0;
 }
 
-.media-select:focus {
-    outline: none;
-    border-color: #f0ad4e;
-    box-shadow: 0 0 10px rgba(229, 160, 13, 0.5);
-}
-
-/* Formulaire d'upload */
-#torrent-upload-form {
+.input-group {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
 }
 
-#data-path-input,
-#torrent-file-input {
-    padding: 12px;
-    font-size: 16px;
-    border: 2px solid #e5a00d;
-    border-radius: 5px;
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-}
-
-#data-path-input:focus {
-    outline: none;
-    border-color: #f0ad4e;
-    box-shadow: 0 0 10px rgba(229, 160, 13, 0.5);
-}
-
-/* Boutons */
-.btn-primary {
-    padding: 12px 25px;
-    font-size: 16px;
-    font-weight: bold;
-    color: white;
-    background: linear-gradient(135deg, #e5a00d 0%, #f0ad4e 100%);
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+.media-select,
+input[type="text"],
+input[type="file"] {
+    padding: 14px 18px;
+    font-size: 1em;
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    background-color: white;
+    color: #333;
+    font-family: inherit;
     transition: all 0.3s ease;
 }
 
+.media-select:focus,
+input[type="text"]:focus,
+input[type="file"]:focus {
+    outline: none;
+    border-color: #ff9900;
+    box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.1);
+}
+
+.btn-primary {
+    background-color: #ff9900;
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 153, 0, 0.3);
+}
+
 .btn-primary:hover {
-    background: linear-gradient(135deg, #f0ad4e 0%, #e5a00d 100%);
-    box-shadow: 0 5px 15px rgba(229, 160, 13, 0.4);
+    background-color: #ff7700;
     transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 153, 0, 0.4);
 }
 
 .btn-primary:active {
     transform: translateY(0);
 }
 
-/* Section liste des seeds */
 .seeds-list-section {
-    background: rgba(0, 0, 0, 0.6);
-    padding: 25px;
-    border-radius: 10px;
+    margin-top: 40px;
+}
+
+.seeds-list-section h2 {
+    color: #ff9900;
+    font-size: 1.5em;
+    margin: 0 0 20px 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(255, 153, 0, 0.3);
 }
 
 #seeds-container {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
 }
 
-.no-seeds {
-    text-align: center;
-    color: #999;
-    font-size: 1.2em;
-    padding: 40px;
+.seed-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    animation: fadeInScale 0.5s ease;
 }
 
-/* Carte de seed */
-.seed-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(229, 160, 13, 0.3);
-    border-radius: 8px;
-    padding: 20px;
-    transition: all 0.3s ease;
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .seed-card:hover {
-    border-color: #e5a00d;
-    box-shadow: 0 5px 15px rgba(229, 160, 13, 0.2);
-    transform: translateY(-2px);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(255, 153, 0, 0.3);
 }
 
-/* En-tête de la carte */
-.seed-header {
+.seed-card h3 {
+    color: #333;
+    font-size: 1.1em;
+    margin: 0 0 12px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.seed-card p {
+    color: #666;
+    font-size: 0.9em;
+    margin: 6px 0;
+}
+
+.seed-card .seed-actions {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid rgba(229, 160, 13, 0.3);
+    gap: 10px;
 }
 
-.seed-name {
-    color: #e5a00d;
-    margin: 0;
-    font-size: 1.4em;
+.seed-card button {
     flex: 1;
-}
-
-.btn-stop {
-    padding: 8px 20px;
-    font-size: 14px;
-    font-weight: bold;
-    color: white;
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    padding: 8px 16px;
     border: none;
-    border-radius: 5px;
+    border-radius: 8px;
+    font-size: 0.9em;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
-.btn-stop:hover {
-    background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
-    box-shadow: 0 3px 10px rgba(220, 53, 69, 0.4);
-}
-
-/* Informations du seed */
-.seed-info {
-    margin-bottom: 15px;
-}
-
-.seed-info p {
-    margin: 8px 0;
-    color: #ccc;
-    font-size: 0.95em;
-}
-
-.seed-info strong {
-    color: #e5a00d;
-    margin-right: 5px;
-}
-
-/* Badge de statut */
-.status-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.85em;
-    font-weight: bold;
-}
-
-.status-badge.active {
-    background: rgba(40, 167, 69, 0.3);
-    color: #28a745;
-    border: 1px solid #28a745;
-}
-
-.status-badge.inactive {
-    background: rgba(220, 53, 69, 0.3);
-    color: #dc3545;
-    border: 1px solid #dc3545;
-}
-
-.state-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.85em;
-    font-weight: bold;
-    background: rgba(229, 160, 13, 0.3);
-    color: #e5a00d;
-    border: 1px solid #e5a00d;
-}
-
-/* Statistiques du seed */
-.seed-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
-    margin-top: 15px;
-}
-
-.stat-item {
-    background: rgba(0, 0, 0, 0.4);
-    padding: 12px;
-    border-radius: 5px;
-    text-align: center;
-}
-
-.stat-label {
-    display: block;
-    color: #999;
-    font-size: 0.85em;
-    margin-bottom: 5px;
-}
-
-.stat-value {
-    display: block;
-    color: #e5a00d;
-    font-size: 1.2em;
-    font-weight: bold;
-}
-
-/* Messages flash */
-.flashes {
-    list-style: none;
-    padding: 0;
-    margin: 20px 0;
-}
-
-.flashes li {
-    padding: 15px;
-    margin-bottom: 10px;
-    background: rgba(220, 53, 69, 0.3);
-    border: 1px solid #dc3545;
-    border-radius: 5px;
+.seed-card button.stop-btn {
+    background-color: #ef4444;
     color: white;
+}
+
+.seed-card button.stop-btn:hover {
+    background-color: #dc2626;
+}
+
+.flash-messages {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    z-index: 1000;
+    max-width: 400px;
+}
+
+.flash-message {
+    background: rgba(255, 153, 0, 0.95);
+    color: white;
+    padding: 16px 20px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .center-container h1 {
-        font-size: 2em;
+    .seed-wrapper {
+        margin: 70px 10px 20px;
+        padding: 15px;
     }
-
-    .center-container h2 {
-        font-size: 1.5em;
+    
+    .seed-header h1 {
+        font-size: 1.8em;
     }
-
-    .seed-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
+    
+    .add-seed-card {
+        padding: 20px;
     }
-
-    .btn-stop {
-        width: 100%;
-    }
-
-    .seed-stats {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    #torrent-upload-form {
-        gap: 10px;
+    
+    #seeds-container {
+        grid-template-columns: 1fr;
     }
 }
 
-@media (max-width: 480px) {
-    .seed-stats {
-        grid-template-columns: 1fr;
-    }
-
-    .add-seed-section,
-    .seeds-list-section {
+@media (max-width: 400px) {
+    .add-seed-card {
         padding: 15px;
+    }
+    
+    .seed-option {
+        padding: 15px;
+    }
+}
+
+/* Touch optimization */
+@media (hover: none) and (pointer: coarse) {
+    .btn-primary,
+    .seed-card button {
+        min-height: 44px;
     }
 }

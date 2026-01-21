@@ -4,68 +4,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#313B45">
     <title>Plex Service</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/plex-icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 </head>
 
 <body>
-    <div class="plex-logo">
-        <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="showButtons()">
-    </div>
-    <div id="buttons" style="display: none;">
-        <button id="connexion" onclick="showLoginForm()">Connexion</button>
-        <button id="creer" onclick="showCreateForm()">Créer</button>
-    </div>
-    <div id="login-form" style="display: none;">
-        <form action="/index" method="post" autocomplete="on">
-            <input type="text" name="username" placeholder="Nom d'utilisateur" required autocomplete="username">
-            <div class="password-container">
-                <input type="password" name="password" placeholder="Mot de passe" required autocomplete="current-password">
-                <span class="toggle-password" onclick="togglePasswordVisibility(this)">👁️</span>
-            </div>
-            <div class="remember-me">
-                <input type="checkbox" id="remember_me" name="remember_me">
-                <label for="remember_me">Maintenir la connexion</label>
-            </div>
-            <div class="submit-container">
-                <input type="submit" value="Se connecter">
-            </div>
-        </form>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="flash-messages">
-                    {% for category, message in messages %}
-                        <div class="flash-message {{ category }}">{{ message }}</div>
-                    {% endfor %}
+    <div class="login-container">
+        <div class="plex-logo">
+            <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="showButtons()">
+        </div>
+        
+        <div id="buttons" class="buttons-wrapper" style="display: none;">
+            <button class="btn-primary" id="connexion" onclick="showLoginForm()">🔐 Connexion</button>
+            <button class="btn-secondary" id="creer" onclick="showCreateForm()">✨ Créer un compte</button>
+        </div>
+        
+        <div id="login-form" class="form-card" style="display: none;">
+            <h2>Connexion</h2>
+            <form action="/index" method="post" autocomplete="on">
+                <div class="input-group">
+                    <input type="text" name="username" placeholder="Nom d'utilisateur" required autocomplete="username">
                 </div>
-            {% endif %}
-        {% endwith %}
-    </div>
-    <div id="create-form">
-        <form action="/register" method="post" autocomplete="on">
-            <div class="tooltip">
-                <input type="text" id="username" name="username" placeholder="Nom d'utilisateur" required autocomplete="username">
-            </div>
-            <div class="tooltip">
-                <input type="text" id="email" name="email" placeholder="Adresse email" required autocomplete="email">
-            </div>
-            <div class="tooltip password-container">
-                <input type="password" id="createPassword" name="createPassword" placeholder="Mot de passe" required autocomplete="new-password">
-                <span class="toggle-password" onclick="togglePasswordVisibility(this)">👁️</span>
-            </div>
-            <div class="tooltip password-container">
-                <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirmer le mot de passe" required autocomplete="new-password">
-                <span class="toggle-password" onclick="togglePasswordVisibility(this)">👁️</span>
-            </div>
-            <div class="submit-container">
-                <input type="submit" id="submit-btn" value="Créer un compte" style="display: none;">
-                <span class="tooltiptext" id="username-tooltip">Nom d'utilisateur requis</span>
-                <span class="tooltiptext" id="email-tooltip">Email invalide</span>
-                <span class="tooltiptext" id="createPassword-tooltip">Mot de passe requis</span>
-                <span class="tooltiptext" id="confirm_password-tooltip">Les mots de passe ne correspondent pas</span>
-            </div>
-        </form>
+                <div class="input-group password-container">
+                    <input type="password" name="password" placeholder="Mot de passe" required autocomplete="current-password">
+                    <span class="toggle-password" onclick="togglePasswordVisibility(this)">👁️</span>
+                </div>
+                <div class="remember-me">
+                    <input type="checkbox" id="remember_me" name="remember_me">
+                    <label for="remember_me">Maintenir la connexion</label>
+                </div>
+                <div class="submit-container">
+                    <input type="submit" class="btn-submit" value="Se connecter">
+                </div>
+            </form>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash-message {{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+        </div>
+        
+        <div id="create-form" class="form-card">
+            <h2>Créer un compte</h2>
+            <form action="/register" method="post" autocomplete="on">
+                <div class="input-group tooltip">
+                    <input type="text" id="username" name="username" placeholder="Nom d'utilisateur" required autocomplete="username">
+                </div>
+                <div class="input-group tooltip">
+                    <input type="text" id="email" name="email" placeholder="Adresse email" required autocomplete="email">
+                </div>
+                <div class="input-group tooltip password-container">
+                    <input type="password" id="createPassword" name="createPassword" placeholder="Mot de passe" required autocomplete="new-password">
+                    <span class="toggle-password" onclick="togglePasswordVisibility(this)">👁️</span>
+                </div>
+                <div class="input-group tooltip password-container">
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirmer le mot de passe" required autocomplete="new-password">
+                    <span class="toggle-password" onclick="togglePasswordVisibility(this)">👁️</span>
+                </div>
+                <div class="submit-container">
+                    <input type="submit" id="submit-btn" class="btn-submit" value="Créer un compte" style="display: none;">
+                    <span class="tooltiptext" id="username-tooltip">Nom d'utilisateur requis</span>
+                    <span class="tooltiptext" id="email-tooltip">Email invalide</span>
+                    <span class="tooltiptext" id="createPassword-tooltip">Mot de passe requis</span>
+                    <span class="tooltiptext" id="confirm_password-tooltip">Les mots de passe ne correspondent pas</span>
+                </div>
+            </form>
+        </div>
     </div>
     <script src="{{ url_for('static', filename='js/index.js') }}"></script>
 </body>

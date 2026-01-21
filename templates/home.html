@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#313B45">
     <title>Plex Service - Home</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/plex-icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/homeMain.css') }}">
@@ -20,29 +22,60 @@
 
     {% include 'navbar.html' %}
 
-    <div class="center-container {% if session.get('from_index') %}blur-background fade-in{% endif %}">
-        <div class="text-info">
-            <p>Bienvenue sur le service de demandes d'accès à des films ou séries pour le Plex de {owner-plex}.</p>
-            <p> - Vous pouvez rechercher des films ou séries et demander l'accès à ceux-ci.</p>
-            <p> - Vous pouvez voir où en sont vos demandes.</p>
-            <p>Si vous rencontrer un problème ou souhaiter proposer une amélioration, veuillez contacter les développeur
-                à l'adresse suivante : {dev-plex-service@gmail.com}</p>
+    <div class="home-wrapper {% if session.get('from_index') %}fade-in{% endif %}">
+        <div class="welcome-card">
+            <div class="welcome-header">
+                <h1>🎬 Bienvenue sur Plex Service</h1>
+            </div>
+            <div class="welcome-content">
+                <div class="info-section">
+                    <div class="info-icon">📺</div>
+                    <div class="info-text">
+                        <h3>Service de Demandes</h3>
+                        <p>Demandez l'accès à vos films et séries préférés pour le Plex de {owner-plex}.</p>
+                    </div>
+                </div>
+                <div class="info-section">
+                    <div class="info-icon">🔍</div>
+                    <div class="info-text">
+                        <h3>Recherche</h3>
+                        <p>Parcourez notre catalogue et demandez l'ajout de nouveaux contenus.</p>
+                    </div>
+                </div>
+                <div class="info-section">
+                    <div class="info-icon">📊</div>
+                    <div class="info-text">
+                        <h3>Suivi des Demandes</h3>
+                        <p>Consultez l'état de vos demandes en temps réel.</p>
+                    </div>
+                </div>
+                <div class="info-section contact">
+                    <div class="info-icon">💬</div>
+                    <div class="info-text">
+                        <h3>Besoin d'aide ?</h3>
+                        <p>Contactez-nous : <a href="mailto:dev-plex-service@gmail.com">dev-plex-service@gmail.com</a></p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="loadingContainer">
-            <div class="loadingAnimation">
-                <svg class="spinner40 spinner-red">
-                    <circle cx="40" cy="40" r="36" stroke-width="3" fill="none"></circle>
-                </svg>
-            </div>
-            <div class="loadingAnimation">
-                <svg class="spinner40 spinner-green">
-                    <circle cx="40" cy="40" r="36" stroke-width="3" fill="none"></circle>
-                </svg>
-            </div>
-            <div class="loadingAnimation">
-                <svg class="spinner40 spinner-blue">
-                    <circle cx="40" cy="40" r="36" stroke-width="3" fill="none"></circle>
-                </svg>
+        
+        <div class="loading-card">
+            <div class="loadingContainer">
+                <div class="loadingAnimation">
+                    <svg class="spinner40 spinner-red">
+                        <circle cx="40" cy="40" r="36" stroke-width="3" fill="none"></circle>
+                    </svg>
+                </div>
+                <div class="loadingAnimation">
+                    <svg class="spinner40 spinner-green">
+                        <circle cx="40" cy="40" r="36" stroke-width="3" fill="none"></circle>
+                    </svg>
+                </div>
+                <div class="loadingAnimation">
+                    <svg class="spinner40 spinner-blue">
+                        <circle cx="40" cy="40" r="36" stroke-width="3" fill="none"></circle>
+                    </svg>
+                </div>
             </div>
         </div>
     </div>

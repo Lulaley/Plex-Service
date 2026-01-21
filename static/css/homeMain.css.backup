@@ -1,0 +1,15 @@
+body {
+    background-color: #313B45; /* Fond plus sombre pour contraster avec le texte blanc */
+    color: white; /* Texte blanc */
+    font-family: Arial, sans-serif; /* Arial comme alternative à Helvetica Neue */
+    margin: 0;
+    padding: 0;
+}
+
+.center-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+}
