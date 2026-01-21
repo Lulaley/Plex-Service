@@ -150,6 +150,7 @@ class ControleurLdap:
             write_log(f"Suppression de l'utilisateur LDAP: {username}")
             base_dn = self.config.get_config('LDAP', 'base_dn')
             dn = f'uid={username},{base_dn}'
+            write_log(f"DN de l'utilisateur à supprimer: {dn}")
             self.conn.delete_s(dn)
             write_log(f"Utilisateur {username} supprimé de la base LDAP")
             return True
