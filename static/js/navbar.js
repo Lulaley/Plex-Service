@@ -1,3 +1,32 @@
+function toggleMenu() {
+    const menu = document.querySelector('.navbar .menu');
+    const hamburger = document.querySelector('.navbar .hamburger');
+    menu.classList.toggle('active');
+    hamburger.classList.toggle('active');
+}
+
+// Fermer le menu mobile quand on clique sur un lien
+function closeMenuOnClick() {
+    if (window.innerWidth <= 768) {
+        const menu = document.querySelector('.navbar .menu');
+        const hamburger = document.querySelector('.navbar .hamburger');
+        menu.classList.remove('active');
+        hamburger.classList.remove('active');
+    }
+}
+
+// Fermer le menu si on clique en dehors
+document.addEventListener('click', function(event) {
+    const navbar = document.querySelector('.navbar');
+    const menu = document.querySelector('.navbar .menu');
+    const hamburger = document.querySelector('.navbar .hamburger');
+    
+    if (!navbar.contains(event.target) && menu.classList.contains('active')) {
+        menu.classList.remove('active');
+        hamburger.classList.remove('active');
+    }
+});
+
 function checkNewUsers() {
     fetch('/check_new_users')
         .then(response => response.json())
