@@ -29,7 +29,7 @@ def load_persisted_seeds():
     return {}
 
 def save_persisted_seeds():
-    """Sauvegarde les seeds actifs dans le fichier JSON."""
+    """Sauvegarde les seeds actifs dans le fichier JSON avec leurs stats."""
     try:
         # Créer une version sérialisable des seeds (sans les objets libtorrent)
         serializable_seeds = {}
@@ -40,12 +40,14 @@ def save_persisted_seeds():
                     'torrent_file_path': seed_data['torrent_file_path'],
                     'data_path': seed_data['data_path'],
                     'name': seed_data['name'],
-                    'is_active': seed_data['is_active']
+                    'is_active': seed_data['is_active'],
+                    'stats': seed_data.get('stats', {'uploaded': 0, 'upload_rate': 0, 'peers': 0, 'seeds': 0, 'progress': 0, 'state': 'unknown'}),
+                    'state': seed_data.get('state', 'unknown')
                 }
         
         with open(SEEDS_PERSISTENCE_FILE, 'w') as f:
             json.dump(serializable_seeds, f, indent=4)
-        write_log(f"Seeds sauvegardés: {len(serializable_seeds)} seeds")
+        # Log retiré car appelé fréquemment
     except Exception as e:
         write_log(f"Erreur lors de la sauvegarde des seeds: {str(e)}", "ERROR")
 
@@ -252,6 +254,9 @@ def monitor_seed(seed_id):
                     'progress': progress,
                     'state': state_str
                 }
+            
+            # Sauvegarder les stats dans le fichier JSON pour que les autres workers les voient
+            save_persisted_seeds()
             
             time.sleep(2)  # Mettre à jour toutes les 2 secondes
         except Exception as e:
