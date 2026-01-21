@@ -295,6 +295,8 @@ def restore_downloads_on_startup():
         
         try:
             from static.Controleur.ControleurTorrent import load_persisted_downloads
+            import json
+            DOWNLOADS_PERSISTENCE_FILE = "/var/www/public/Plex-Service/tmp/active_downloads.json"
             
             persisted = load_persisted_downloads()
             
@@ -304,6 +306,9 @@ def restore_downloads_on_startup():
             
             write_log(f"Trouvé {len(persisted)} téléchargement(s) à vérifier")
             
+            # Compter combien de downloads on va réellement relancer
+            downloads_to_restore = []
+            
             # Vérifier chaque download
             for download_id, download_info in list(persisted.items()):
                 # Vérifier si le téléchargement est terminé (100%)
@@ -312,8 +317,6 @@ def restore_downloads_on_startup():
                 
                 if progress >= 100:
                     write_log(f"Download {download_id} déjà terminé (100%), nettoyage")
-                    import json
-                    DOWNLOADS_PERSISTENCE_FILE = "/var/www/public/Plex-Service/tmp/active_downloads.json"
                     persisted[download_id]['is_active'] = False
                     with open(DOWNLOADS_PERSISTENCE_FILE, 'w') as f:
                         json.dump(persisted, f, indent=4)
@@ -340,7 +343,33 @@ def restore_downloads_on_startup():
                     write_log(f"Fichier torrent {torrent_path} introuvable, téléchargement {download_id} ignoré", "WARNING")
                     continue
                 
-                write_log(f"Relance du téléchargement {download_id} ({download_info.get('name', 'Unknown')}) - {progress:.1f}% complété")
+                # Ajouter à la liste
+                downloads_to_restore.append({
+                    'id': download_id,
+                    'name': download_info.get('name', 'Unknown'),
+                    'torrent_path': torrent_path,
+                    'save_path': save_path,
+                    'progress': progress
+                })
+            
+            # Ne restaurer QUE si on a trouvé des downloads à restaurer
+            if not downloads_to_restore:
+                write_log("Aucun téléchargement à restaurer après vérification")
+                return
+            
+            write_log(f"Relance de {len(downloads_to_restore)} téléchargement(s)")
+            
+            # Relancer chaque download
+            for dl_info in downloads_to_restore:
+                download_id = dl_info['id']
+                
+                # Vérifier que ce download n'est pas déjà en cours dans ce worker
+                with downloads_lock:
+                    if download_id in downloads and downloads[download_id].get('is_downloading', False):
+                        write_log(f"Téléchargement {download_id} déjà en cours dans ce worker, skip")
+                        continue
+                
+                write_log(f"Relance du téléchargement {download_id} ({dl_info['name']}) - {dl_info['progress']:.1f}% complété")
                 
                 # Créer un handle et relancer le téléchargement dans un thread
                 handle = {
@@ -348,18 +377,20 @@ def restore_downloads_on_startup():
                     'is_downloading': True,
                     'is_active': True,
                     'handle': None,
-                    'save_path': save_path,
-                    'torrent_file_path': torrent_path,
+                    'save_path': dl_info['save_path'],
+                    'torrent_file_path': dl_info['torrent_path'],
                     'downloaded_files': [],
                     'username': 'system',  # Utilisateur système pour restauration
-                    'name': download_info.get('name', 'Unknown')
+                    'name': dl_info['name']
                 }
-                downloads[download_id] = handle
+                
+                with downloads_lock:
+                    downloads[download_id] = handle
                 
                 # Lancer dans un thread
                 download_thread = threading.Thread(
                     target=background_download,
-                    args=(torrent_path, save_path, handle, 'system'),
+                    args=(dl_info['torrent_path'], dl_info['save_path'], handle, 'system'),
                     daemon=True
                 )
                 download_thread.start()
@@ -367,6 +398,9 @@ def restore_downloads_on_startup():
                 write_log(f"Téléchargement {download_id} relancé avec succès")
             
             write_log("Restauration des téléchargements terminée")
+            
+            # Garder le verrou pendant 5 secondes pour éviter que d'autres workers restaurent
+            time.sleep(5)
             
         finally:
             # Libérer le verrou en supprimant le fichier
