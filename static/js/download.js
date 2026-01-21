@@ -7,6 +7,40 @@ document.addEventListener('DOMContentLoaded', function () {
     let isDownloading = false;
     let eventSource = null;
 
+    // Au chargement de la page, vérifier s'il y a des téléchargements en cours
+    checkActiveDownloads();
+
+    function checkActiveDownloads() {
+        fetch('/get_downloads')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.downloads && data.downloads.length > 0) {
+                    // Trouver le premier téléchargement actif
+                    const activeDownload = data.downloads.find(dl => dl.is_active);
+                    if (activeDownload) {
+                        console.log('Téléchargement actif trouvé:', activeDownload);
+                        // Se reconnecter au stream de ce téléchargement
+                        reconnectToDownload(activeDownload);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la vérification des téléchargements actifs:', error);
+            });
+    }
+
+    function reconnectToDownload(downloadInfo) {
+        isDownloading = true;
+        torrentFileInput.disabled = true;
+        downloadButton.textContent = 'Annuler le téléchargement';
+        downloadIdInput.value = downloadInfo.download_id;
+
+        // Se connecter au stream du téléchargement existant
+        const streamUrl = `/stream_download/${downloadInfo.download_id}`;
+        console.log('Reconnexion au stream:', streamUrl);
+        connectToStream(streamUrl);
+    }
+
     torrentForm.addEventListener('submit', function (event) {
         event.preventDefault();
         if (isDownloading) {
@@ -36,92 +70,89 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (data.success) {
                         // Mettre à jour le champ caché avec l'identifiant du téléchargement
                         downloadIdInput.value = data.download_id;
-
-                        eventSource = new EventSource(data.redirect_url);
-                        var progressBar = document.getElementById('progress-bar');
-                        var speedInfo = document.getElementById('speed-info');
-                        var uploadSpeedInfo = document.getElementById('upload-speed-info');
-                        var elapsedTimeElem = document.getElementById('elapsed-time');
-                        var remainingTimeElem = document.getElementById('remaining-time');
-                        var startTime = Date.now();
-                        var lastProgress = 0;
-
-                        eventSource.onmessage = function (event) {
-                            var logMessage = event.data;
-
-                            if (logMessage === 'done') {
-                                progressBar.style.width = '100%';
-                                progressBar.textContent = '100%';
-                                speedInfo.textContent = 'Vitesse de téléchargement: 0 kB/s';
-                                uploadSpeedInfo.textContent = 'Vitesse d\'upload: 0 kB/s';
-                                remainingTimeElem.textContent = 'Temps restant: 0s';
-                                eventSource.close();
-                                isDownloading = false;
-                                downloadButton.textContent = 'Lancer le téléchargement';
-                                torrentFileInput.disabled = false;
-                                return;
-                            }
-
-                            var progressMatch = logMessage.match(/(\d+\.\d+)% complete/);
-                            var downloadSpeedMatch = logMessage.match(/down: (\d+\.\d+ kB\/s)/);
-                            var uploadSpeedMatch = logMessage.match(/up: (\d+\.\d+ kB\/s)/);
-
-                            if (progressMatch) {
-                                var progress = parseFloat(progressMatch[1]);
-                                progressBar.style.width = progress + '%';
-                                progressBar.textContent = progress.toFixed(2) + '%';
-
-                                var elapsedTime = (Date.now() - startTime) / 1000;
-                                elapsedTimeElem.textContent = 'Temps écoulé: ' + formatTime(elapsedTime);
-
-                                if (downloadSpeedMatch) {
-                                    var downloadSpeed = parseFloat(downloadSpeedMatch[1]);
-                                    speedInfo.textContent = 'Vitesse de téléchargement: ' + formatSpeed(downloadSpeed);
-                                }
-
-                                if (uploadSpeedMatch) {
-                                    var uploadSpeed = parseFloat(uploadSpeedMatch[1]);
-                                    uploadSpeedInfo.textContent = 'Vitesse d\'upload: ' + formatSpeed(uploadSpeed);
-                                }
-
-                                if (progress > lastProgress) {
-                                    var remainingTime = (elapsedTime / progress) * (100 - progress);
-                                    remainingTimeElem.textContent = 'Temps restant: ' + formatTime(remainingTime);
-                                    lastProgress = progress;
-                                }
-                            }
-                        };
-
-                        eventSource.onopen = function () {
-                            console.log('Connection opened');
-                        };
-
-                        eventSource.onerror = function () {
-                            console.log('Connection closed');
-                            eventSource.close();
-                            isDownloading = false;
-                            downloadButton.textContent = 'Lancer le téléchargement';
-                            torrentFileInput.disabled = false;
-                        };
+                        
+                        // Se connecter au stream
+                        connectToStream(data.redirect_url);
                     } else {
-                        console.error('Erreur lors du téléchargement du fichier');
+                        console.error('Erreur lors du téléchargement');
                         isDownloading = false;
-                        downloadButton.textContent = 'Lancer le téléchargement';
                         torrentFileInput.disabled = false;
+                        downloadButton.textContent = 'Lancer le téléchargement';
                     }
                 });
-            } else {
-                console.error('Erreur lors du téléchargement du fichier');
+            }
+        });
+    }
+
+    function connectToStream(streamUrl) {
+        eventSource = new EventSource(streamUrl);
+        var progressBar = document.getElementById('progress-bar');
+        var speedInfo = document.getElementById('speed-info');
+        var uploadSpeedInfo = document.getElementById('upload-speed-info');
+        var elapsedTimeElem = document.getElementById('elapsed-time');
+        var remainingTimeElem = document.getElementById('remaining-time');
+        var startTime = Date.now();
+        var lastProgress = 0;
+
+        eventSource.onmessage = function (event) {
+            var logMessage = event.data;
+
+            if (logMessage === 'done' || logMessage === 'cancelled' || logMessage === 'not_found') {
+                if (logMessage === 'done') {
+                    progressBar.style.width = '100%';
+                    progressBar.textContent = '100%';
+                }
+                speedInfo.textContent = 'Vitesse de téléchargement: 0 kB/s';
+                uploadSpeedInfo.textContent = 'Vitesse d\'upload: 0 kB/s';
+                remainingTimeElem.textContent = 'Temps restant: 0s';
+                eventSource.close();
                 isDownloading = false;
                 downloadButton.textContent = 'Lancer le téléchargement';
                 torrentFileInput.disabled = false;
+                return;
             }
-        }).catch(error => {
-            console.error('Erreur réseau ou autre:', error);
+
+            var progressMatch = logMessage.match(/(\d+\.\d+)% complete/);
+            var downloadSpeedMatch = logMessage.match(/down: (\d+\.\d+) kB\/s/);
+            var uploadSpeedMatch = logMessage.match(/up: (\d+\.\d+) kB\/s/);
+
+            if (progressMatch) {
+                var progress = parseFloat(progressMatch[1]);
+                progressBar.style.width = progress + '%';
+                progressBar.textContent = progress.toFixed(2) + '%';
+
+                var elapsedTime = (Date.now() - startTime) / 1000;
+                elapsedTimeElem.textContent = 'Temps écoulé: ' + formatTime(elapsedTime);
+
+                if (downloadSpeedMatch) {
+                    var downloadSpeed = parseFloat(downloadSpeedMatch[1]);
+                    speedInfo.textContent = 'Vitesse de téléchargement: ' + formatSpeed(downloadSpeed);
+                }
+
+                if (uploadSpeedMatch) {
+                    var uploadSpeed = parseFloat(uploadSpeedMatch[1]);
+                    uploadSpeedInfo.textContent = 'Vitesse d\'upload: ' + formatSpeed(uploadSpeed);
+                }
+
+                if (progress > lastProgress) {
+                    var remainingTime = (elapsedTime / progress) * (100 - progress);
+                    remainingTimeElem.textContent = 'Temps restant: ' + formatTime(remainingTime);
+                    lastProgress = progress;
+                }
+            }
+        };
+
+        eventSource.onopen = function () {
+            console.log('Connection opened');
+        };
+
+        eventSource.onerror = function () {
+            console.log('Connection closed');
+            eventSource.close();
             isDownloading = false;
             downloadButton.textContent = 'Lancer le téléchargement';
             torrentFileInput.disabled = false;
-        });
+        };
     }
 
     function stopDownload() {

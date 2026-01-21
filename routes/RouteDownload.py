@@ -204,6 +204,70 @@ def stop_download_route(app):
             write_log(f"Erreur lors de la mise à jour de la persistance: {str(e)}", "ERROR")
             return jsonify(success=False, message=str(e))
 
+def stream_download_route(app):
+    @app.route('/stream_download/<download_id>')
+    def inner_stream_download(download_id):
+        """Stream les mises à jour d'un téléchargement existant."""
+        write_log(f"Client se connecte au stream du download {download_id}")
+        
+        @stream_with_context
+        def generate():
+            write_log(f"Génération du stream pour {download_id}")
+            last_progress = -1
+            
+            # Vérifier si le download existe (soit en mémoire, soit dans la persistance)
+            from static.Controleur.ControleurTorrent import load_persisted_downloads
+            
+            while True:
+                # Vérifier dans le worker actuel
+                handle_data = downloads.get(download_id)
+                
+                # Si pas trouvé localement, vérifier dans la persistance
+                if not handle_data:
+                    persisted = load_persisted_downloads()
+                    if download_id not in persisted:
+                        write_log(f"Download {download_id} non trouvé")
+                        yield "data: not_found\n\n"
+                        break
+                    
+                    # Utiliser les données de la persistance
+                    persisted_data = persisted[download_id]
+                    if not persisted_data.get('is_active', True):
+                        write_log(f"Download {download_id} n'est plus actif")
+                        yield "data: done\n\n"
+                        break
+                    
+                    # Construire un message à partir des stats persistées
+                    stats = persisted_data.get('stats', {})
+                    progress = stats.get('progress', 0)
+                    download_rate = stats.get('download_rate', 0)
+                    upload_rate = stats.get('upload_rate', 0)
+                    peers = stats.get('peers', 0)
+                    state = stats.get('state', 'downloading')
+                    
+                    msg = f"{progress:.2f}% complete (down: {download_rate:.1f} kB/s up: {upload_rate:.1f} kB/s peers: {peers}) {state}"
+                    if msg != last_progress:
+                        yield f"data: {msg}\n\n"
+                        last_progress = msg
+                else:
+                    # Données du worker actuel
+                    if not handle_data.get('is_downloading', False):
+                        final_msg = handle_data.get('final_message', 'done')
+                        yield f"data: {final_msg}\n\n"
+                        break
+                    
+                    if 'progress_message' in handle_data:
+                        msg = handle_data['progress_message']
+                        if msg != last_progress:
+                            yield f"data: {msg}\n\n"
+                            last_progress = msg
+                
+                time.sleep(1)
+            
+            write_log(f"Stream terminé pour {download_id}")
+        
+        return Response(generate(), mimetype='text/event-stream')
+
 def get_downloads_route(app):
     @app.route('/get_downloads', methods=['GET'])
     def inner_get_downloads():
