@@ -160,17 +160,21 @@ body {
 }
 
 .wish-details {
-    padding: 16px;
+    padding: 0 16px;
     background: rgba(255, 255, 255, 0.95);
     border-top: 1px solid rgba(0, 0, 0, 0.1);
-    display: none;
     color: #666;
     font-size: 0.9em;
-    transition: opacity 0.3s ease;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
 .wish-details.show {
-    display: block;
+    padding: 16px;
+    max-height: 500px;
+    opacity: 1;
 }
 
 .empty-state {
