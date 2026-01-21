@@ -144,6 +144,7 @@ body {
 .wish-info {
     padding: 16px;
     background: white;
+    border-radius: 0 0 12px 12px;
 }
 
 .wish-info h3 {
@@ -161,7 +162,7 @@ body {
 
 .wish-details {
     position: absolute;
-    top: 100%;
+    top: calc(100% - 1px);
     left: 0;
     right: 0;
     padding: 0 16px;
