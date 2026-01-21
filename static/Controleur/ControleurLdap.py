@@ -147,6 +147,7 @@ class ControleurLdap:
     def delete_user(self, username):
         try:
             self.bind_as_root()
+            write_log(f"Suppression de l'utilisateur LDAP: {username}")
             base_dn = self.config.get_config('LDAP', 'base_dn')
             dn = f'uid={username},{base_dn}'
             self.conn.delete_s(dn)
