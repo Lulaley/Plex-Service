@@ -74,6 +74,7 @@ body {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     animation: fadeInScale 0.5s ease;
     position: relative;
+    border: 2px solid transparent;
 }
 
 @keyframes fadeInScale {
@@ -93,7 +94,7 @@ body {
 }
 
 .wish-card.pending:hover {
-    border: 2px solid #ff9900;
+    border-color: #ff9900;
 }
 
 .wish-card:active {
