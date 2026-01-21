@@ -73,10 +73,10 @@ def save_persisted_downloads():
         with downloads_lock:
             for download_id, download_data in downloads.items():
                 serializable_downloads[download_id] = {
-                    'download_id': download_data['download_id'],
+                    'download_id': download_data.get('id', download_id),
                     'name': download_data.get('name', 'Unknown'),
                     'save_path': download_data.get('save_path', ''),
-                    'torrent_path': download_data.get('torrent_path', ''),
+                    'torrent_path': download_data.get('torrent_file_path', ''),
                     'is_active': download_data.get('is_active', True),
                     'stats': download_data.get('stats', {'progress': 0, 'download_rate': 0, 'upload_rate': 0, 'peers': 0, 'state': 'downloading'})
                 }
@@ -170,6 +170,7 @@ def stop_download(handle):
             handle['handle'].pause()
             handle['handle'].clear_error()
             handle['is_downloading'] = False
+            handle['is_active'] = False
             write_log("Téléchargement annulé par l'utilisateur.")
             
             # Supprimer les fichiers téléchargés (commenté pour le test)
@@ -287,11 +288,27 @@ def download_torrent(torrent_file_path, save_path, handle):
 
     write_log(f"Téléchargement de {info.name()}")
     while not h.is_seed():
+        # Vérifier si le téléchargement a été annulé localement
         if not handle['is_downloading']:
-            write_log("Téléchargement annulé.")
+            write_log("Téléchargement annulé localement.")
             ses.remove_torrent(h)
             with downloads_lock:
-                del downloads[handle['id']]
+                if handle['id'] in downloads:
+                    del downloads[handle['id']]
+            remove_download_from_persistence(handle['id'])
+            yield "data: cancelled\n\n"
+            return
+        
+        # Vérifier si le téléchargement a été annulé via le fichier de persistance (depuis un autre worker)
+        persisted = load_persisted_downloads()
+        if handle['id'] in persisted and not persisted[handle['id']].get('is_active', True):
+            write_log("Téléchargement annulé via le fichier de persistance (autre worker).")
+            handle['is_downloading'] = False
+            handle['is_active'] = False
+            ses.remove_torrent(h)
+            with downloads_lock:
+                if handle['id'] in downloads:
+                    del downloads[handle['id']]
             remove_download_from_persistence(handle['id'])
             yield "data: cancelled\n\n"
             return

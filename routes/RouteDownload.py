@@ -108,11 +108,13 @@ def start_download(app):
             handle = {
                 'id': download_id,
                 'is_downloading': True,
+                'is_active': True,
                 'handle': None,
                 'save_path': save_path,
                 'torrent_file_path': torrent_file_path,
                 'downloaded_files': [],
-                'username': username
+                'username': username,
+                'name': 'Unknown'
             }
             downloads[download_id] = handle
             
@@ -160,26 +162,47 @@ def start_download(app):
 def stop_download_route(app):
     @app.route('/stop_download', methods=['POST'])
     def inner_stop_download():
+        from static.Controleur.ControleurTorrent import load_persisted_downloads, save_persisted_downloads
         write_log("Requête d'annulation de téléchargement reçue")
         data = request.get_json()
         download_id = data.get('download_id')  # Récupérer l'identifiant du téléchargement
         
         write_log(f"Tentative d'annulation pour download_id: {download_id}")
-        write_log(f"Downloads actifs: {list(downloads.keys())}")
+        write_log(f"Downloads actifs dans ce worker: {list(downloads.keys())}")
         
-        handle = downloads.get(download_id)  # Utiliser le dictionnaire global downloads
+        # Vérifier d'abord dans le worker actuel
+        handle = downloads.get(download_id)
         if handle:
             username = handle.get('username', 'unknown')
-            write_log(f"Annulation du téléchargement pour l'utilisateur: {username}")
+            write_log(f"Annulation du téléchargement pour l'utilisateur: {username} (trouvé dans ce worker)")
             if stop_download(handle):
                 write_log("Téléchargement annulé avec succès")
                 return jsonify(success=True)
             else:
                 write_log("Erreur lors de l'annulation du téléchargement")
                 return jsonify(success=False)
-        else:
-            write_log(f"Aucun téléchargement en cours pour l'identifiant {download_id}")
-            return jsonify(success=False, message="Téléchargement introuvable")
+        
+        # Si pas trouvé dans ce worker, marquer comme annulé dans le fichier de persistance
+        write_log(f"Download non trouvé dans ce worker, marquage dans le fichier de persistance")
+        try:
+            persisted_downloads = load_persisted_downloads()
+            if download_id in persisted_downloads:
+                persisted_downloads[download_id]['is_active'] = False
+                # Sauvegarder manuellement dans le fichier
+                import json
+                import os
+                DOWNLOADS_PERSISTENCE_FILE = "/var/www/public/Plex-Service/tmp/active_downloads.json"
+                os.makedirs(os.path.dirname(DOWNLOADS_PERSISTENCE_FILE), exist_ok=True)
+                with open(DOWNLOADS_PERSISTENCE_FILE, 'w') as f:
+                    json.dump(persisted_downloads, f, indent=4)
+                write_log(f"Download {download_id} marqué comme inactif dans la persistance")
+                return jsonify(success=True)
+            else:
+                write_log(f"Aucun téléchargement trouvé pour l'identifiant {download_id}")
+                return jsonify(success=False, message="Téléchargement introuvable")
+        except Exception as e:
+            write_log(f"Erreur lors de la mise à jour de la persistance: {str(e)}", "ERROR")
+            return jsonify(success=False, message=str(e))
 
 def get_downloads_route(app):
     @app.route('/get_downloads', methods=['GET'])
