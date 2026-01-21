@@ -1,5 +1,7 @@
 import os
 import sys
+import signal
+import atexit
 chemin_actuel = os.path.dirname(__file__)
 chemin_routes = os.path.join(chemin_actuel, '../routes')
 sys.path.append(chemin_routes)
@@ -64,6 +66,33 @@ restore_seeds_on_startup()
 
 # Restaurer les téléchargements au démarrage
 restore_downloads_on_startup()
+
+# Gestion de l'arrêt propre du service
+def cleanup():
+    """Fonction de nettoyage appelée lors de l'arrêt du service"""
+    from static.Controleur.ControleurLog import write_log
+    write_log("Arrêt du service Plex-Service - Nettoyage en cours...")
+    
+    # Arrêter tous les téléchargements en cours
+    try:
+        from routes.RouteDownload import active_downloads
+        for download_id in list(active_downloads.keys()):
+            active_downloads[download_id]['cancelled'] = True
+        write_log(f"Arrêt de {len(active_downloads)} téléchargements en cours")
+    except Exception as e:
+        write_log(f"Erreur lors de l'arrêt des téléchargements: {e}", "ERROR")
+    
+    write_log("Nettoyage terminé")
+
+def signal_handler(signum, frame):
+    """Gestion des signaux SIGTERM et SIGINT"""
+    cleanup()
+    sys.exit(0)
+
+# Enregistrer les handlers pour les signaux
+signal.signal(signal.SIGTERM, signal_handler)
+signal.signal(signal.SIGINT, signal_handler)
+atexit.register(cleanup)
 
 if __name__ == '__main__':
     app.run(debug=True, port=conf.get_config('APP', 'port'), host='0.0.0.0')
