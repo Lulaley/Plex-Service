@@ -4,6 +4,7 @@ from static.Controleur.ControleurTorrent import download_torrent, stop_download,
 import threading
 import uuid
 import os
+import time
 
 # Créer un verrou pour synchroniser l'accès à la session
 session_lock = threading.Lock()
@@ -52,11 +53,42 @@ def upload(app):
                 file_path = os.path.join("/var/www/public/Plex-Service/tmp/", filename)
                 file.save(file_path)
                 write_log(f"Fichier .torrent déposé par {username} : {file_path}")
-                return jsonify({'success': True, 'message': 'Fichier téléchargé avec succès', 'redirect_url': url_for('inner_start_download', torrent_file_path=file_path), 'download_id': str(uuid.uuid4())})
+                
+                # Générer un ID unique pour ce téléchargement
+                download_id = str(uuid.uuid4())
+                
+                return jsonify({
+                    'success': True,
+                    'message': 'Fichier téléchargé avec succès',
+                    'redirect_url': url_for('inner_start_download', torrent_file_path=file_path, download_id=download_id),
+                    'download_id': download_id
+                })
 
             else:
                 write_log(f"Format de fichier non supporté par {username}")
                 return jsonify({'success': False, 'message': 'Format de fichier non supporté'}), 400
+
+def background_download(torrent_file_path, save_path, handle, username):
+    """Fonction qui tourne en arrière-plan pour gérer le téléchargement."""
+    try:
+        write_log(f"Thread de téléchargement démarré pour {username}")
+        for status in download_torrent(torrent_file_path, save_path, handle):
+            # Extraire le message de status
+            if status.startswith('data: '):
+                message = status[6:].strip()
+                handle['progress_message'] = message
+                
+                # Si c'est le message final
+                if message in ['done', 'cancelled', 'not enough space']:
+                    handle['final_message'] = message
+                    handle['is_downloading'] = False
+                    break
+        
+        write_log(f"Thread de téléchargement terminé pour {username}")
+    except Exception as e:
+        write_log(f"Erreur dans le thread de téléchargement: {str(e)}", "ERROR")
+        handle['is_downloading'] = False
+        handle['final_message'] = 'error'
 
 def start_download(app):
     @app.route('/start_download')
@@ -65,53 +97,86 @@ def start_download(app):
             username = session.get('username')
             torrent_file_path = request.args.get('torrent_file_path')
             save_path = request.args.get('save_path')
-            download_id = str(uuid.uuid4())  # Générer un identifiant unique pour le téléchargement
+            download_id = request.args.get('download_id')  # Récupérer l'ID depuis l'URL
             
+            if not download_id:
+                download_id = str(uuid.uuid4())  # Générer un ID si manquant
+            
+            write_log(f"Démarrage du téléchargement avec ID: {download_id}")
+            
+            # Créer le handle avant de lancer le thread
+            handle = {
+                'id': download_id,
+                'is_downloading': True,
+                'handle': None,
+                'save_path': save_path,
+                'torrent_file_path': torrent_file_path,
+                'downloaded_files': [],
+                'username': username
+            }
+            downloads[download_id] = handle
+            
+            # Lancer le téléchargement dans un thread séparé
+            download_thread = threading.Thread(
+                target=background_download,
+                args=(torrent_file_path, save_path, handle, username),
+                daemon=True
+            )
+            download_thread.start()
+            
+            # Retourner un flux de statut
             @stream_with_context
             def generate():
-                with session_lock:
-                    write_log(f"Envoi d'une requête de téléchargement pour l'utilisateur: {username}")
+                write_log(f"Client connecté au stream de téléchargement {download_id}")
+                last_progress = -1
+                
+                while downloads.get(download_id, {}).get('is_downloading', False):
+                    handle_data = downloads.get(download_id)
+                    if not handle_data:
+                        break
                     
-                    handle = {
-                        'id': download_id,
-                        'is_downloading': True,
-                        'handle': None,
-                        'save_path': save_path,
-                        'torrent_file_path': torrent_file_path,
-                        'downloaded_files': []
-                    }
-                    downloads[download_id] = handle  # Stocker le handle dans le dictionnaire global downloads
-                    try:
-                        write_log(f"Téléchargement du fichier .torrent pour {username}")
-                        for status in download_torrent(torrent_file_path, save_path, handle):
-                            yield status
-                    except Exception as e:
-                        write_log(f"Erreur lors du téléchargement du fichier .torrent pour {username}: {str(e)}")
-                        flash('Erreur lors du téléchargement du fichier .torrent')
-                        return redirect(url_for('inner_download'))
+                    if 'progress_message' in handle_data:
+                        msg = handle_data['progress_message']
+                        if msg != last_progress:
+                            yield f"data: {msg}\n\n"
+                            last_progress = msg
+                    
+                    time.sleep(1)
+                
+                # Envoyer le message final
+                handle_data = downloads.get(download_id)
+                if handle_data and 'final_message' in handle_data:
+                    yield f"data: {handle_data['final_message']}\n\n"
+                else:
+                    yield "data: done\n\n"
+                
+                write_log(f"Client déconnecté du stream {download_id}")
             
             return Response(generate(), mimetype='text/event-stream')
         except Exception as e:
-            write_log(f"Erreur lors de la récupération du chemin du fichier .torrent pour {username}: {str(e)}")
-            flash('Erreur lors de la récupération du chemin du fichier .torrent')
-            return redirect(url_for('inner_download'))
+            write_log(f"Erreur lors du démarrage du téléchargement: {str(e)}")
+            return jsonify({'success': False, 'message': str(e)}), 500
 
 def stop_download_route(app):
     @app.route('/stop_download', methods=['POST'])
     def inner_stop_download():
-        with session_lock:
-            write_log("Requête d'annulation de téléchargement reçue")
-            data = request.get_json()
-            download_id = data.get('download_id')  # Récupérer l'identifiant du téléchargement
-            handle = downloads.get(download_id)  # Utiliser le dictionnaire global downloads
-            if handle:
-                write_log(f"Annulation du téléchargement pour l'utilisateur: {handle['username']}")
-                if stop_download(handle):
-                    write_log("Téléchargement annulé avec succès")
-                    return jsonify(success=True)
-                else:
-                    write_log("Erreur lors de l'annulation du téléchargement")
-                    return jsonify(success=False)
+        write_log("Requête d'annulation de téléchargement reçue")
+        data = request.get_json()
+        download_id = data.get('download_id')  # Récupérer l'identifiant du téléchargement
+        
+        write_log(f"Tentative d'annulation pour download_id: {download_id}")
+        write_log(f"Downloads actifs: {list(downloads.keys())}")
+        
+        handle = downloads.get(download_id)  # Utiliser le dictionnaire global downloads
+        if handle:
+            username = handle.get('username', 'unknown')
+            write_log(f"Annulation du téléchargement pour l'utilisateur: {username}")
+            if stop_download(handle):
+                write_log("Téléchargement annulé avec succès")
+                return jsonify(success=True)
             else:
-                write_log("Aucun téléchargement en cours pour cet identifiant")
+                write_log("Erreur lors de l'annulation du téléchargement")
                 return jsonify(success=False)
+        else:
+            write_log(f"Aucun téléchargement en cours pour l'identifiant {download_id}")
+            return jsonify(success=False, message="Téléchargement introuvable")
