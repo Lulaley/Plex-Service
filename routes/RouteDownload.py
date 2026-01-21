@@ -281,81 +281,103 @@ def get_downloads_route(app):
 
 def restore_downloads_on_startup():
     """Restaure et relance automatiquement les téléchargements interrompus au démarrage."""
-    write_log("Vérification des téléchargements interrompus au démarrage")
+    
+    # Utiliser un verrou pour éviter que plusieurs workers restaurent en même temps
+    RESTORE_LOCK_FILE = "/var/www/public/Plex-Service/tmp/downloads_restore.lock"
+    
     try:
-        from static.Controleur.ControleurTorrent import load_persisted_downloads
+        # Essayer d'acquérir le verrou de manière non-bloquante
+        import fcntl
+        lock_file = open(RESTORE_LOCK_FILE, 'w')
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         
-        persisted = load_persisted_downloads()
+        write_log("Vérification des téléchargements interrompus au démarrage")
         
-        if not persisted:
-            write_log("Aucun téléchargement à restaurer")
-            return
-        
-        write_log(f"Trouvé {len(persisted)} téléchargement(s) à vérifier")
-        
-        # Vérifier chaque download
-        for download_id, download_info in list(persisted.items()):
-            # Vérifier si le téléchargement est terminé (100%)
-            stats = download_info.get('stats', {})
-            progress = stats.get('progress', 0)
+        try:
+            from static.Controleur.ControleurTorrent import load_persisted_downloads
             
-            if progress >= 100:
-                write_log(f"Download {download_id} déjà terminé (100%), nettoyage")
-                import json
-                DOWNLOADS_PERSISTENCE_FILE = "/var/www/public/Plex-Service/tmp/active_downloads.json"
-                persisted[download_id]['is_active'] = False
-                with open(DOWNLOADS_PERSISTENCE_FILE, 'w') as f:
-                    json.dump(persisted, f, indent=4)
-                continue
+            persisted = load_persisted_downloads()
             
-            # Si inactif mais pas terminé, vérifier si on peut le reprendre
-            if not download_info.get('is_active', True):
-                write_log(f"Download {download_id} marqué comme inactif mais incomplet ({progress:.1f}%)")
-                # Vérifier si resume_data existe
-                resume_file = f"/var/www/public/Plex-Service/tmp/resume_data/{download_id}.resume"
-                if os.path.exists(resume_file):
-                    write_log(f"Resume data trouvé pour {download_id}, tentative de relance")
-                    # Continuer pour relancer
-                else:
-                    write_log(f"Pas de resume_data pour {download_id}, ignoré", "WARNING")
+            if not persisted:
+                write_log("Aucun téléchargement à restaurer")
+                return
+            
+            write_log(f"Trouvé {len(persisted)} téléchargement(s) à vérifier")
+            
+            # Vérifier chaque download
+            for download_id, download_info in list(persisted.items()):
+                # Vérifier si le téléchargement est terminé (100%)
+                stats = download_info.get('stats', {})
+                progress = stats.get('progress', 0)
+                
+                if progress >= 100:
+                    write_log(f"Download {download_id} déjà terminé (100%), nettoyage")
+                    import json
+                    DOWNLOADS_PERSISTENCE_FILE = "/var/www/public/Plex-Service/tmp/active_downloads.json"
+                    persisted[download_id]['is_active'] = False
+                    with open(DOWNLOADS_PERSISTENCE_FILE, 'w') as f:
+                        json.dump(persisted, f, indent=4)
                     continue
+                
+                # Si inactif mais pas terminé, vérifier si on peut le reprendre
+                if not download_info.get('is_active', True):
+                    write_log(f"Download {download_id} marqué comme inactif mais incomplet ({progress:.1f}%)")
+                    # Vérifier si resume_data existe
+                    resume_file = f"/var/www/public/Plex-Service/tmp/resume_data/{download_id}.resume"
+                    if os.path.exists(resume_file):
+                        write_log(f"Resume data trouvé pour {download_id}, tentative de relance")
+                        # Continuer pour relancer
+                    else:
+                        write_log(f"Pas de resume_data pour {download_id}, ignoré", "WARNING")
+                        continue
+                
+                # Récupérer les informations
+                torrent_path = download_info.get('torrent_path', '')
+                save_path = download_info.get('save_path', '')
+                
+                # Vérifier que le fichier torrent existe toujours
+                if not os.path.exists(torrent_path):
+                    write_log(f"Fichier torrent {torrent_path} introuvable, téléchargement {download_id} ignoré", "WARNING")
+                    continue
+                
+                write_log(f"Relance du téléchargement {download_id} ({download_info.get('name', 'Unknown')}) - {progress:.1f}% complété")
+                
+                # Créer un handle et relancer le téléchargement dans un thread
+                handle = {
+                    'id': download_id,
+                    'is_downloading': True,
+                    'is_active': True,
+                    'handle': None,
+                    'save_path': save_path,
+                    'torrent_file_path': torrent_path,
+                    'downloaded_files': [],
+                    'username': 'system',  # Utilisateur système pour restauration
+                    'name': download_info.get('name', 'Unknown')
+                }
+                downloads[download_id] = handle
+                
+                # Lancer dans un thread
+                download_thread = threading.Thread(
+                    target=background_download,
+                    args=(torrent_path, save_path, handle, 'system'),
+                    daemon=True
+                )
+                download_thread.start()
+                
+                write_log(f"Téléchargement {download_id} relancé avec succès")
             
-            # Récupérer les informations
-            torrent_path = download_info.get('torrent_path', '')
-            save_path = download_info.get('save_path', '')
+            write_log("Restauration des téléchargements terminée")
             
-            # Vérifier que le fichier torrent existe toujours
-            if not os.path.exists(torrent_path):
-                write_log(f"Fichier torrent {torrent_path} introuvable, téléchargement {download_id} ignoré", "WARNING")
-                continue
-            
-            write_log(f"Relance du téléchargement {download_id} ({download_info.get('name', 'Unknown')}) - {progress:.1f}% complété")
-            
-            # Créer un handle et relancer le téléchargement dans un thread
-            handle = {
-                'id': download_id,
-                'is_downloading': True,
-                'is_active': True,
-                'handle': None,
-                'save_path': save_path,
-                'torrent_file_path': torrent_path,
-                'downloaded_files': [],
-                'username': 'system',  # Utilisateur système pour restauration
-                'name': download_info.get('name', 'Unknown')
-            }
-            downloads[download_id] = handle
-            
-            # Lancer dans un thread
-            download_thread = threading.Thread(
-                target=background_download,
-                args=(torrent_path, save_path, handle, 'system'),
-                daemon=True
-            )
-            download_thread.start()
-            
-            write_log(f"Téléchargement {download_id} relancé avec succès")
-        
-        write_log("Restauration des téléchargements terminée")
-        
+        finally:
+            # Libérer le verrou
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+            lock_file.close()
+            if os.path.exists(RESTORE_LOCK_FILE):
+                os.remove(RESTORE_LOCK_FILE)
+                
+    except BlockingIOError:
+        # Un autre worker est déjà en train de restaurer
+        write_log("Un autre worker restaure déjà les téléchargements, skip")
+        return
     except Exception as e:
         write_log(f"Erreur lors de la restauration des téléchargements: {str(e)}", "ERROR")

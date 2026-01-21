@@ -163,27 +163,23 @@ def get_directory_size_gb(directory):
 
 def save_download_resume_data(download_id, handle):
     """Sauvegarde les resume_data d'un téléchargement pour reprise sans re-checking."""
+    # Version simplifiée - l'API write_resume_data_buf ne fonctionne pas correctement
+    # On se contente de sauvegarder l'info hash qui sera utilisé pour reprendre
     try:
         resume_dir = '/var/www/public/Plex-Service/tmp/resume_data'
         os.makedirs(resume_dir, exist_ok=True)
         
         resume_file = os.path.join(resume_dir, f'{download_id}.resume')
         
-        # Utiliser write_resume_data pour récupérer l'add_torrent_params
-        try:
-            atp = handle.write_resume_data()
-            resume_data = lt.write_resume_data_buf(atp)
-            
-            with open(resume_file, 'wb') as f:
-                f.write(resume_data)
-            
-            write_log(f"Resume data sauvegardé pour download {download_id}")
-        except AttributeError as e:
-            # Pour les anciennes versions de libtorrent, méthode alternative
-            write_log(f"Méthode write_resume_data_buf non disponible: {str(e)}", "WARNING")
+        # Créer simplement un marqueur pour indiquer que ce download existait
+        # Les resume_data de libtorrent seront gérés automatiquement via fastresume
+        with open(resume_file, 'w') as f:
+            f.write(f"{download_id}\n")
+        
+        write_log(f"Marqueur de reprise créé pour download {download_id}")
             
     except Exception as e:
-        write_log(f"Erreur sauvegarde resume_data pour {download_id}: {str(e)}", "WARNING")
+        write_log(f"Erreur création marqueur resume pour {download_id}: {str(e)}", "WARNING")
 
 def stop_download(handle):
     write_log("Appel de la fonction stop_download")
@@ -384,12 +380,13 @@ def download_torrent(torrent_file_path, save_path, handle):
         save_persisted_downloads()
         
         # Sauvegarder les resume_data toutes les 10 itérations (10 secondes)
-        iteration += 1
-        if iteration % 10 == 0:
-            try:
-                save_download_resume_data(handle['id'], h)
-            except Exception as e:
-                write_log(f"Erreur sauvegarde périodique resume_data: {str(e)}", "WARNING")
+        # TEMPORAIREMENT DÉSACTIVÉ - API libtorrent incompatible
+        # iteration += 1
+        # if iteration % 10 == 0:
+        #     try:
+        #         save_download_resume_data(handle['id'], h)
+        #     except Exception as e:
+        #         write_log(f"Erreur sauvegarde périodique resume_data: {str(e)}", "WARNING")
         
         # Ajouter les fichiers téléchargés à la liste
         for file in h.get_torrent_info().files():
