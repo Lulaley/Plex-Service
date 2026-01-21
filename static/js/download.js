@@ -75,9 +75,13 @@ document.addEventListener('DOMContentLoaded', function () {
         downloadButton.innerHTML = '<span class="btn-icon">■</span><span class="btn-text">Annuler le téléchargement</span>';
         downloadIdInput.value = downloadInfo.download_id;
 
+        // Mettre à jour le nom du fichier dans la zone d'upload
+        const fileName = downloadInfo.name || 'Téléchargement en cours';
+        updateFileInfo(fileName);
+        
         // Afficher la carte d'infos et mettre à jour le nom
         downloadInfoCard.style.display = 'block';
-        document.getElementById('file-info').textContent = downloadInfo.name || 'Téléchargement en cours';
+        document.getElementById('file-info').textContent = fileName;
 
         const streamUrl = `/stream_download/${downloadInfo.download_id}`;
         console.log('Reconnexion au stream:', streamUrl);
