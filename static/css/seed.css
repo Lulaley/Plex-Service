@@ -159,6 +159,120 @@ input[type="file"]:focus {
     animation: fadeInScale 0.5s ease;
 }
 
+.seed-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(255, 153, 0, 0.2);
+}
+
+.seed-name {
+    color: #333;
+    font-size: 1.2em;
+    margin: 0;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.btn-stop {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.9em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-stop:hover {
+    background-color: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.seed-info {
+    margin-bottom: 15px;
+}
+
+.seed-info p {
+    color: #333;
+    font-size: 0.9em;
+    margin: 8px 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.seed-info strong {
+    color: #666;
+    font-weight: 600;
+}
+
+.status-badge,
+.state-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 600;
+}
+
+.status-badge.active {
+    background: rgba(34, 197, 94, 0.2);
+    color: #059669;
+}
+
+.status-badge.inactive {
+    background: rgba(239, 68, 68, 0.2);
+    color: #dc2626;
+}
+
+.state-badge {
+    background: rgba(59, 130, 246, 0.2);
+    color: #2563eb;
+}
+
+.seed-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.8em;
+    font-weight: 500;
+}
+
+.stat-value {
+    color: #ff9900;
+    font-size: 1em;
+    font-weight: 700;
+}
+
+.no-seeds {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 1.1em;
+    padding: 40px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+}
+
 @keyframes fadeInScale {
     from {
         opacity: 0;
@@ -173,49 +287,6 @@ input[type="file"]:focus {
 .seed-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(255, 153, 0, 0.3);
-}
-
-.seed-card h3 {
-    color: #333;
-    font-size: 1.1em;
-    margin: 0 0 12px 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.seed-card p {
-    color: #666;
-    font-size: 0.9em;
-    margin: 6px 0;
-}
-
-.seed-card .seed-actions {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-    display: flex;
-    gap: 10px;
-}
-
-.seed-card button {
-    flex: 1;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.9em;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.seed-card button.stop-btn {
-    background-color: #ef4444;
-    color: white;
-}
-
-.seed-card button.stop-btn:hover {
-    background-color: #dc2626;
 }
 
 .flash-messages {

@@ -121,6 +121,8 @@ body {
     justify-content: center;
     align-items: center;
     gap: 30px;
+    min-height: 120px;
+    position: relative;
 }
 
 /* Responsive */

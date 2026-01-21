@@ -237,7 +237,8 @@ body {
         min-height: 44px;
     }
     
-    .wish-details {
+    /* Sur mobile, afficher les détails au tap */
+    .wish-card:active .wish-details {
         display: block;
     }
 }
