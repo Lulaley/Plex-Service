@@ -21,6 +21,30 @@ def register(app):
             email = request.form['email']
 
             write_log(f"Tentative d'inscription pour l'utilisateur: {username}")
+            
+            # Validation du nom d'utilisateur
+            if not username or len(username.strip()) < 3:
+                write_log(f"Nom d'utilisateur invalide (trop court): {username}", 'ERROR')
+                flash('Le nom d\'utilisateur doit contenir au moins 3 caractères')
+                return redirect(url_for('index'))
+            
+            if len(username) > 50:
+                write_log(f"Nom d'utilisateur invalide (trop long): {username}", 'ERROR')
+                flash('Le nom d\'utilisateur ne peut pas dépasser 50 caractères')
+                return redirect(url_for('index'))
+            
+            # Vérifier que le nom ne contient pas trop d'espaces consécutifs
+            if '  ' in username:
+                write_log(f"Nom d'utilisateur invalide (espaces multiples): {username}", 'ERROR')
+                flash('Le nom d\'utilisateur ne peut pas contenir plusieurs espaces consécutifs')
+                return redirect(url_for('index'))
+            
+            # Vérifier que le nom ne contient que des caractères autorisés (lettres, chiffres, espaces, tirets, underscores)
+            if not re.match(r'^[a-zA-Z0-9 _.-]+$', username):
+                write_log(f"Nom d'utilisateur invalide (caractères non autorisés): {username}", 'ERROR')
+                flash('Le nom d\'utilisateur ne peut contenir que des lettres, chiffres, espaces, tirets et underscores')
+                return redirect(url_for('index'))
+            
             if not is_hashed(password):
                 hashed_password = ldap_salted_sha1.hash(password)
             else:
@@ -33,6 +57,7 @@ def register(app):
             if ds.search_user(username):
                 write_log(f"L'utilisateur {username} existe déjà")
                 ds.disconnect()
+                flash('Ce nom d\'utilisateur existe déjà')
                 return redirect(url_for('index'))
             write_log(f"L'utilisateur {username} n'existe pas, ajout en cours")
             # Construire le DN et les attributs de l'utilisateur
