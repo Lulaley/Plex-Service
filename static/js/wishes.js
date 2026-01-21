@@ -11,10 +11,14 @@ function showDetails(element) {
     const details = element.querySelector('.wish-details');
     const id = element.getAttribute('data-id');
     
+    console.log('Adding details-open class to:', element);
+    console.log('Element classes before:', element.className);
+    
     // Si les détails sont déjà chargés, juste les afficher
     if (details.innerHTML.trim() !== '') {
         details.classList.add('show');
         element.classList.add('details-open');
+        console.log('Element classes after:', element.className);
         return;
     }
     
@@ -29,6 +33,7 @@ function showDetails(element) {
             `;
             details.classList.add('show');
             element.classList.add('details-open');
+            console.log('Element classes after fetch:', element.className);
         })
         .catch(error => console.error('Erreur:', error));
 }

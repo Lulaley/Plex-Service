@@ -41,7 +41,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }, false);
 
     // Clic sur la zone d'upload
-    uploadZone.addEventListener('click', function() {
+    uploadZone.addEventListener('click', function(e) {
+        e.stopPropagation();
         if (!isDownloading) {
             torrentFileInput.click();
         }
@@ -134,8 +135,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function updateFileInfo(fileName) {
-        document.querySelector('.upload-text').textContent = fileName;
-        document.querySelector('.upload-subtext').textContent = 'Fichier sélectionné';
+        const uploadText = document.querySelector('.upload-text');
+        const uploadSubtext = document.querySelector('.upload-subtext');
+        if (uploadText && uploadSubtext) {
+            uploadText.textContent = fileName;
+            uploadText.style.color = '#333';
+            uploadSubtext.textContent = 'Fichier sélectionné';
+            uploadSubtext.style.color = '#22c55e';
+        }
     }
 
     function connectToStream(streamUrl) {
