@@ -240,13 +240,16 @@ def monitor_seed(seed_id):
                     write_log(f"Seed {seed_id} - Changement d'état: {state_str}")
                     seed_data['state'] = state_str
                 
+                # Calculer la progression (progress_ppm fonctionne aussi pendant checking_files)
+                progress = s.progress_ppm / 10000.0  # Convertir parts-per-million en pourcentage
+                
                 # Mettre à jour les statistiques
                 seed_data['stats'] = {
                     'uploaded': s.total_upload,
                     'upload_rate': s.upload_rate / 1000,  # en kB/s
                     'peers': s.num_peers,
                     'seeds': s.num_seeds,
-                    'progress': s.progress * 100,
+                    'progress': progress,
                     'state': state_str
                 }
             
