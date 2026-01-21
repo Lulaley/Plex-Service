@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const streamUrl = `/stream_download/${downloadInfo.download_id}`;
         console.log('Reconnexion au stream:', streamUrl);
-        connectToStream(streamUrl);
+        connectToStream(streamUrl, downloadInfo.progress || 0);
     }
 
     torrentForm.addEventListener('submit', function (event) {
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function connectToStream(streamUrl) {
+    function connectToStream(streamUrl, initialProgress = 0) {
         eventSource = new EventSource(streamUrl);
         var progressBar = document.getElementById('progress-bar');
         var progressText = progressBar.querySelector('.progress-text');
@@ -160,7 +160,9 @@ document.addEventListener('DOMContentLoaded', function () {
         var elapsedTimeElem = document.getElementById('elapsed-time');
         var remainingTimeElem = document.getElementById('remaining-time');
         var startTime = Date.now();
-        var lastProgress = 0;
+        var lastProgress = initialProgress;
+        var progressHistory = [];
+        var lastProgressUpdate = Date.now();
 
         eventSource.onmessage = function (event) {
             var logMessage = event.data;
@@ -195,8 +197,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 var elapsedTime = (Date.now() - startTime) / 1000;
                 elapsedTimeElem.textContent = formatTime(elapsedTime);
 
+                var downloadSpeed = 0;
                 if (downloadSpeedMatch) {
-                    var downloadSpeed = parseFloat(downloadSpeedMatch[1]);
+                    downloadSpeed = parseFloat(downloadSpeedMatch[1]);
                     speedInfo.textContent = formatSpeed(downloadSpeed);
                 }
 
@@ -205,10 +208,41 @@ document.addEventListener('DOMContentLoaded', function () {
                     uploadSpeedInfo.textContent = formatSpeed(uploadSpeed);
                 }
 
-                if (progress > lastProgress && progress > 0) {
-                    var remainingTime = (elapsedTime / progress) * (100 - progress);
-                    remainingTimeElem.textContent = formatTime(remainingTime);
+                // Calculer le temps restant seulement si le progrès avance et qu'on a une vitesse
+                if (progress > lastProgress && downloadSpeed > 0) {
+                    var now = Date.now();
+                    var timeDiff = (now - lastProgressUpdate) / 1000; // en secondes
+                    var progressDiff = progress - lastProgress;
+                    
+                    // Ajouter à l'historique
+                    progressHistory.push({
+                        time: now,
+                        progress: progress,
+                        speed: progressDiff / timeDiff
+                    });
+                    
+                    // Garder seulement les 5 dernières mesures
+                    if (progressHistory.length > 5) {
+                        progressHistory.shift();
+                    }
+                    
+                    // Calculer la vitesse moyenne
+                    var avgSpeed = progressHistory.reduce((sum, item) => sum + item.speed, 0) / progressHistory.length;
+                    
+                    // Calculer le temps restant basé sur la vitesse moyenne
+                    var remainingProgress = 100 - progress;
+                    var remainingTime = remainingProgress / avgSpeed;
+                    
+                    // Afficher seulement si le calcul est valide
+                    if (isFinite(remainingTime) && remainingTime > 0) {
+                        remainingTimeElem.textContent = formatTime(remainingTime);
+                    }
+                    
                     lastProgress = progress;
+                    lastProgressUpdate = now;
+                } else if (downloadSpeed === 0 && progress < 100) {
+                    // Pendant le file check ou si la vitesse est 0
+                    remainingTimeElem.textContent = 'Calcul...';
                 }
             }
         };
