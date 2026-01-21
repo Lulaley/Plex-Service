@@ -282,16 +282,16 @@ def get_downloads_route(app):
 def restore_downloads_on_startup():
     """Restaure et relance automatiquement les téléchargements interrompus au démarrage."""
     
-    # Utiliser un verrou pour éviter que plusieurs workers restaurent en même temps
+    # Utiliser un verrou atomique pour éviter que plusieurs workers restaurent en même temps
     RESTORE_LOCK_FILE = "/var/www/public/Plex-Service/tmp/downloads_restore.lock"
     
     try:
-        # Essayer d'acquérir le verrou de manière non-bloquante
-        import fcntl
-        lock_file = open(RESTORE_LOCK_FILE, 'w')
-        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        # Créer le fichier de verrou de manière atomique (échoue si existe déjà)
+        fd = os.open(RESTORE_LOCK_FILE, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o644)
+        os.write(fd, f"{os.getpid()}\n".encode())
+        os.close(fd)
         
-        write_log("Vérification des téléchargements interrompus au démarrage")
+        write_log("Vérification des téléchargements interrompus au démarrage (verrou acquis)")
         
         try:
             from static.Controleur.ControleurTorrent import load_persisted_downloads
@@ -369,15 +369,23 @@ def restore_downloads_on_startup():
             write_log("Restauration des téléchargements terminée")
             
         finally:
-            # Libérer le verrou
-            fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
-            lock_file.close()
+            # Libérer le verrou en supprimant le fichier
             if os.path.exists(RESTORE_LOCK_FILE):
-                os.remove(RESTORE_LOCK_FILE)
+                try:
+                    os.remove(RESTORE_LOCK_FILE)
+                    write_log("Verrou de restauration libéré")
+                except:
+                    pass
                 
-    except BlockingIOError:
-        # Un autre worker est déjà en train de restaurer
+    except FileExistsError:
+        # Un autre worker est déjà en train de restaurer (le fichier existe déjà)
         write_log("Un autre worker restaure déjà les téléchargements, skip")
         return
     except Exception as e:
         write_log(f"Erreur lors de la restauration des téléchargements: {str(e)}", "ERROR")
+        # Libérer le verrou en cas d'erreur
+        if os.path.exists(RESTORE_LOCK_FILE):
+            try:
+                os.remove(RESTORE_LOCK_FILE)
+            except:
+                pass
