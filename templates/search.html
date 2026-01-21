@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recherche</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#313B45">
+    <title>Recherche - Plex Service</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/plex-icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/search.css') }}">
 </head>
@@ -12,9 +15,19 @@
 <body>
     {% include 'navbar.html' %}
 
-    <div class="container">
-        <h1>Recherche</h1>
-        <input type="text" id="search-input" placeholder="Rechercher un film ou une série...">
+    <div class="search-wrapper">
+        <div class="search-header">
+            <h1>Recherche</h1>
+            <p class="subtitle">Trouvez vos films et séries préférés</p>
+        </div>
+        
+        <div class="search-card">
+            <div class="search-input-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-input" placeholder="Rechercher un film ou une série...">
+            </div>
+        </div>
+        
         <div id="results"></div>
     </div>
 
