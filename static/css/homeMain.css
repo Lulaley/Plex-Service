@@ -125,7 +125,7 @@ body {
     position: relative;
 }
 
-/* Responsive */
+/* Responsive Design */
 @media (max-width: 768px) {
     body {
         padding-bottom: 20px;
@@ -135,44 +135,136 @@ body {
         margin: 70px 10px 20px;
         padding: 10px;
     }
-    
+
     .welcome-card {
-        padding: 25px;
+        padding: 20px 15px;
+        border-radius: 15px;
     }
-    
+
     .welcome-header h1 {
         font-size: 1.8em;
+        margin-bottom: 8px;
     }
-    
+
+    .welcome-header {
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+    }
+
     .welcome-content {
         grid-template-columns: 1fr;
+        gap: 20px;
     }
-    
+
+    .info-section {
+        padding: 16px;
+    }
+
+    .info-icon {
+        font-size: 2.2em;
+    }
+
+    .info-text h3 {
+        font-size: 1.1em;
+    }
+
+    .info-text p {
+        font-size: 0.9em;
+    }
+
+    .loading-card {
+        padding: 20px 15px;
+        border-radius: 15px;
+    }
+
     .loadingContainer {
         gap: 15px;
+        min-height: 100px;
     }
 }
 
-@media (max-width: 400px) {
+/* Optimisation spécifique pour grands écrans mobiles */
+@media (min-width: 400px) and (max-width: 768px) {
+    .welcome-header h1 {
+        font-size: 2em;
+    }
+
+    .welcome-card {
+        padding: 30px 20px;
+    }
+
+    .welcome-content {
+        gap: 22px;
+    }
+
+    .info-section {
+        padding: 18px;
+    }
+}
+
+/* Mode paysage mobile */
+@media (max-height: 600px) and (orientation: landscape) {
+    .home-wrapper {
+        margin: 60px 15px 15px;
+    }
+
+    .welcome-card {
+        padding: 15px;
+    }
+
+    .welcome-header {
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+    }
+
+    .welcome-header h1 {
+        font-size: 1.5em;
+        margin-bottom: 5px;
+    }
+
+    .welcome-content {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .info-section {
+        padding: 12px;
+    }
+
+    .info-icon {
+        font-size: 1.8em;
+    }
+}
+
+/* Très petits écrans */
+@media (max-width: 360px) {
     .home-wrapper {
         margin: 65px 8px 15px;
         padding: 8px;
     }
 
     .welcome-card {
-        padding: 20px;
+        padding: 15px 12px;
     }
-    
+
+    .welcome-header h1 {
+        font-size: 1.5em;
+    }
+
     .info-section {
-        padding: 15px;
+        padding: 14px;
     }
-    
+
     .info-icon {
         font-size: 2em;
     }
-    
+
     .info-text h3 {
-        font-size: 1.1em;
+        font-size: 1em;
+    }
+
+    .info-text p {
+        font-size: 0.85em;
     }
 }
 
@@ -182,39 +274,13 @@ body {
         min-height: 44px;
         -webkit-tap-highlight-color: transparent;
     }
-    
+
     .info-section:hover {
         transform: none;
     }
-    
+
     .info-section:active {
         transform: scale(0.98);
-    }
-}
-
-/* Mode paysage mobile */
-@media (max-width: 768px) and (orientation: landscape) {
-    .home-wrapper {
-        margin: 60px 10px 15px;
-        padding: 10px;
-    }
-    
-    .welcome-card {
-        padding: 20px;
-    }
-    
-    .welcome-header {
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-    }
-    
-    .welcome-header h1 {
-        font-size: 1.5em;
-    }
-    
-    .welcome-content {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
     }
 }
 

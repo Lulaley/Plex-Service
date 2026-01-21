@@ -202,7 +202,7 @@ body {
     margin: 0;
 }
 
-/* Responsive */
+/* Responsive Design */
 @media (max-width: 768px) {
     body {
         padding-bottom: 20px;
@@ -212,46 +212,127 @@ body {
         margin: 70px 10px 20px;
         padding: 10px;
     }
-    
+
     .wishes-header h1 {
         font-size: 1.8em;
+        margin-bottom: 8px;
     }
-    
+
     .subtitle {
         font-size: 0.95em;
     }
-    
+
     .wishes-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
         gap: 16px;
     }
-    
+
     .wish-poster {
         height: 225px;
     }
-    
+
+    .wish-info {
+        padding: 14px;
+    }
+
+    .wish-info h3 {
+        font-size: 0.95em;
+    }
+
+    .wish-badge {
+        padding: 5px 10px;
+        font-size: 0.8em;
+    }
+
     .wishes-section h2 {
         font-size: 1.3em;
     }
 }
 
-@media (max-width: 400px) {
+/* Optimisation spécifique pour grands écrans mobiles */
+@media (min-width: 400px) and (max-width: 768px) {
+    .wishes-header h1 {
+        font-size: 2em;
+    }
+
+    .subtitle {
+        font-size: 1em;
+    }
+
+    .wishes-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 20px;
+    }
+
+    .wish-poster {
+        height: 270px;
+    }
+}
+
+/* Mode paysage mobile */
+@media (max-height: 600px) and (orientation: landscape) {
+    .wishes-wrapper {
+        margin: 60px 15px 15px;
+    }
+
+    .wishes-header {
+        margin-bottom: 20px;
+    }
+
+    .wishes-header h1 {
+        font-size: 1.5em;
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        font-size: 0.9em;
+    }
+
+    .wishes-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+    }
+
+    .wish-poster {
+        height: 180px;
+    }
+
+    .wish-info {
+        padding: 12px;
+    }
+}
+
+/* Très petits écrans */
+@media (max-width: 360px) {
     .wishes-wrapper {
         margin: 65px 8px 15px;
         padding: 8px;
     }
 
+    .wishes-header h1 {
+        font-size: 1.5em;
+    }
+
     .wishes-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
+        gap: 10px;
     }
-    
+
     .wish-poster {
-        height: 200px;
+        height: 180px;
     }
-    
+
+    .wish-info {
+        padding: 12px;
+    }
+
     .wish-info h3 {
-        font-size: 0.9em;
+        font-size: 0.85em;
+    }
+
+    .wish-badge {
+        padding: 4px 8px;
+        font-size: 0.75em;
     }
 }
 
@@ -261,37 +342,13 @@ body {
         min-height: 44px;
         -webkit-tap-highlight-color: transparent;
     }
-    
+
     .wish-card:hover:not(.details-open) {
         transform: none;
     }
-    
+
     .wish-card:active:not(.details-open) {
         transform: scale(0.97);
     }
 }
 
-/* Mode paysage mobile */
-@media (max-width: 768px) and (orientation: landscape) {
-    .wishes-wrapper {
-        margin: 60px 10px 15px;
-        padding: 10px;
-    }
-    
-    .wishes-header {
-        margin-bottom: 20px;
-    }
-    
-    .wishes-header h1 {
-        font-size: 1.5em;
-    }
-    
-    .wishes-grid {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 12px;
-    }
-    
-    .wish-poster {
-        height: 200px;
-    }
-}

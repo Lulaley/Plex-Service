@@ -249,14 +249,120 @@ input[type="email"]:focus {
     position: relative;
 }
 
-/* Media queries */
-@media only screen and (max-width: 600px) {
-    .form-card {
-        padding: 25px;
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {
+        padding: 20px 10px;
     }
-    
+
+    .login-container {
+        padding: 0;
+    }
+
+    .plex-logo {
+        margin-bottom: 35px;
+    }
+
+    .plex-logo img {
+        width: 180px;
+    }
+
+    .buttons-wrapper {
+        gap: 12px;
+        margin-bottom: 25px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 16px 20px;
+        font-size: 1.05em;
+        min-height: 56px;
+    }
+
+    .btn-primary:active,
+    .btn-secondary:active {
+        transform: scale(0.98);
+    }
+
+    .form-card {
+        padding: 25px 20px;
+        border-radius: 15px;
+    }
+
     .form-card h2 {
-        font-size: 1.5em;
+        font-size: 1.6em;
+        margin-bottom: 20px;
+    }
+
+    .input-group {
+        margin-bottom: 16px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    input[type="email"] {
+        padding: 14px 18px;
+        font-size: 1em;
+    }
+
+    .btn-submit {
+        padding: 14px 28px;
+        font-size: 1em;
+    }
+}
+
+/* Optimisation spécifique pour grands écrans mobiles */
+@media (min-width: 400px) and (max-width: 768px) {
+    .plex-logo img {
+        width: 200px;
+    }
+
+    .form-card {
+        padding: 35px 25px;
+    }
+
+    .form-card h2 {
+        font-size: 1.7em;
+    }
+}
+
+/* Mode paysage mobile */
+@media (max-height: 600px) and (orientation: landscape) {
+    body {
+        padding: 10px;
+    }
+
+    .plex-logo {
+        margin-bottom: 15px;
+    }
+
+    .plex-logo img {
+        width: 120px;
+    }
+
+    .buttons-wrapper {
+        gap: 8px;
+        margin-bottom: 15px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        padding: 12px 16px;
+        font-size: 0.95em;
+        min-height: 48px;
+    }
+
+    .form-card {
+        padding: 20px 18px;
+    }
+
+    .form-card h2 {
+        font-size: 1.4em;
+        margin-bottom: 15px;
+    }
+
+    .input-group {
+        margin-bottom: 12px;
     }
 
     input[type="text"],
@@ -264,15 +370,39 @@ input[type="email"]:focus {
     input[type="email"] {
         padding: 12px 16px;
     }
+
+    .btn-submit {
+        padding: 10px 24px;
+    }
 }
 
-@media only screen and (max-width: 400px) {
-    .login-container {
-        padding: 0 10px;
+/* Très petits écrans */
+@media (max-width: 360px) {
+    body {
+        padding: 15px 8px;
     }
-    
+
+    .plex-logo img {
+        width: 150px;
+    }
+
     .form-card {
-        padding: 20px;
+        padding: 20px 15px;
+    }
+
+    .form-card h2 {
+        font-size: 1.4em;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        font-size: 1em;
+        padding: 14px 16px;
+    }
+
+    .btn-submit {
+        padding: 12px 24px;
+        font-size: 0.95em;
     }
 }
 
@@ -284,53 +414,25 @@ input[type="email"]:focus {
         min-height: 44px;
         -webkit-tap-highlight-color: transparent;
     }
-    
+
     .btn-primary:hover,
     .btn-secondary:hover,
     .btn-submit:hover {
         transform: none;
     }
-    
+
     .btn-primary:active,
     .btn-secondary:active,
     .btn-submit:active {
         transform: scale(0.97);
     }
-}
 
-/* Mode paysage mobile */
-@media (max-width: 768px) and (orientation: landscape) {
-    body {
-        padding: 10px;
-    }
-    
-    .plex-logo {
-        margin-bottom: 20px;
-    }
-    
-    .plex-logo img {
-        width: 150px;
-    }
-    
-    .buttons-wrapper {
-        gap: 10px;
-        margin-bottom: 20px;
-    }
-    
-    .form-card {
-        padding: 25px;
-    }
-    
-    .form-card h2 {
-        font-size: 1.4em;
-        margin-bottom: 20px;
-    }
-    
-    .input-group {
-        margin-bottom: 14px;
-    }
-}
-
-/* Touch optimization for password toggle */
-@media (hover: none) and (pointer: coarse) {
     .toggle-password {
+        min-width: 44px;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+

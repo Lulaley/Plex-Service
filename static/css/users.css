@@ -192,7 +192,7 @@ body {
     transform: translateY(0);
 }
 
-/* Responsive */
+/* Responsive Design */
 @media (max-width: 768px) {
     body {
         padding-bottom: 20px;
@@ -202,37 +202,90 @@ body {
         margin: 70px 10px 20px;
         padding: 10px;
     }
-    
+
     .users-header h1 {
         font-size: 1.8em;
+        margin-bottom: 8px;
     }
-    
+
+    .users-table-card {
+        padding: 0;
+        border-radius: 15px;
+    }
+
     .users-table thead th,
     .users-table tbody td {
         padding: 12px 10px;
         font-size: 0.9em;
     }
-    
+
     .action-buttons {
         flex-direction: column;
+        gap: 6px;
     }
-    
+
     .btn {
         width: 100%;
+        padding: 10px 16px;
+        font-size: 0.9em;
     }
 }
 
+/* Optimisation spécifique pour grands écrans mobiles */
+@media (min-width: 400px) and (max-width: 768px) {
+    .users-header h1 {
+        font-size: 2em;
+    }
+
+    .users-table thead th,
+    .users-table tbody td {
+        padding: 14px 12px;
+        font-size: 0.95em;
+    }
+
+    .btn {
+        padding: 12px 18px;
+    }
+}
+
+/* Mode paysage mobile */
+@media (max-height: 600px) and (orientation: landscape) {
+    .users-wrapper {
+        margin: 60px 15px 15px;
+    }
+
+    .users-header h1 {
+        font-size: 1.5em;
+        margin-bottom: 15px;
+    }
+
+    .users-table thead th,
+    .users-table tbody td {
+        padding: 10px 8px;
+        font-size: 0.85em;
+    }
+
+    .btn {
+        padding: 8px 14px;
+    }
+}
+
+/* Très petits écrans et mode carte mobile */
 @media (max-width: 600px) {
     .users-wrapper {
         margin: 65px 8px 15px;
         padding: 8px;
     }
 
+    .users-header h1 {
+        font-size: 1.5em;
+    }
+
     /* Stack table on mobile */
     .users-table thead {
         display: none;
     }
-    
+
     .users-table tbody tr {
         display: block;
         margin-bottom: 15px;
@@ -240,18 +293,18 @@ body {
         overflow: hidden;
         border: 1px solid rgba(0, 0, 0, 0.1);
     }
-    
+
     .users-table tbody td {
         display: block;
         text-align: left;
         padding: 12px 15px;
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     }
-    
+
     .users-table tbody td:last-child {
         border-bottom: none;
     }
-    
+
     .users-table tbody td::before {
         content: attr(data-label);
         font-weight: 600;
@@ -259,6 +312,14 @@ body {
         margin-bottom: 5px;
         color: #ff9900;
         font-size: 0.85em;
+    }
+
+    .action-buttons {
+        gap: 8px;
+    }
+
+    .btn {
+        padding: 10px 16px;
     }
 }
 
@@ -268,26 +329,9 @@ body {
         min-height: 44px;
         -webkit-tap-highlight-color: transparent;
     }
-    
-    .result-item {
+
+    .users-table tbody tr {
         -webkit-tap-highlight-color: transparent;
     }
 }
 
-/* Mode paysage mobile */
-@media (max-width: 768px) and (orientation: landscape) {
-    .users-wrapper {
-        margin: 60px 10px 15px;
-        padding: 10px;
-    }
-    
-    .users-header h1 {
-        font-size: 1.5em;
-    }
-    
-    .users-table thead th,
-    .users-table tbody td {
-        padding: 10px 8px;
-        font-size: 0.85em;
-    }
-}
