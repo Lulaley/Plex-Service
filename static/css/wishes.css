@@ -168,13 +168,14 @@ body {
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    transition: all 0.3s ease;
+    will-change: max-height, opacity, padding;
 }
 
 .wish-details.show {
     padding: 16px;
     max-height: 500px;
     opacity: 1;
+    transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
 }
 
 .empty-state {
