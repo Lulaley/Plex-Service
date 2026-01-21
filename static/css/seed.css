@@ -299,9 +299,13 @@ input[type="file"]:focus {
 
 /* Responsive design */
 @media (max-width: 768px) {
+    body {
+        padding-bottom: 20px;
+    }
+
     .seed-wrapper {
         margin: 70px 10px 20px;
-        padding: 15px;
+        padding: 10px;
     }
     
     .seed-header h1 {
@@ -365,7 +369,8 @@ input[type="file"]:focus {
 
 @media (max-width: 600px) {
     .seed-wrapper {
-        padding: 10px;
+        margin: 65px 8px 15px;
+        padding: 8px;
     }
     
     .add-seed-card {

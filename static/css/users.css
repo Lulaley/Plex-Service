@@ -194,9 +194,13 @@ body {
 
 /* Responsive */
 @media (max-width: 768px) {
+    body {
+        padding-bottom: 20px;
+    }
+
     .users-wrapper {
         margin: 70px 10px 20px;
-        padding: 15px;
+        padding: 10px;
     }
     
     .users-header h1 {
@@ -219,6 +223,11 @@ body {
 }
 
 @media (max-width: 600px) {
+    .users-wrapper {
+        margin: 65px 8px 15px;
+        padding: 8px;
+    }
+
     /* Stack table on mobile */
     .users-table thead {
         display: none;
@@ -268,7 +277,8 @@ body {
 /* Mode paysage mobile */
 @media (max-width: 768px) and (orientation: landscape) {
     .users-wrapper {
-        margin: 60px 15px 15px;
+        margin: 60px 10px 15px;
+        padding: 10px;
     }
     
     .users-header h1 {

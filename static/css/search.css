@@ -247,10 +247,14 @@ input[type="text"]::placeholder {
 
 /* Responsive */
 @media (max-width: 768px) {
+    body {
+        padding-bottom: 20px;
+    }
+
     .search-wrapper,
     .container {
         margin: 70px 10px 20px;
-        padding: 15px;
+        padding: 10px;
     }
     
     .search-header h1,
@@ -285,7 +289,8 @@ input[type="text"]::placeholder {
 @media (max-width: 400px) {
     .search-wrapper,
     .container {
-        padding: 10px;
+        margin: 65px 8px 15px;
+        padding: 8px;
     }
     
     .result-item img {
@@ -321,7 +326,8 @@ input[type="text"]::placeholder {
 @media (max-width: 768px) and (orientation: landscape) {
     .search-wrapper,
     .container {
-        margin: 60px 15px 15px;
+        margin: 60px 10px 15px;
+        padding: 10px;
     }
     
     .search-header {
