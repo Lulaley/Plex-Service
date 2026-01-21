@@ -313,16 +313,17 @@ def save_resume_data(identifier, handle):
         
         resume_file = os.path.join(resume_dir, f'{identifier}.resume')
         
-        # Générer les resume_data
-        handle.save_resume_data()
-        # Note: dans libtorrent, les resume_data sont récupérés via un alert
-        # Pour simplifier, on peut aussi utiliser write_resume_data()
-        resume_data = lt.write_resume_data(handle.status())
-        
-        with open(resume_file, 'wb') as f:
-            f.write(lt.bencode(resume_data))
-        
-        write_log(f"Resume data sauvegardé pour {identifier}")
+        # Utiliser write_resume_data pour récupérer l'add_torrent_params
+        try:
+            atp = handle.write_resume_data()
+            resume_data = lt.write_resume_data_buf(atp)
+            
+            with open(resume_file, 'wb') as f:
+                f.write(resume_data)
+            
+            write_log(f"Resume data sauvegardé pour {identifier}")
+        except Exception as e:
+            write_log(f"Erreur lors de la sauvegarde des resume_data pour {identifier}: {str(e)}", "WARNING")
     except Exception as e:
         write_log(f"Erreur lors de la sauvegarde des resume_data pour {identifier}: {str(e)}", "WARNING")
 

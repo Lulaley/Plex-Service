@@ -169,13 +169,19 @@ def save_download_resume_data(download_id, handle):
         
         resume_file = os.path.join(resume_dir, f'{download_id}.resume')
         
-        # Générer les resume_data
-        resume_data = lt.write_resume_data(handle.status())
-        
-        with open(resume_file, 'wb') as f:
-            f.write(lt.bencode(resume_data))
-        
-        write_log(f"Resume data sauvegardé pour download {download_id}")
+        # Utiliser write_resume_data pour récupérer l'add_torrent_params
+        try:
+            atp = handle.write_resume_data()
+            resume_data = lt.write_resume_data_buf(atp)
+            
+            with open(resume_file, 'wb') as f:
+                f.write(resume_data)
+            
+            write_log(f"Resume data sauvegardé pour download {download_id}")
+        except AttributeError as e:
+            # Pour les anciennes versions de libtorrent, méthode alternative
+            write_log(f"Méthode write_resume_data_buf non disponible: {str(e)}", "WARNING")
+            
     except Exception as e:
         write_log(f"Erreur sauvegarde resume_data pour {download_id}: {str(e)}", "WARNING")
 
