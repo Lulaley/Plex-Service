@@ -137,10 +137,16 @@ def download_torrent(torrent_file_path, save_path, handle):
         search_name = extract_title_prefix(info.name())
         search_name = search_name.replace('.', ' ')
         write_log(f"Nom de la série extrait: {search_name}")
-        series_info = search.search_serie(search_name)
-        name = series_info['name']
-        write_log(f"Nom de la série: {name}")
-        name = name.replace(' ', '.')
+        try:
+            series_info = search.search_serie(search_name)
+            name = series_info['name']
+            write_log(f"Nom de la série: {name}")
+            name = name.replace(' ', '.')
+        except (ValueError, KeyError, IndexError) as e:
+            write_log(f"Impossible de trouver la série sur TMDB: {str(e)}", "WARNING")
+            write_log(f"Utilisation du nom du torrent comme nom de dossier", "WARNING")
+            name = extract_title_prefix(info.name())
+            name = name.replace(' ', '.')
     else:
         save_path = conf.get_config('DLT', 'movies')
         write_log("Le contenu du torrent est identifié comme un film")
