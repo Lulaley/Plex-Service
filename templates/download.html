@@ -14,24 +14,80 @@
 <body>
     {% include 'navbar.html' %}
 
-    <div class="center-container blur-background fade-in">
-        <form id="torrent-form">
-            <label for="torrent-file">Télécharger un fichier .torrent :</label>
-            <input type="file" name="torrent-file" id="torrent-file" accept=".torrent" required>
-            <button type="submit" id="download-button">Lancer le téléchargement</button>
-            <input type="hidden" id="download-id" value=""> <!-- Champ caché pour l'identifiant du téléchargement -->
-        </form>
-
-        <div class="status-info">
-            <div id="file-info">Nom du fichier: Aucun fichier sélectionné</div>
-            <div id="speed-info">Vitesse de téléchargement: 0 kB/s</div>
-            <div id="upload-speed-info">Vitesse d'upload: 0 kB/s</div>
-            <div id="elapsed-time">Temps écoulé: 0s</div>
-            <div id="remaining-time">Temps restant estimé: Inconnu</div>
+    <div class="download-wrapper">
+        <div class="download-header">
+            <h1>📥 Gestionnaire de Téléchargements</h1>
+            <p class="subtitle">Gérez vos téléchargements torrents</p>
         </div>
 
-        <div class="progress-container">
-            <div class="progress-bar" id="progress-bar">0%</div>
+        <!-- Zone d'upload -->
+        <div class="upload-card">
+            <form id="torrent-form">
+                <div class="upload-zone" id="upload-zone">
+                    <svg class="upload-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <label for="torrent-file" class="upload-label">
+                        <span class="upload-text">Cliquez pour sélectionner un fichier .torrent</span>
+                        <span class="upload-subtext">ou glissez-déposez le fichier ici</span>
+                    </label>
+                    <input type="file" name="torrent-file" id="torrent-file" accept=".torrent" required>
+                </div>
+                <button type="submit" id="download-button" class="btn-primary">
+                    <span class="btn-icon">▶</span>
+                    <span class="btn-text">Lancer le téléchargement</span>
+                </button>
+                <input type="hidden" id="download-id" value="">
+            </form>
+        </div>
+
+        <!-- Carte d'informations du téléchargement -->
+        <div class="download-info-card" id="download-info-card" style="display: none;">
+            <div class="card-header">
+                <h3>📄 <span id="file-info">Aucun fichier sélectionné</span></h3>
+            </div>
+            
+            <div class="progress-section">
+                <div class="progress-container">
+                    <div class="progress-bar" id="progress-bar">
+                        <span class="progress-text">0%</span>
+                    </div>
+                </div>
+                <div class="progress-percentage" id="progress-percentage">0%</div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">⬇️</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Téléchargement</div>
+                        <div class="stat-value" id="speed-info">0 kB/s</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⬆️</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Upload</div>
+                        <div class="stat-value" id="upload-speed-info">0 kB/s</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏱️</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Temps écoulé</div>
+                        <div class="stat-value" id="elapsed-time">0s</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Temps restant</div>
+                        <div class="stat-value" id="remaining-time">Calcul...</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         {% with messages = get_flashed_messages() %}

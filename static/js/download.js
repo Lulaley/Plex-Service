@@ -2,10 +2,50 @@ document.addEventListener('DOMContentLoaded', function () {
     const torrentForm = document.getElementById('torrent-form');
     const torrentFileInput = document.getElementById('torrent-file');
     const downloadButton = document.getElementById('download-button');
-    const downloadIdInput = document.getElementById('download-id'); // Champ caché pour l'identifiant du téléchargement
+    const downloadIdInput = document.getElementById('download-id');
+    const uploadZone = document.getElementById('upload-zone');
+    const downloadInfoCard = document.getElementById('download-info-card');
 
     let isDownloading = false;
     let eventSource = null;
+
+    // Gestion du drag & drop
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadZone.addEventListener(eventName, () => {
+            uploadZone.classList.add('dragover');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadZone.addEventListener(eventName, () => {
+            uploadZone.classList.remove('dragover');
+        }, false);
+    });
+
+    uploadZone.addEventListener('drop', function(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length > 0 && files[0].name.endsWith('.torrent')) {
+            torrentFileInput.files = files;
+            updateFileInfo(files[0].name);
+        }
+    }, false);
+
+    // Clic sur la zone d'upload
+    uploadZone.addEventListener('click', function() {
+        if (!isDownloading) {
+            torrentFileInput.click();
+        }
+    });
 
     // Au chargement de la page, vérifier s'il y a des téléchargements en cours
     checkActiveDownloads();
@@ -15,11 +55,9 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 if (data.success && data.downloads && data.downloads.length > 0) {
-                    // Trouver le premier téléchargement actif
                     const activeDownload = data.downloads.find(dl => dl.is_active);
                     if (activeDownload) {
                         console.log('Téléchargement actif trouvé:', activeDownload);
-                        // Se reconnecter au stream de ce téléchargement
                         reconnectToDownload(activeDownload);
                     }
                 }
@@ -32,14 +70,14 @@ document.addEventListener('DOMContentLoaded', function () {
     function reconnectToDownload(downloadInfo) {
         isDownloading = true;
         torrentFileInput.disabled = true;
-        downloadButton.textContent = 'Annuler le téléchargement';
+        downloadButton.classList.add('cancel');
+        downloadButton.innerHTML = '<span class="btn-icon">■</span><span class="btn-text">Annuler le téléchargement</span>';
         downloadIdInput.value = downloadInfo.download_id;
 
-        // Afficher le nom du fichier
-        var fileInfo = document.getElementById('file-info');
-        fileInfo.textContent = 'Nom du fichier: ' + (downloadInfo.name || 'Téléchargement en cours');
+        // Afficher la carte d'infos et mettre à jour le nom
+        downloadInfoCard.style.display = 'block';
+        document.getElementById('file-info').textContent = downloadInfo.name || 'Téléchargement en cours';
 
-        // Se connecter au stream du téléchargement existant
         const streamUrl = `/stream_download/${downloadInfo.download_id}`;
         console.log('Reconnexion au stream:', streamUrl);
         connectToStream(streamUrl);
@@ -59,7 +97,11 @@ document.addEventListener('DOMContentLoaded', function () {
     function startDownload() {
         isDownloading = true;
         torrentFileInput.disabled = true;
-        downloadButton.textContent = 'Annuler le téléchargement';
+        downloadButton.classList.add('cancel');
+        downloadButton.innerHTML = '<span class="btn-icon">■</span><span class="btn-text">Annuler le téléchargement</span>';
+
+        // Afficher la carte d'informations
+        downloadInfoCard.style.display = 'block';
 
         var formData = new FormData();
         var fileInput = document.getElementById('torrent-file');
@@ -72,25 +114,35 @@ document.addEventListener('DOMContentLoaded', function () {
             if (response.ok) {
                 response.json().then(data => {
                     if (data.success) {
-                        // Mettre à jour le champ caché avec l'identifiant du téléchargement
                         downloadIdInput.value = data.download_id;
-                        
-                        // Se connecter au stream
                         connectToStream(data.redirect_url);
                     } else {
                         console.error('Erreur lors du téléchargement');
-                        isDownloading = false;
-                        torrentFileInput.disabled = false;
-                        downloadButton.textContent = 'Lancer le téléchargement';
+                        resetDownloadUI();
                     }
                 });
             }
         });
     }
 
+    function resetDownloadUI() {
+        isDownloading = false;
+        torrentFileInput.disabled = false;
+        downloadButton.classList.remove('cancel');
+        downloadButton.innerHTML = '<span class="btn-icon">▶</span><span class="btn-text">Lancer le téléchargement</span>';
+        downloadInfoCard.style.display = 'none';
+    }
+
+    function updateFileInfo(fileName) {
+        document.querySelector('.upload-text').textContent = fileName;
+        document.querySelector('.upload-subtext').textContent = 'Fichier sélectionné';
+    }
+
     function connectToStream(streamUrl) {
         eventSource = new EventSource(streamUrl);
         var progressBar = document.getElementById('progress-bar');
+        var progressText = progressBar.querySelector('.progress-text');
+        var progressPercentage = document.getElementById('progress-percentage');
         var speedInfo = document.getElementById('speed-info');
         var uploadSpeedInfo = document.getElementById('upload-speed-info');
         var elapsedTimeElem = document.getElementById('elapsed-time');
@@ -104,15 +156,17 @@ document.addEventListener('DOMContentLoaded', function () {
             if (logMessage === 'done' || logMessage === 'cancelled' || logMessage === 'not_found') {
                 if (logMessage === 'done') {
                     progressBar.style.width = '100%';
-                    progressBar.textContent = '100%';
+                    progressText.textContent = '100%';
+                    progressPercentage.textContent = '100%';
                 }
-                speedInfo.textContent = 'Vitesse de téléchargement: 0 kB/s';
-                uploadSpeedInfo.textContent = 'Vitesse d\'upload: 0 kB/s';
-                remainingTimeElem.textContent = 'Temps restant: 0s';
+                speedInfo.textContent = '0 kB/s';
+                uploadSpeedInfo.textContent = '0 kB/s';
+                remainingTimeElem.textContent = logMessage === 'done' ? 'Terminé !' : 'Annulé';
                 eventSource.close();
-                isDownloading = false;
-                downloadButton.textContent = 'Lancer le téléchargement';
-                torrentFileInput.disabled = false;
+                
+                setTimeout(() => {
+                    resetDownloadUI();
+                }, 2000);
                 return;
             }
 
@@ -123,24 +177,25 @@ document.addEventListener('DOMContentLoaded', function () {
             if (progressMatch) {
                 var progress = parseFloat(progressMatch[1]);
                 progressBar.style.width = progress + '%';
-                progressBar.textContent = progress.toFixed(2) + '%';
+                progressText.textContent = progress.toFixed(2) + '%';
+                progressPercentage.textContent = progress.toFixed(1) + '%';
 
                 var elapsedTime = (Date.now() - startTime) / 1000;
-                elapsedTimeElem.textContent = 'Temps écoulé: ' + formatTime(elapsedTime);
+                elapsedTimeElem.textContent = formatTime(elapsedTime);
 
                 if (downloadSpeedMatch) {
                     var downloadSpeed = parseFloat(downloadSpeedMatch[1]);
-                    speedInfo.textContent = 'Vitesse de téléchargement: ' + formatSpeed(downloadSpeed);
+                    speedInfo.textContent = formatSpeed(downloadSpeed);
                 }
 
                 if (uploadSpeedMatch) {
                     var uploadSpeed = parseFloat(uploadSpeedMatch[1]);
-                    uploadSpeedInfo.textContent = 'Vitesse d\'upload: ' + formatSpeed(uploadSpeed);
+                    uploadSpeedInfo.textContent = formatSpeed(uploadSpeed);
                 }
 
-                if (progress > lastProgress) {
+                if (progress > lastProgress && progress > 0) {
                     var remainingTime = (elapsedTime / progress) * (100 - progress);
-                    remainingTimeElem.textContent = 'Temps restant: ' + formatTime(remainingTime);
+                    remainingTimeElem.textContent = formatTime(remainingTime);
                     lastProgress = progress;
                 }
             }
@@ -153,19 +208,13 @@ document.addEventListener('DOMContentLoaded', function () {
         eventSource.onerror = function () {
             console.log('Connection closed');
             eventSource.close();
-            isDownloading = false;
-            downloadButton.textContent = 'Lancer le téléchargement';
-            torrentFileInput.disabled = false;
+            resetDownloadUI();
         };
     }
 
     function stopDownload() {
-        isDownloading = false;
-        torrentFileInput.disabled = false;
-        downloadButton.textContent = 'Lancer le téléchargement';
-
         const downloadState = {
-            download_id: downloadIdInput.value // Inclure l'identifiant du téléchargement
+            download_id: downloadIdInput.value
         };
 
         fetch('/stop_download', {
@@ -182,6 +231,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (eventSource) {
                     eventSource.close();
                 }
+                resetDownloadUI();
             } else {
                 console.error('Erreur lors de l\'annulation du téléchargement');
             }
@@ -190,12 +240,13 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Erreur réseau ou autre:', error);
         });
     }
-});
 
-document.getElementById('torrent-file').addEventListener('change', function (event) {
-    var fileInfo = document.getElementById('file-info');
-    var fileName = event.target.files[0] ? event.target.files[0].name : 'Aucun fichier sélectionné';
-    fileInfo.textContent = 'Nom du fichier: ' + fileName;
+    // Gestion du changement de fichier
+    torrentFileInput.addEventListener('change', function (event) {
+        if (event.target.files[0]) {
+            updateFileInfo(event.target.files[0].name);
+        }
+    });
 });
 
 function formatSpeed(speed) {

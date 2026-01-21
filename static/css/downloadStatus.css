@@ -1,20 +1,70 @@
 .progress-container {
-    width: 50%;
-    background-color: #f3f3f3;
-    border-radius: 25px;
-    margin: 20px 0;
+    width: 100%;
+    height: 40px;
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+    margin-bottom: 15px;
 }
 
 .progress-bar {
     width: 0%;
-    height: 30px;
-    background-color: #4caf50;
-    text-align: center;
-    line-height: 30px;
-    color: white;
-    border-radius: 25px;
+    height: 100%;
+    background: linear-gradient(90deg, #ff9900 0%, #ff6b00 50%, #ff9900 100%);
+    background-size: 200% 100%;
+    animation: gradientShift 2s ease infinite;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 20px rgba(255, 153, 0, 0.4);
+    position: relative;
+    overflow: hidden;
 }
 
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.progress-text {
+    position: relative;
+    z-index: 1;
+    color: white;
+    font-weight: 600;
+    font-size: 0.95em;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.progress-percentage {
+    text-align: right;
+    color: #ff9900;
+    font-size: 1.5em;
+    font-weight: 700;
+    margin-top: 10px;
+}
+
+/* Anciens styles pour compatibilité */
 .status-info > div {
     display: flex;
     justify-content: space-between;
