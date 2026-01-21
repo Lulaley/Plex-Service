@@ -278,3 +278,81 @@ def get_downloads_route(app):
         except Exception as e:
             write_log(f"Erreur lors de la récupération des downloads: {str(e)}", "ERROR")
             return jsonify({'success': False, 'message': str(e)}), 500
+
+def restore_downloads_on_startup():
+    """Restaure et relance automatiquement les téléchargements interrompus au démarrage."""
+    write_log("Vérification des téléchargements interrompus au démarrage")
+    try:
+        from static.Controleur.ControleurTorrent import load_persisted_downloads
+        
+        persisted = load_persisted_downloads()
+        
+        if not persisted:
+            write_log("Aucun téléchargement à restaurer")
+            return
+        
+        write_log(f"Trouvé {len(persisted)} téléchargement(s) à vérifier")
+        
+        # Nettoyer les downloads qui ne sont plus actifs
+        for download_id, download_info in list(persisted.items()):
+            if not download_info.get('is_active', True):
+                write_log(f"Download {download_id} marqué comme inactif, ignoré")
+                continue
+            
+            # Récupérer les informations
+            torrent_path = download_info.get('torrent_path', '')
+            save_path = download_info.get('save_path', '')
+            
+            # Vérifier que le fichier torrent existe toujours
+            if not os.path.exists(torrent_path):
+                write_log(f"Fichier torrent {torrent_path} introuvable, téléchargement {download_id} ignoré", "WARNING")
+                # Marquer comme inactif dans la persistance
+                import json
+                DOWNLOADS_PERSISTENCE_FILE = "/var/www/public/Plex-Service/tmp/active_downloads.json"
+                persisted[download_id]['is_active'] = False
+                with open(DOWNLOADS_PERSISTENCE_FILE, 'w') as f:
+                    json.dump(persisted, f, indent=4)
+                continue
+            
+            # Vérifier si resume_data existe
+            resume_file = f"/var/www/public/Plex-Service/tmp/resume_data/{download_id}.resume"
+            if not os.path.exists(resume_file):
+                write_log(f"Pas de resume_data pour {download_id}, téléchargement à relancer manuellement", "WARNING")
+                # Marquer comme inactif pour que l'utilisateur le relance
+                import json
+                DOWNLOADS_PERSISTENCE_FILE = "/var/www/public/Plex-Service/tmp/active_downloads.json"
+                persisted[download_id]['is_active'] = False
+                with open(DOWNLOADS_PERSISTENCE_FILE, 'w') as f:
+                    json.dump(persisted, f, indent=4)
+                continue
+            
+            write_log(f"Relance du téléchargement {download_id} ({download_info.get('name', 'Unknown')})")
+            
+            # Créer un handle et relancer le téléchargement dans un thread
+            handle = {
+                'id': download_id,
+                'is_downloading': True,
+                'is_active': True,
+                'handle': None,
+                'save_path': save_path,
+                'torrent_file_path': torrent_path,
+                'downloaded_files': [],
+                'username': 'system',  # Utilisateur système pour restauration
+                'name': download_info.get('name', 'Unknown')
+            }
+            downloads[download_id] = handle
+            
+            # Lancer dans un thread
+            download_thread = threading.Thread(
+                target=background_download,
+                args=(torrent_path, save_path, handle, 'system'),
+                daemon=True
+            )
+            download_thread.start()
+            
+            write_log(f"Téléchargement {download_id} relancé avec succès")
+        
+        write_log("Restauration des téléchargements terminée")
+        
+    except Exception as e:
+        write_log(f"Erreur lors de la restauration des téléchargements: {str(e)}", "ERROR")

@@ -321,6 +321,7 @@ def download_torrent(torrent_file_path, save_path, handle):
     save_persisted_downloads()
 
     write_log(f"Téléchargement de {info.name()}")
+    iteration = 0  # Compteur pour sauvegarder les resume_data périodiquement
     while not h.is_seed():
         # Vérifier si le téléchargement a été annulé localement
         if not handle['is_downloading']:
@@ -376,6 +377,14 @@ def download_torrent(torrent_file_path, save_path, handle):
         # Sauvegarder les stats dans le fichier
         save_persisted_downloads()
         
+        # Sauvegarder les resume_data toutes les 10 itérations (10 secondes)
+        iteration += 1
+        if iteration % 10 == 0:
+            try:
+                save_download_resume_data(handle['id'], h)
+            except Exception as e:
+                write_log(f"Erreur sauvegarde périodique resume_data: {str(e)}", "WARNING")
+        
         # Ajouter les fichiers téléchargés à la liste
         for file in h.get_torrent_info().files():
             file_path = os.path.join(save_path, file.path)
@@ -393,6 +402,15 @@ def download_torrent(torrent_file_path, save_path, handle):
     
     # Retirer de la persistance une fois terminé
     remove_download_from_persistence(handle['id'])
+    
+    # Supprimer les resume_data (plus nécessaires)
+    resume_file = os.path.join('/var/www/public/Plex-Service/tmp/resume_data', f'{handle["id"]}.resume')
+    if os.path.exists(resume_file):
+        try:
+            os.remove(resume_file)
+            write_log(f"Resume data supprimé pour {handle['id']}")
+        except Exception as e:
+            write_log(f"Erreur suppression resume_data: {str(e)}", "WARNING")
     
     yield "data: done\n\n"
     sys.stdout.flush()  # Force l'envoi des données

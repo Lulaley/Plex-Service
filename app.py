@@ -10,7 +10,7 @@ from routes.RouteLogin import login
 from routes.RouteRegister import register
 from routes.RouteLogout import logout
 from routes.RouteHome import home
-from routes.RouteDownload import download, upload, start_download, stop_download_route, get_downloads_route, stream_download_route
+from routes.RouteDownload import download, upload, start_download, stop_download_route, get_downloads_route, stream_download_route, restore_downloads_on_startup
 from routes.RouteSeed import seed, get_media_list, start_seed_route, stop_seed_route, get_seeds_stats_route, upload_torrent_for_seed, restore_seeds_on_startup
 from routes.RouteUsers import users
 from routes.RouteWish import wishes
@@ -61,6 +61,9 @@ search_routes(app)
 
 # Restaurer les seeds au démarrage
 restore_seeds_on_startup()
+
+# Restaurer les téléchargements au démarrage
+restore_downloads_on_startup()
 
 if __name__ == '__main__':
     app.run(debug=True, port=conf.get_config('APP', 'port'), host='0.0.0.0')
