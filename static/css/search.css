@@ -299,6 +299,50 @@ input[type="text"]::placeholder {
 
 /* Touch optimization */
 @media (hover: none) and (pointer: coarse) {
+    .request-button {
+        min-height: 44px;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    .result-item {
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    .result-item:hover {
+        transform: none;
+    }
+    
+    .result-item:active {
+        transform: scale(0.98);
+    }
+}
+
+/* Mode paysage mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .search-wrapper,
+    .container {
+        margin: 60px 15px 15px;
+    }
+    
+    .search-header {
+        margin-bottom: 20px;
+    }
+    
+    .search-header h1 {
+        font-size: 1.5em;
+    }
+    
+    .search-card {
+        padding: 15px;
+    }
+    
+    .result-item img {
+        height: 180px;
+    }
+}
+
+/* Touch optimization */
+@media (hover: none) and (pointer: coarse) {
     .result-item,
     .request-button {
         min-height: 44px;

@@ -282,4 +282,55 @@ input[type="email"]:focus {
     .btn-secondary,
     .btn-submit {
         min-height: 44px;
+        -webkit-tap-highlight-color: transparent;
     }
+    
+    .btn-primary:hover,
+    .btn-secondary:hover,
+    .btn-submit:hover {
+        transform: none;
+    }
+    
+    .btn-primary:active,
+    .btn-secondary:active,
+    .btn-submit:active {
+        transform: scale(0.97);
+    }
+}
+
+/* Mode paysage mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    body {
+        padding: 10px;
+    }
+    
+    .plex-logo {
+        margin-bottom: 20px;
+    }
+    
+    .plex-logo img {
+        width: 150px;
+    }
+    
+    .buttons-wrapper {
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .form-card {
+        padding: 25px;
+    }
+    
+    .form-card h2 {
+        font-size: 1.4em;
+        margin-bottom: 20px;
+    }
+    
+    .input-group {
+        margin-bottom: 14px;
+    }
+}
+
+/* Touch optimization for password toggle */
+@media (hover: none) and (pointer: coarse) {
+    .toggle-password {

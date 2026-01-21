@@ -250,10 +250,38 @@ body {
 @media (hover: none) and (pointer: coarse) {
     .wish-card {
         min-height: 44px;
+        -webkit-tap-highlight-color: transparent;
     }
     
-    /* Sur mobile, afficher les détails au tap */
-    .wish-card:active .wish-details {
-        display: block;
+    .wish-card:hover:not(.details-open) {
+        transform: none;
+    }
+    
+    .wish-card:active:not(.details-open) {
+        transform: scale(0.97);
+    }
+}
+
+/* Mode paysage mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .wishes-wrapper {
+        margin: 60px 15px 15px;
+    }
+    
+    .wishes-header {
+        margin-bottom: 20px;
+    }
+    
+    .wishes-header h1 {
+        font-size: 1.5em;
+    }
+    
+    .wishes-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 12px;
+    }
+    
+    .wish-poster {
+        height: 200px;
     }
 }

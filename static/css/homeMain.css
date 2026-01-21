@@ -157,6 +157,55 @@ body {
     .info-section {
         padding: 15px;
     }
+    
+    .info-icon {
+        font-size: 2em;
+    }
+    
+    .info-text h3 {
+        font-size: 1.1em;
+    }
+}
+
+/* Touch optimization */
+@media (hover: none) and (pointer: coarse) {
+    .info-section {
+        min-height: 44px;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    .info-section:hover {
+        transform: none;
+    }
+    
+    .info-section:active {
+        transform: scale(0.98);
+    }
+}
+
+/* Mode paysage mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .home-wrapper {
+        margin: 60px 15px 15px;
+    }
+    
+    .welcome-card {
+        padding: 20px;
+    }
+    
+    .welcome-header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+    }
+    
+    .welcome-header h1 {
+        font-size: 1.5em;
+    }
+    
+    .welcome-content {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
 }
 
 /* For legacy center-logo animation compatibility */
