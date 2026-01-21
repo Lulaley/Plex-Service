@@ -148,7 +148,7 @@ body {
     transition: border-radius 0.3s ease;
 }
 
-.wish-card:has(.wish-details.show) .wish-info {
+.wish-card.details-open .wish-info {
     border-radius: 0;
 }
 

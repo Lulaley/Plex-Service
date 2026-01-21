@@ -1,7 +1,9 @@
 function showDetails(element) {
-    // D'abord, masquer tous les autres détails
-    document.querySelectorAll('.wish-details.show').forEach(detail => {
-        if (detail !== element.querySelector('.wish-details')) {
+    // D'abord, masquer tous les autres détails et retirer la classe
+    document.querySelectorAll('.wish-card.details-open').forEach(card => {
+        card.classList.remove('details-open');
+        const detail = card.querySelector('.wish-details');
+        if (detail) {
             detail.classList.remove('show');
         }
     });
@@ -12,6 +14,7 @@ function showDetails(element) {
     // Si les détails sont déjà chargés, juste les afficher
     if (details.innerHTML.trim() !== '') {
         details.classList.add('show');
+        element.classList.add('details-open');
         return;
     }
     
@@ -25,6 +28,7 @@ function showDetails(element) {
                 <p><strong>Date de la demande:</strong> ${data.requestDate}</p>
             `;
             details.classList.add('show');
+            element.classList.add('details-open');
         })
         .catch(error => console.error('Erreur:', error));
 }
@@ -32,6 +36,7 @@ function showDetails(element) {
 function hideDetails(element) {
     const details = element.querySelector('.wish-details');
     details.classList.remove('show');
+    element.classList.remove('details-open');
 }
 
 function validateWish(element) {
