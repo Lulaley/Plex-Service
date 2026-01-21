@@ -167,7 +167,7 @@ body {
 
 .wish-details {
     position: absolute;
-    top: 100%;
+    top: calc(100% - 2px);
     left: 0;
     right: 0;
     padding: 0 16px;
