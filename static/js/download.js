@@ -35,6 +35,10 @@ document.addEventListener('DOMContentLoaded', function () {
         downloadButton.textContent = 'Annuler le téléchargement';
         downloadIdInput.value = downloadInfo.download_id;
 
+        // Afficher le nom du fichier
+        var fileInfo = document.getElementById('file-info');
+        fileInfo.textContent = 'Nom du fichier: ' + (downloadInfo.name || 'Téléchargement en cours');
+
         // Se connecter au stream du téléchargement existant
         const streamUrl = `/stream_download/${downloadInfo.download_id}`;
         console.log('Reconnexion au stream:', streamUrl);
