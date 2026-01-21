@@ -5,6 +5,7 @@ import time
 import threading
 import json
 import os
+import fcntl  # Pour le verrouillage de fichier
 
 # Dictionnaire global pour stocker les seeds actifs
 active_seeds = {}
@@ -12,6 +13,8 @@ seeds_lock = threading.Lock()
 
 # Fichier de persistance
 SEEDS_PERSISTENCE_FILE = "/var/www/public/Plex-Service/tmp/active_seeds.json"
+# Fichier de lock pour éviter les restaurations multiples
+SEEDS_RESTORE_LOCK_FILE = "/var/www/public/Plex-Service/tmp/seeds_restore.lock"
 
 def load_persisted_seeds():
     """Charge les seeds persistés depuis le fichier JSON."""
@@ -287,32 +290,79 @@ def get_seed_stats(seed_id):
     return None
 
 def get_all_seeds():
-    """Retourne la liste de tous les seeds actifs."""
-    with seeds_lock:
-        seeds_list = []
-        for seed_id, seed_data in active_seeds.items():
-            seeds_list.append({
-                'id': seed_data['id'],
-                'name': seed_data['name'],
-                'data_path': seed_data['data_path'],
-                'is_active': seed_data['is_active'],
-                'state': seed_data.get('state', 'unknown'),
-                'stats': seed_data['stats']
-            })
-        return seeds_list
+    """Retourne la liste de tous les seeds actifs depuis le fichier de persistance (partagé entre workers)."""
+    # Charger depuis le fichier JSON qui est partagé entre tous les workers Gunicorn
+    # Au lieu de se baser sur active_seeds qui est en mémoire locale du worker
+    persisted_seeds = load_persisted_seeds()
+    
+    seeds_list = []
+    for seed_id, seed_info in persisted_seeds.items():
+        # Vérifier si ce seed est géré par CE worker spécifiquement pour les stats en temps réel
+        stats = {'uploaded': 0, 'upload_rate': 0, 'peers': 0}
+        state = 'seeding'
+        is_active = True
+        
+        with seeds_lock:
+            if seed_id in active_seeds:
+                # Ce worker gère ce seed, on peut avoir les stats en temps réel
+                stats = active_seeds[seed_id]['stats']
+                state = active_seeds[seed_id].get('state', 'seeding')
+                is_active = active_seeds[seed_id]['is_active']
+        
+        seeds_list.append({
+            'id': seed_id,
+            'name': seed_info.get('name', 'Unknown'),
+            'data_path': seed_info.get('data_path', ''),
+            'is_active': is_active,
+            'state': state,
+            'stats': stats
+        })
+    
+    return seeds_list
 
 def restore_seeds():
     """Restaure les seeds persistés au démarrage."""
-    write_log("Restauration des seeds persistés")
-    persisted_seeds = load_persisted_seeds()
-    
-    for seed_id, seed_info in persisted_seeds.items():
+    # Acquérir un verrou sur un fichier pour éviter les restaurations multiples
+    # (important avec Gunicorn qui lance plusieurs workers)
+    lock_file = None
+    try:
+        # Créer le répertoire tmp s'il n'existe pas
+        os.makedirs(os.path.dirname(SEEDS_RESTORE_LOCK_FILE), exist_ok=True)
+        
+        # Ouvrir le fichier de lock
+        lock_file = open(SEEDS_RESTORE_LOCK_FILE, 'w')
+        
+        # Tenter d'acquérir un verrou exclusif non-bloquant
         try:
-            write_log(f"Restauration du seed {seed_id}")
-            start_seed(
-                seed_id,
-                seed_info['torrent_file_path'],
-                seed_info['data_path']
-            )
-        except Exception as e:
-            write_log(f"Erreur lors de la restauration du seed {seed_id}: {str(e)}", "ERROR")
+            fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except IOError:
+            # Un autre worker a déjà le lock, ne pas restaurer les seeds
+            write_log("Un autre worker Gunicorn est déjà en train de restaurer les seeds, skip")
+            return
+        
+        write_log("Ce worker Gunicorn restaure les seeds (lock acquis)")
+        write_log("Restauration des seeds persistés")
+        persisted_seeds = load_persisted_seeds()
+        
+        for seed_id, seed_info in persisted_seeds.items():
+            try:
+                write_log(f"Restauration du seed {seed_id}")
+                start_seed(
+                    seed_id,
+                    seed_info['torrent_file_path'],
+                    seed_info['data_path']
+                )
+            except Exception as e:
+                write_log(f"Erreur lors de la restauration du seed {seed_id}: {str(e)}", "ERROR")
+    
+    except Exception as e:
+        write_log(f"Erreur globale lors de la restauration des seeds: {str(e)}", "ERROR")
+    
+    finally:
+        # Libérer le verrou et fermer le fichier
+        if lock_file:
+            try:
+                fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
+                lock_file.close()
+            except:
+                pass
