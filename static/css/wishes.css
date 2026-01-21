@@ -74,7 +74,6 @@ body {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     animation: fadeInScale 0.5s ease;
     position: relative;
-    border: 2px solid transparent;
 }
 
 @keyframes fadeInScale {
@@ -88,13 +87,9 @@ body {
     }
 }
 
-.wish-card:hover {
+.wish-card:hover:not(.details-open) {
     transform: translateY(-8px) scale(1.03);
     box-shadow: 0 12px 32px rgba(255, 153, 0, 0.3);
-}
-
-.wish-card.pending:hover {
-    border-color: #ff9900;
 }
 
 .wish-card:active {
