@@ -22,7 +22,7 @@ def load_persisted_seeds():
         if os.path.exists(SEEDS_PERSISTENCE_FILE):
             with open(SEEDS_PERSISTENCE_FILE, 'r') as f:
                 data = json.load(f)
-                write_log(f"Seeds persistés chargés: {len(data)} seeds trouvés")
+                # Log retiré car appelé trop fréquemment (polling frontend)
                 return data
     except Exception as e:
         write_log(f"Erreur lors du chargement des seeds persistés: {str(e)}", "ERROR")
