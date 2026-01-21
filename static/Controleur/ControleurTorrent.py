@@ -161,6 +161,24 @@ def get_directory_size_gb(directory):
             total_size += os.path.getsize(fp)
     return total_size / (1024 ** 3)
 
+def save_download_resume_data(download_id, handle):
+    """Sauvegarde les resume_data d'un téléchargement pour reprise sans re-checking."""
+    try:
+        resume_dir = '/var/www/public/Plex-Service/tmp/resume_data'
+        os.makedirs(resume_dir, exist_ok=True)
+        
+        resume_file = os.path.join(resume_dir, f'{download_id}.resume')
+        
+        # Générer les resume_data
+        resume_data = lt.write_resume_data(handle.status())
+        
+        with open(resume_file, 'wb') as f:
+            f.write(lt.bencode(resume_data))
+        
+        write_log(f"Resume data sauvegardé pour download {download_id}")
+    except Exception as e:
+        write_log(f"Erreur sauvegarde resume_data pour {download_id}: {str(e)}", "WARNING")
+
 def stop_download(handle):
     write_log("Appel de la fonction stop_download")
     write_log(f"handle: {handle}")
@@ -273,7 +291,23 @@ def download_torrent(torrent_file_path, save_path, handle):
         save_path = ensure_directory_exists(save_path, name)
         write_log(f"Chemin de sauvegarde: {save_path}")
     
-    h = ses.add_torrent({'ti': info, 'save_path': save_path})
+    # Préparer les paramètres du torrent
+    atp = {
+        'ti': info,
+        'save_path': save_path
+    }
+    
+    # Charger les resume_data si disponibles pour reprendre sans re-checking
+    resume_file = os.path.join('/var/www/public/Plex-Service/tmp/resume_data', f'{handle["id"]}.resume')
+    if os.path.exists(resume_file):
+        try:
+            with open(resume_file, 'rb') as f:
+                atp['resume_data'] = f.read()
+            write_log(f"Resume data chargé pour {handle['id']}, reprise sans re-checking")
+        except Exception as e:
+            write_log(f"Erreur lors du chargement des resume_data: {str(e)}", "WARNING")
+    
+    h = ses.add_torrent(atp)
     handle['is_downloading'] = True
     handle['handle'] = h
     handle['save_path'] = save_path
@@ -291,6 +325,11 @@ def download_torrent(torrent_file_path, save_path, handle):
         # Vérifier si le téléchargement a été annulé localement
         if not handle['is_downloading']:
             write_log("Téléchargement annulé localement.")
+            # Sauvegarder resume_data pour reprendre plus tard
+            try:
+                save_download_resume_data(handle['id'], h)
+            except Exception as e:
+                write_log(f"Erreur sauvegarde resume_data: {str(e)}", "WARNING")
             ses.remove_torrent(h)
             with downloads_lock:
                 if handle['id'] in downloads:
@@ -305,6 +344,11 @@ def download_torrent(torrent_file_path, save_path, handle):
             write_log("Téléchargement annulé via le fichier de persistance (autre worker).")
             handle['is_downloading'] = False
             handle['is_active'] = False
+            # Sauvegarder resume_data pour reprendre plus tard
+            try:
+                save_download_resume_data(handle['id'], h)
+            except Exception as e:
+                write_log(f"Erreur sauvegarde resume_data: {str(e)}", "WARNING")
             ses.remove_torrent(h)
             with downloads_lock:
                 if handle['id'] in downloads:

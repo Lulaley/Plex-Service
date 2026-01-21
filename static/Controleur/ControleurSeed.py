@@ -169,16 +169,24 @@ def start_seed(seed_id, torrent_file_path, data_path):
         else:
             write_log(f"Le chemin {expected_path} existe bien!")
         
-        h = ses.add_torrent({
+        # Préparer les paramètres du torrent
+        atp = {
             'ti': info,
             'save_path': save_path,
-            'flags': lt.torrent_flags.upload_mode  # Mode upload uniquement (pas de download)
-        })
+            'flags': lt.torrent_flags.upload_mode | lt.torrent_flags.seed_mode  # Mode seed: pas de vérification si complet
+        }
         
-        # Forcer la vérification des fichiers
-        h.force_recheck()
-        write_log(f"Force recheck lancé pour {seed_id}")
+        # Charger les resume_data si disponibles pour éviter le checking
+        resume_file = os.path.join('/var/www/public/Plex-Service/tmp/resume_data', f'{seed_id}.resume')
+        if os.path.exists(resume_file):
+            try:
+                with open(resume_file, 'rb') as f:
+                    atp['resume_data'] = f.read()
+                write_log(f"Resume data chargé pour {seed_id}, pas de checking nécessaire")
+            except Exception as e:
+                write_log(f"Erreur lors du chargement des resume_data: {str(e)}", "WARNING")
         
+        h = ses.add_torrent(atp)
         write_log(f"Torrent ajouté à la session, état initial: {h.status().state}")
         
         with seeds_lock:
@@ -276,6 +284,13 @@ def stop_seed(seed_id):
             seed_data = active_seeds[seed_id]
             seed_data['is_active'] = False
             
+            # Sauvegarder les resume_data avant d'arrêter
+            if 'handle' in seed_data and seed_data['handle']:
+                try:
+                    save_resume_data(seed_id, seed_data['handle'])
+                except Exception as e:
+                    write_log(f"Erreur lors de la sauvegarde des resume_data: {str(e)}", "WARNING")
+            
             # Arrêter la session libtorrent
             if 'session' in seed_data and seed_data['session']:
                 seed_data['session'].remove_torrent(seed_data['handle'])
@@ -289,6 +304,27 @@ def stop_seed(seed_id):
     except Exception as e:
         write_log(f"Erreur lors de l'arrêt du seed {seed_id}: {str(e)}", "ERROR")
         return False
+
+def save_resume_data(identifier, handle):
+    """Sauvegarde les resume_data d'un torrent."""
+    try:
+        resume_dir = '/var/www/public/Plex-Service/tmp/resume_data'
+        os.makedirs(resume_dir, exist_ok=True)
+        
+        resume_file = os.path.join(resume_dir, f'{identifier}.resume')
+        
+        # Générer les resume_data
+        handle.save_resume_data()
+        # Note: dans libtorrent, les resume_data sont récupérés via un alert
+        # Pour simplifier, on peut aussi utiliser write_resume_data()
+        resume_data = lt.write_resume_data(handle.status())
+        
+        with open(resume_file, 'wb') as f:
+            f.write(lt.bencode(resume_data))
+        
+        write_log(f"Resume data sauvegardé pour {identifier}")
+    except Exception as e:
+        write_log(f"Erreur lors de la sauvegarde des resume_data pour {identifier}: {str(e)}", "WARNING")
 
 def get_seed_stats(seed_id):
     """Retourne les statistiques d'un seed."""
