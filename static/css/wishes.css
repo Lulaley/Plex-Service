@@ -68,7 +68,7 @@ body {
 .wish-card {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 12px;
-    overflow: hidden;
+    overflow: visible;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
@@ -160,8 +160,12 @@ body {
 }
 
 .wish-details {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
     padding: 0 16px;
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.98);
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     color: #666;
     font-size: 0.9em;
@@ -169,6 +173,9 @@ body {
     opacity: 0;
     overflow: hidden;
     will-change: max-height, opacity, padding;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    z-index: 10;
 }
 
 .wish-details.show {
