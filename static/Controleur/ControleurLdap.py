@@ -149,20 +149,20 @@ class ControleurLdap:
             self.bind_as_root()
             write_log(f"Suppression de l'utilisateur LDAP: {username}")
             base_dn = self.config.get_config('LDAP', 'base_dn')
-            dn = f'uid={username},{base_dn}'
-            write_log(f"DN de l'utilisateur à supprimer: {dn}")
             
-            # Vérifier d'abord si l'utilisateur existe
-            try:
-                search_filter = f"(uid={username})"
-                result = self.conn.search_s(base_dn, ldap.SCOPE_SUBTREE, search_filter)
-                if not result:
-                    write_log(f"L'utilisateur {username} n'existe pas dans LDAP, suppression ignorée", 'WARNING')
-                    return True  # Considérer comme succès car l'utilisateur n'existe plus
-            except ldap.LDAPError as search_error:
-                write_log(f"Erreur lors de la recherche de l'utilisateur: {search_error}", 'ERROR')
+            # Chercher l'utilisateur pour obtenir son vrai DN
+            search_filter = f"(uid={username})"
+            result = self.conn.search_s(base_dn, ldap.SCOPE_SUBTREE, search_filter)
             
-            # Tenter la suppression
+            if not result:
+                write_log(f"L'utilisateur {username} n'existe pas dans LDAP, suppression ignorée", 'WARNING')
+                return True  # Considérer comme succès car l'utilisateur n'existe plus
+            
+            # Utiliser le DN retourné par la recherche
+            dn = result[0][0]
+            write_log(f"DN réel de l'utilisateur à supprimer: {dn}")
+            
+            # Tenter la suppression avec le vrai DN
             self.conn.delete_s(dn)
             write_log(f"Utilisateur {username} supprimé de la base LDAP")
             return True
