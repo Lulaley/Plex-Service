@@ -1,4 +1,11 @@
 function showDetails(element) {
+    // D'abord, masquer tous les autres détails
+    document.querySelectorAll('.wish-details.show').forEach(detail => {
+        if (detail !== element.querySelector('.wish-details')) {
+            detail.classList.remove('show');
+        }
+    });
+    
     const details = element.querySelector('.wish-details');
     const id = element.getAttribute('data-id');
     
