@@ -144,8 +144,10 @@ body {
     transition: border-radius 0.3s ease;
 }
 
-.wish-card.details-open .wish-info {
-    border-radius: 0;
+.wish-card.details-open .wish-info,
+.wish-card.pending.details-open .wish-info,
+.wish-card.validated.details-open .wish-info {
+    border-radius: 0 !important;
 }
 
 .wish-info h3 {
