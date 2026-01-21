@@ -160,7 +160,7 @@ class ControleurLdap:
         try:
             self.bind_as_root()
             base_dn = self.config.get_config('LDAP', 'base_dn')
-            search_filter = "(objectClass=inetOrgPerson)"
+            search_filter = "(&(objectClass=inetOrgPerson)(RightsAgreement=PlexService::*))"
             result = self.conn.search_s(base_dn, ldap.SCOPE_SUBTREE, search_filter)
             users = []
             for dn, entry in result:
