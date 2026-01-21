@@ -1,6 +1,14 @@
 function showDetails(element) {
     const details = element.querySelector('.wish-details');
     const id = element.getAttribute('data-id');
+    
+    // Si les détails sont déjà chargés, juste les afficher
+    if (details.innerHTML.trim() !== '') {
+        details.classList.add('show');
+        return;
+    }
+    
+    // Sinon, charger les détails
     fetch(`/wish_details/${id}`)
         .then(response => response.json())
         .then(data => {
@@ -9,8 +17,14 @@ function showDetails(element) {
                 <p><strong>Utilisateur:</strong> ${data.wishOwner}</p>
                 <p><strong>Date de la demande:</strong> ${data.requestDate}</p>
             `;
+            details.classList.add('show');
         })
         .catch(error => console.error('Erreur:', error));
+}
+
+function hideDetails(element) {
+    const details = element.querySelector('.wish-details');
+    details.classList.remove('show');
 }
 
 function validateWish(element) {

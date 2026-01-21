@@ -25,7 +25,7 @@
             <h2>🕒 Demandes en attente</h2>
             <div class="wishes-grid">
                 {% for wish in wishes if wish.status == 'pending' %}
-                <div class="wish-card pending" onmouseover="showDetails(this)" onclick="validateWish(this)" data-id="{{ wish.wishId }}" data-status="{{ wish.status }}">
+                <div class="wish-card pending" onmouseenter="showDetails(this)" onmouseleave="hideDetails(this)" onclick="validateWish(this)" data-id="{{ wish.wishId }}" data-status="{{ wish.status }}">
                     <div class="wish-poster">
                         <img src="https://image.tmdb.org/t/p/w500{{ wish.poster_path }}" alt="{{ wish.title }}">
                         <span class="wish-badge pending">⌛ En attente</span>
@@ -48,7 +48,7 @@
             <h2>✅ Demandes validées</h2>
             <div class="wishes-grid">
                 {% for wish in wishes if wish.status == 'validated' %}
-                <div class="wish-card validated" onmouseover="showDetails(this)" data-id="{{ wish.wishId }}" data-status="{{ wish.status }}">
+                <div class="wish-card validated" onmouseenter="showDetails(this)" onmouseleave="hideDetails(this)" data-id="{{ wish.wishId }}" data-status="{{ wish.status }}">
                     <div class="wish-poster">
                         <img src="https://image.tmdb.org/t/p/w500{{ wish.poster_path }}" alt="{{ wish.title }}">
                         <span class="wish-badge validated">✓ Validée</span>

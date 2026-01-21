@@ -166,9 +166,10 @@ body {
     display: none;
     color: #666;
     font-size: 0.9em;
+    transition: opacity 0.3s ease;
 }
 
-.wish-card:hover .wish-details {
+.wish-details.show {
     display: block;
 }
 
