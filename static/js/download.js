@@ -71,6 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function reconnectToDownload(downloadInfo) {
         isDownloading = true;
         torrentFileInput.disabled = true;
+        uploadZone.classList.add('downloading');
         downloadButton.classList.add('cancel');
         downloadButton.innerHTML = '<span class="btn-icon">■</span><span class="btn-text">Annuler le téléchargement</span>';
         downloadIdInput.value = downloadInfo.download_id;

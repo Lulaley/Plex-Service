@@ -104,9 +104,14 @@ body {
 .upload-text {
     display: block;
     font-size: 1.2em;
-    color: #333;
+    color: #333 !important;
     margin-bottom: 8px;
     font-weight: 500;
+}
+
+.upload-zone.downloading .upload-text {
+    color: #333 !important;
+    opacity: 1 !important;
 }
 
 .upload-subtext {

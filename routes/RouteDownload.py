@@ -399,8 +399,8 @@ def restore_downloads_on_startup():
             
             write_log("Restauration des téléchargements terminée")
             
-            # Garder le verrou pendant 5 secondes pour éviter que d'autres workers restaurent
-            time.sleep(5)
+            # Garder le verrou pendant 2 secondes pour éviter que d'autres workers restaurent
+            time.sleep(2)
             
         finally:
             # Libérer le verrou en supprimant le fichier
