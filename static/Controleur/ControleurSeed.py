@@ -305,14 +305,14 @@ def get_all_seeds():
     
     seeds_list = []
     for seed_id, seed_info in persisted_seeds.items():
-        # Vérifier si ce seed est géré par CE worker spécifiquement pour les stats en temps réel
-        stats = {'uploaded': 0, 'upload_rate': 0, 'peers': 0}
-        state = 'seeding'
-        is_active = True
+        # Par défaut, utiliser les stats depuis le fichier JSON (partagées entre workers)
+        stats = seed_info.get('stats', {'uploaded': 0, 'upload_rate': 0, 'peers': 0, 'seeds': 0, 'progress': 0, 'state': 'unknown'})
+        state = seed_info.get('state', 'seeding')
+        is_active = seed_info.get('is_active', True)
         
+        # Si ce worker gère ce seed, utiliser les stats en mémoire (plus récentes)
         with seeds_lock:
             if seed_id in active_seeds:
-                # Ce worker gère ce seed, on peut avoir les stats en temps réel
                 stats = active_seeds[seed_id]['stats']
                 state = active_seeds[seed_id].get('state', 'seeding')
                 is_active = active_seeds[seed_id]['is_active']
