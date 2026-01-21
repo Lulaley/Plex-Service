@@ -1,11 +1,10 @@
 .navbar {
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    background-color: #2C3E50;
     padding: 0;
     position: sticky;
     top: 0;
     z-index: 1000;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    backdrop-filter: blur(10px);
 }
 
 .navbar img {
@@ -31,7 +30,7 @@
 }
 
 .navbar .menu button {
-    background: linear-gradient(135deg, #ff9900 0%, #ff7700 100%);
+    background-color: #ff9900;
     color: white;
     border: none;
     padding: 10px 18px;
@@ -67,7 +66,7 @@
 .navbar .menu button:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(255, 153, 0, 0.5);
-    background: linear-gradient(135deg, #ff7700 0%, #ff9900 100%);
+    background-color: #ff7700;
 }
 
 .navbar .menu button:active {
@@ -76,16 +75,16 @@
 }
 
 .navbar .menu .username {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-color: #ff9900;
     margin-right: 0;
     padding: 10px 20px;
     font-weight: 600;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 2px 8px rgba(255, 153, 0, 0.3);
 }
 
 .navbar .menu .username:hover {
-    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.6);
+    background-color: #ff7700;
+    box-shadow: 0 6px 16px rgba(255, 153, 0, 0.5);
 }
 
 .left-buttons {
@@ -209,7 +208,7 @@
     .navbar .menu.active {
         flex-direction: column;
         align-items: stretch;
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        background-color: #2C3E50;
     }
     
     .navbar .menu.active > .left-buttons,
