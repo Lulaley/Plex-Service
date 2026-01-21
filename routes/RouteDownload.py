@@ -71,7 +71,7 @@ def upload(app):
 def background_download(torrent_file_path, save_path, handle, username):
     """Fonction qui tourne en arrière-plan pour gérer le téléchargement."""
     try:
-        write_log(f"Thread de téléchargement démarré pour {username}")
+        write_log(f"Thread de téléchargement démarré pour {username} (download_id: {handle.get('id')})")
         for status in download_torrent(torrent_file_path, save_path, handle):
             # Extraire le message de status
             if status.startswith('data: '):
@@ -79,12 +79,12 @@ def background_download(torrent_file_path, save_path, handle, username):
                 handle['progress_message'] = message
                 
                 # Si c'est le message final
-                if message in ['done', 'cancelled', 'not enough space']:
+                if message in ['done', 'cancelled', 'not enough space', 'error']:
                     handle['final_message'] = message
                     handle['is_downloading'] = False
                     break
         
-        write_log(f"Thread de téléchargement terminé pour {username}")
+        write_log(f"Thread de téléchargement terminé pour {username} (download_id: {handle.get('id')})")
     except Exception as e:
         write_log(f"Erreur dans le thread de téléchargement: {str(e)}", "ERROR")
         handle['is_downloading'] = False
