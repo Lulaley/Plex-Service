@@ -1,6 +1,6 @@
 from flask import render_template, request, session, jsonify, redirect, url_for, flash, Response, stream_with_context
 from static.Controleur.ControleurLog import write_log
-from static.Controleur.ControleurTorrent import download_torrent, stop_download, downloads, downloads_lock
+from static.Controleur.ControleurTorrent import download_torrent, stop_download, downloads, downloads_lock, get_all_downloads
 import threading
 import uuid
 import os
@@ -180,3 +180,14 @@ def stop_download_route(app):
         else:
             write_log(f"Aucun téléchargement en cours pour l'identifiant {download_id}")
             return jsonify(success=False, message="Téléchargement introuvable")
+
+def get_downloads_route(app):
+    @app.route('/get_downloads', methods=['GET'])
+    def inner_get_downloads():
+        """Retourne la liste de tous les downloads actifs."""
+        try:
+            downloads_list = get_all_downloads()
+            return jsonify({'success': True, 'downloads': downloads_list})
+        except Exception as e:
+            write_log(f"Erreur lors de la récupération des downloads: {str(e)}", "ERROR")
+            return jsonify({'success': False, 'message': str(e)}), 500

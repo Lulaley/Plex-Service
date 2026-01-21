@@ -7,10 +7,16 @@ import re
 import os
 import sys
 import threading
+import json
+import fcntl
 
 # Dictionnaire global pour stocker les informations des téléchargements en cours
 downloads = {}
 downloads_lock = threading.Lock()
+
+# Fichier de persistance
+DOWNLOADS_PERSISTENCE_FILE = "/var/www/public/Plex-Service/tmp/active_downloads.json"
+DOWNLOADS_RESTORE_LOCK_FILE = "/var/www/public/Plex-Service/tmp/downloads_restore.lock"
 
 def is_movie_or_series(torrent_info):
     """
@@ -49,6 +55,76 @@ def extract_title_prefix(filename):
     
     # Si aucun motif n'est trouvé, retourner la chaîne entière
     return filename
+
+def load_persisted_downloads():
+    """Charge les downloads persistés depuis le fichier JSON."""
+    try:
+        if os.path.exists(DOWNLOADS_PERSISTENCE_FILE):
+            with open(DOWNLOADS_PERSISTENCE_FILE, 'r') as f:
+                return json.load(f)
+    except Exception as e:
+        write_log(f"Erreur lors du chargement des downloads persistés: {str(e)}", "ERROR")
+    return {}
+
+def save_persisted_downloads():
+    """Sauvegarde les downloads actifs dans le fichier JSON avec leurs stats."""
+    try:
+        serializable_downloads = {}
+        with downloads_lock:
+            for download_id, download_data in downloads.items():
+                serializable_downloads[download_id] = {
+                    'download_id': download_data['download_id'],
+                    'name': download_data.get('name', 'Unknown'),
+                    'save_path': download_data.get('save_path', ''),
+                    'torrent_path': download_data.get('torrent_path', ''),
+                    'is_active': download_data.get('is_active', True),
+                    'stats': download_data.get('stats', {'progress': 0, 'download_rate': 0, 'upload_rate': 0, 'peers': 0, 'state': 'downloading'})
+                }
+        
+        os.makedirs(os.path.dirname(DOWNLOADS_PERSISTENCE_FILE), exist_ok=True)
+        with open(DOWNLOADS_PERSISTENCE_FILE, 'w') as f:
+            json.dump(serializable_downloads, f, indent=4)
+    except Exception as e:
+        write_log(f"Erreur lors de la sauvegarde des downloads: {str(e)}", "ERROR")
+
+def remove_download_from_persistence(download_id):
+    """Retire un download spécifique du fichier de persistance."""
+    try:
+        persisted = load_persisted_downloads()
+        if download_id in persisted:
+            del persisted[download_id]
+            os.makedirs(os.path.dirname(DOWNLOADS_PERSISTENCE_FILE), exist_ok=True)
+            with open(DOWNLOADS_PERSISTENCE_FILE, 'w') as f:
+                json.dump(persisted, f, indent=4)
+            write_log(f"Download {download_id} retiré de la persistance")
+    except Exception as e:
+        write_log(f"Erreur lors du retrait du download de la persistance: {str(e)}", "ERROR")
+
+def get_all_downloads():
+    """Retourne la liste de tous les downloads actifs depuis le fichier de persistance (partagé entre workers)."""
+    persisted_downloads = load_persisted_downloads()
+    
+    downloads_list = []
+    for download_id, download_info in persisted_downloads.items():
+        # Par défaut, utiliser les stats depuis le fichier JSON (partagées entre workers)
+        stats = download_info.get('stats', {'progress': 0, 'download_rate': 0, 'upload_rate': 0, 'peers': 0, 'state': 'downloading'})
+        is_active = download_info.get('is_active', True)
+        
+        # Si ce worker gère ce download, utiliser les stats en mémoire (plus récentes)
+        with downloads_lock:
+            if download_id in downloads:
+                stats = downloads[download_id].get('stats', stats)
+                is_active = downloads[download_id].get('is_active', is_active)
+        
+        downloads_list.append({
+            'download_id': download_id,
+            'name': download_info.get('name', 'Unknown'),
+            'save_path': download_info.get('save_path', ''),
+            'is_active': is_active,
+            'stats': stats
+        })
+    
+    return downloads_list
 
 def ensure_directory_exists(base_path, series_name):
     # Créer le chemin complet du dossier
@@ -205,6 +281,9 @@ def download_torrent(torrent_file_path, save_path, handle):
 
     with downloads_lock:
         downloads[handle['id']] = handle
+    
+    # Sauvegarder dans le fichier de persistance
+    save_persisted_downloads()
 
     write_log(f"Téléchargement de {info.name()}")
     while not h.is_seed():
@@ -213,6 +292,7 @@ def download_torrent(torrent_file_path, save_path, handle):
             ses.remove_torrent(h)
             with downloads_lock:
                 del downloads[handle['id']]
+            remove_download_from_persistence(handle['id'])
             yield "data: cancelled\n\n"
             return
 
@@ -221,6 +301,19 @@ def download_torrent(torrent_file_path, save_path, handle):
             s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000,
             s.num_peers, s.state)
         write_log(log_message)
+        
+        # Mettre à jour les stats
+        handle['stats'] = {
+            'progress': s.progress * 100,
+            'download_rate': s.download_rate / 1000,
+            'upload_rate': s.upload_rate / 1000,
+            'peers': s.num_peers,
+            'state': str(s.state)
+        }
+        handle['name'] = info.name()
+        
+        # Sauvegarder les stats dans le fichier
+        save_persisted_downloads()
         
         # Ajouter les fichiers téléchargés à la liste
         for file in h.get_torrent_info().files():
@@ -236,6 +329,10 @@ def download_torrent(torrent_file_path, save_path, handle):
     ses.remove_torrent(h)
     with downloads_lock:
         del downloads[handle['id']]
+    
+    # Retirer de la persistance une fois terminé
+    remove_download_from_persistence(handle['id'])
+    
     yield "data: done\n\n"
     sys.stdout.flush()  # Force l'envoi des données
     

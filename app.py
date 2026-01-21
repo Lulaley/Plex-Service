@@ -10,7 +10,7 @@ from routes.RouteLogin import login
 from routes.RouteRegister import register
 from routes.RouteLogout import logout
 from routes.RouteHome import home
-from routes.RouteDownload import download, upload, start_download, stop_download_route
+from routes.RouteDownload import download, upload, start_download, stop_download_route, get_downloads_route
 from routes.RouteSeed import seed, get_media_list, start_seed_route, stop_seed_route, get_seeds_stats_route, upload_torrent_for_seed, restore_seeds_on_startup
 from routes.RouteUsers import users
 from routes.RouteWish import wishes
@@ -47,6 +47,7 @@ download(app)
 upload(app)
 start_download(app)
 stop_download_route(app)
+get_downloads_route(app)
 seed(app)
 get_media_list(app)
 start_seed_route(app)
