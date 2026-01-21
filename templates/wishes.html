@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mes Demandes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#313B45">
+    <title>Mes Demandes - Plex Service</title>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/plex-icon.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/wishes.css') }}">
 </head>
@@ -12,33 +15,56 @@
 <body>
     {% include 'navbar.html' %}
 
-    <div class="container">
-        <h1>Mes Demandes</h1>
-
-        <h2>Demandes en attente</h2>
-        <div class="wishes-grid">
-            {% for wish in wishes if wish.status == 'pending' %}
-            <div class="wish-item" onmouseover="showDetails(this)" onclick="validateWish(this)" data-id="{{ wish.wishId }}" data-status="{{ wish.status }}">
-                <img src="https://image.tmdb.org/t/p/w500{{ wish.poster_path }}" alt="{{ wish.title }}">
-                <p>{{ wish.title }}</p>
-                <div class="wish-details" id="details-{{ wish.wishId }}">
-                    <!-- Les détails seront chargés ici -->
-                </div>
-            </div>
-            {% endfor %}
+    <div class="wishes-wrapper">
+        <div class="wishes-header">
+            <h1>Mes Demandes</h1>
+            <p class="subtitle">Gérez vos demandes de films et séries</p>
         </div>
 
-        <h2>Demandes validées</h2>
-        <div class="wishes-grid">
-            {% for wish in wishes if wish.status == 'validated' %}
-            <div class="wish-item" onmouseover="showDetails(this)" data-id="{{ wish.wishId }}" data-status="{{ wish.status }}">
-                <img src="https://image.tmdb.org/t/p/w500{{ wish.poster_path }}" alt="{{ wish.title }}">
-                <p>{{ wish.title }}</p>
-                <div class="wish-details" id="details-{{ wish.wishId }}">
-                    <!-- Les détails seront chargés ici -->
+        <div class="wishes-section">
+            <h2>🕒 Demandes en attente</h2>
+            <div class="wishes-grid">
+                {% for wish in wishes if wish.status == 'pending' %}
+                <div class="wish-card pending" onmouseover="showDetails(this)" onclick="validateWish(this)" data-id="{{ wish.wishId }}" data-status="{{ wish.status }}">
+                    <div class="wish-poster">
+                        <img src="https://image.tmdb.org/t/p/w500{{ wish.poster_path }}" alt="{{ wish.title }}">
+                        <span class="wish-badge pending">⌛ En attente</span>
+                    </div>
+                    <div class="wish-info">
+                        <h3>{{ wish.title }}</h3>
+                    </div>
+                    <div class="wish-details" id="details-{{ wish.wishId }}"></div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
+            {% if wishes|selectattr('status', 'equalto', 'pending')|list|length == 0 %}
+            <div class="empty-state">
+                <p>📦 Aucune demande en attente</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="wishes-section">
+            <h2>✅ Demandes validées</h2>
+            <div class="wishes-grid">
+                {% for wish in wishes if wish.status == 'validated' %}
+                <div class="wish-card validated" onmouseover="showDetails(this)" data-id="{{ wish.wishId }}" data-status="{{ wish.status }}">
+                    <div class="wish-poster">
+                        <img src="https://image.tmdb.org/t/p/w500{{ wish.poster_path }}" alt="{{ wish.title }}">
+                        <span class="wish-badge validated">✓ Validée</span>
+                    </div>
+                    <div class="wish-info">
+                        <h3>{{ wish.title }}</h3>
+                    </div>
+                    <div class="wish-details" id="details-{{ wish.wishId }}"></div>
+                </div>
+                {% endfor %}
+            </div>
+            {% if wishes|selectattr('status', 'equalto', 'validated')|list|length == 0 %}
+            <div class="empty-state">
+                <p>📦 Aucune demande validée</p>
+            </div>
+            {% endif %}
         </div>
     </div>
 

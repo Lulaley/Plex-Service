@@ -1,76 +1,242 @@
 body {
-    background-color: #313B45; /* Fond plus sombre pour contraster avec le texte blanc */
-    color: white; /* Texte blanc */
-    font-family: Arial, sans-serif; /* Arial comme alternative à Helvetica Neue */
+    background-color: #313B45;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
 }
 
-.center-logo {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    transform: translate(-43%, -45%) scale(0.1);
-    z-index: 1000;
+.wishes-wrapper {
+    max-width: 1400px;
+    width: 100%;
+    margin: 80px auto 40px;
+    padding: 20px;
+    animation: fadeInUp 0.6s ease;
+    box-sizing: border-box;
 }
 
-.container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 90vh;
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-button {
-    background-color: #ff9900;
-    color: white;
-    border: none;
-    padding: 10px;
-    border-radius: 5px;
-    cursor: pointer;
+.wishes-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.wishes-header h1 {
+    font-size: 2.5em;
+    margin: 0 0 10px 0;
+    color: #ff9900;
+}
+
+.subtitle {
+    color: #94a3b8;
+    font-size: 1.1em;
+    margin: 0;
+}
+
+.wishes-section {
+    margin-bottom: 50px;
+}
+
+.wishes-section h2 {
+    color: #ff9900;
+    font-size: 1.5em;
+    margin: 0 0 20px 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(255, 153, 0, 0.3);
 }
 
 .wishes-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 24px;
 }
 
-.wish-item {
-    width: 200px;
+.wish-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    overflow: hidden;
     cursor: pointer;
-    transition: transform 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    animation: fadeInScale 0.5s ease;
+    position: relative;
 }
 
-.wish-item:hover {
-    transform: scale(1.05);
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
-.wish-item img {
+.wish-card:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 12px 32px rgba(255, 153, 0, 0.3);
+}
+
+.wish-card.pending:hover {
+    border: 2px solid #ff9900;
+}
+
+.wish-card:active {
+    transform: translateY(-4px) scale(1.01);
+}
+
+.wish-poster {
+    position: relative;
     width: 100%;
-    height: auto;
-    border-radius: 5px;
+    height: 300px;
+    overflow: hidden;
 }
 
-.wish-item p {
-    text-align: center;
-    margin: 10px 0 0;
-    font-weight: bold;
+.wish-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.wish-card:hover .wish-poster img {
+    transform: scale(1.1);
+}
+
+.wish-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85em;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+    z-index: 1;
+}
+
+.wish-badge.pending {
+    background: rgba(255, 153, 0, 0.9);
+    color: white;
+}
+
+.wish-badge.validated {
+    background: rgba(34, 197, 94, 0.9);
+    color: white;
+}
+
+.wish-info {
+    padding: 16px;
+    background: white;
+}
+
+.wish-info h3 {
+    font-size: 1em;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.4;
 }
 
 .wish-details {
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.95);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
     display: none;
-    transition: max-height 0.3s ease-out;
-    overflow: hidden;
-    color: black;
-    background-color: #f9f9f9;
-    padding: 10px;
-    border-radius: 5px;
-    margin-top: 10px;
+    color: #666;
+    font-size: 0.9em;
 }
 
-.wish-item.active .wish-details {
+.wish-card:hover .wish-details {
     display: block;
-    max-height: 200px; /* Adjust as needed */
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #94a3b8;
+    font-size: 1.1em;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+}
+
+.empty-state p {
+    margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .wishes-wrapper {
+        margin: 70px 10px 20px;
+        padding: 15px;
+    }
+    
+    .wishes-header h1 {
+        font-size: 1.8em;
+    }
+    
+    .subtitle {
+        font-size: 0.95em;
+    }
+    
+    .wishes-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 16px;
+    }
+    
+    .wish-poster {
+        height: 225px;
+    }
+    
+    .wishes-section h2 {
+        font-size: 1.3em;
+    }
+}
+
+@media (max-width: 400px) {
+    .wishes-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .wish-poster {
+        height: 200px;
+    }
+    
+    .wish-info h3 {
+        font-size: 0.9em;
+    }
+}
+
+/* Touch optimization */
+@media (hover: none) and (pointer: coarse) {
+    .wish-card {
+        min-height: 44px;
+    }
+    
+    .wish-details {
+        display: block;
+    }
 }
