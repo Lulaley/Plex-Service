@@ -81,12 +81,12 @@ body {
 }
 
 .users-table tbody tr {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid rgba(255, 153, 0, 0.2);
     transition: all 0.2s ease;
 }
 
 .users-table tbody tr:hover {
-    background: rgba(255, 153, 0, 0.05);
+    background: rgba(255, 153, 0, 0.15);
 }
 
 .users-table tbody tr:last-child {
@@ -100,11 +100,11 @@ body {
 
 .username {
     font-weight: 600;
-    color: #333;
+    color: #fff;
 }
 
 .email {
-    color: #666;
+    color: #cbd5e1;
     font-size: 0.9em;
 }
 
