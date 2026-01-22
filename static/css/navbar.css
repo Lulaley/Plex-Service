@@ -201,6 +201,8 @@
     .navbar .menu {
         position: relative;
         padding: 12px 0;
+        max-width: 100%;
+        margin: 0;
     }
     
     .navbar img {
