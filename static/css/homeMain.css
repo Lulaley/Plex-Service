@@ -19,12 +19,12 @@ body {
 }
 
 .welcome-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(44, 62, 80, 0.95);
     border-radius: 20px;
     padding: 40px;
     margin-bottom: 30px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 153, 0, 0.3);
     animation: fadeInUp 0.6s ease;
 }
 
@@ -63,13 +63,13 @@ body {
     align-items: flex-start;
     gap: 15px;
     padding: 20px;
-    background: rgba(0, 0, 0, 0.02);
+    background: rgba(0, 0, 0, 0.2);
     border-radius: 12px;
     transition: all 0.3s ease;
 }
 
 .info-section:hover {
-    background: rgba(255, 153, 0, 0.05);
+    background: rgba(255, 153, 0, 0.15);
     transform: translateY(-2px);
 }
 
@@ -79,13 +79,13 @@ body {
 }
 
 .info-text h3 {
-    color: #333;
+    color: #fff;
     font-size: 1.2em;
     margin: 0 0 8px 0;
 }
 
 .info-text p {
-    color: #666;
+    color: #cbd5e1;
     font-size: 0.95em;
     margin: 0;
     line-height: 1.6;
@@ -109,11 +109,11 @@ body {
 }
 
 .dev-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(44, 62, 80, 0.95);
     border-radius: 20px;
     padding: 40px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 153, 0, 0.3);
     animation: fadeInUp 0.6s ease 0.2s both;
     text-align: center;
 }
@@ -146,7 +146,7 @@ body {
 }
 
 .dev-card p {
-    color: #666;
+    color: #cbd5e1;
     font-size: 1.1em;
     margin: 0;
 }

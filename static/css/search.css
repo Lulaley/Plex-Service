@@ -49,12 +49,12 @@ body {
 }
 
 .search-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(44, 62, 80, 0.95);
     border-radius: 16px;
     padding: 30px;
     margin-bottom: 30px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 153, 0, 0.3);
     transition: all 0.3s ease;
     width: 100%;
     box-sizing: border-box;

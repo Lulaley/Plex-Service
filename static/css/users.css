@@ -48,11 +48,11 @@ body {
 }
 
 .users-table-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(44, 62, 80, 0.95);
     border-radius: 16px;
     padding: 0;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 153, 0, 0.3);
     overflow: hidden;
 }
 
@@ -64,7 +64,7 @@ body {
 .users-table {
     width: 100%;
     border-collapse: collapse;
-    color: #333;
+    color: #fff;
 }
 
 .users-table thead {
