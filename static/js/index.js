@@ -58,6 +58,10 @@ function showButtons() {
 function showLoginForm() {
     const btnLogin = document.getElementById('connexion');
     const btnRegister = document.getElementById('creer');
+    
+    // Gérer les classes actives
+    btnLogin.classList.add('active');
+    btnRegister.classList.remove('active');
 
     const createForm = document.getElementById('create-form');
     createForm.style.display = 'none';
@@ -85,6 +89,10 @@ function showLoginForm() {
 function showCreateForm() {
     const btnLogin = document.getElementById('connexion');
     const btnRegister = document.getElementById('creer');
+    
+    // Gérer les classes actives
+    btnRegister.classList.add('active');
+    btnLogin.classList.remove('active');
 
     const loginForm = document.getElementById('login-form');
     loginForm.style.display = 'none';
