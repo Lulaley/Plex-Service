@@ -149,6 +149,8 @@ input[type="file"]:focus {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 20px;
+    box-sizing: border-box;
+    width: 100%;
 }
 
 .seed-card {
@@ -157,7 +159,7 @@ input[type="file"]:focus {
     padding: 20px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
-    animation: fadeInScale 0.5s ease;
+    box-sizing: border-box;
 }
 
 .seed-header {
