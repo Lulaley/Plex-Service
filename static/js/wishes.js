@@ -35,17 +35,17 @@ function showDetails(element) {
 
 function hideDetails(element) {
     const details = element.querySelector('.wish-details');
-    const wishInfo = element.querySelector('.wish-info');
     details.classList.remove('show');
     element.classList.remove('details-open');
-    // Réinitialiser le border-radius
-    if (wishInfo) {
-        wishInfo.style.borderRadius = '';
-    }
 }
 
-funcdetails.classList.remove('show');
-    element.classList.remove('details-open');
+function validateWish(element) {
+    const status = element.getAttribute('data-status');
+    if (status === 'validated') {
+        alert('Cette demande est déjà validée.');
+        return;
+    }
+
     const id = element.getAttribute('data-id');
     fetch(`/validate_wish/${id}`, {
         method: 'POST',
