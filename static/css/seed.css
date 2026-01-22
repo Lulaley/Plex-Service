@@ -147,7 +147,7 @@ input[type="file"]:focus {
 
 #seeds-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: 1fr;
     gap: 20px;
     box-sizing: border-box;
     width: 100%;
@@ -162,6 +162,8 @@ input[type="file"]:focus {
     transition: all 0.3s ease;
     box-sizing: border-box;
     animation: fadeInScale 0.5s ease;
+    width: 100%;
+    max-width: 100%;
 }
 
 .seed-header {
@@ -244,7 +246,7 @@ input[type="file"]:focus {
 
 .seed-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
     gap: 12px;
     padding-top: 15px;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
