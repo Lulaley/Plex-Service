@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (statValues[4]) statValues[4].textContent = `${progress}%`;
     }
 
-    function displaySeeds(seeds) {
+    function createSeedCard(seed) {
         const card = document.createElement('div');
         card.className = 'seed-card';
         card.id = `seed-${seed.id}`;
