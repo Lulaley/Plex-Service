@@ -155,7 +155,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function displaySeeds(seeds) {
-        seedsContainer.innerHTML = '';
         seedsCountElem.textContent = seeds.length;
 
         if (seeds.length === 0) {
@@ -163,13 +162,68 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        // Créer un Map des seeds actuels pour comparaison
+        const currentSeedIds = new Set(
+            Array.from(seedsContainer.children)
+                .filter(el => el.id && el.id.startsWith('seed-'))
+                .map(el => el.id.replace('seed-', ''))
+        );
+
+        const newSeedIds = new Set(seeds.map(s => s.id));
+
+        // Supprimer les seeds qui n'existent plus
+        Array.from(seedsContainer.children).forEach(child => {
+            if (child.id && child.id.startsWith('seed-')) {
+                const seedId = child.id.replace('seed-', '');
+                if (!newSeedIds.has(seedId)) {
+                    child.remove();
+                }
+            }
+        });
+
+        // Ajouter ou mettre à jour les seeds
         seeds.forEach(seed => {
-            const seedCard = createSeedCard(seed);
-            seedsContainer.appendChild(seedCard);
+            const existingCard = document.getElementById(`seed-${seed.id}`);
+            if (existingCard) {
+                // Mettre à jour la carte existante sans la recréer
+                updateSeedCard(existingCard, seed);
+            } else {
+                // Créer une nouvelle carte
+                const seedCard = createSeedCard(seed);
+                seedsContainer.appendChild(seedCard);
+            }
         });
     }
 
-    function createSeedCard(seed) {
+    function updateSeedCard(card, seed) {
+        const uploadRate = seed.stats.upload_rate ? seed.stats.upload_rate.toFixed(2) : '0.00';
+        const uploaded = seed.stats.uploaded ? formatBytes(seed.stats.uploaded) : '0 B';
+        const peers = seed.stats.peers || 0;
+        const seedsCount = seed.stats.seeds || 0;
+        const progress = seed.stats.progress ? seed.stats.progress.toFixed(1) : '0.0';
+        const state = seed.stats.state || seed.state || 'unknown';
+
+        // Mettre à jour seulement le contenu qui change
+        const statusBadge = card.querySelector('.status-badge');
+        if (statusBadge) {
+            statusBadge.className = `status-badge ${seed.is_active ? 'active' : 'inactive'}`;
+            statusBadge.textContent = seed.is_active ? 'Actif' : 'Inactif';
+        }
+
+        const stateBadge = card.querySelector('.state-badge');
+        if (stateBadge) {
+            stateBadge.textContent = state;
+        }
+
+        const statValues = card.querySelectorAll('.stat-value');
+        if (statValues[0]) statValues[0].textContent = `${uploadRate} kB/s`;
+        if (statValues[1]) statValues[1].textContent = uploaded;
+        if (statValues[2]) statValues[2].textContent = peers;
+        if (statValues[3]) statValues[3].textContent = seedsCount;
+        if (statValues[4]) statValues[4].textContent = `${progress}%`;
+    }
+
+    function displaySeeds(seeds) {
         const card = document.createElement('div');
         card.className = 'seed-card';
         card.id = `seed-${seed.id}`;

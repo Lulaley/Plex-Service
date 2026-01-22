@@ -357,12 +357,13 @@ input[type="file"]:focus {
     }
 
     #seeds-container {
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        grid-template-columns: 1fr;
         gap: 15px;
     }
 
     .seed-card {
         padding: 16px;
+        max-width: 100%;
     }
 
     .seed-name {
@@ -485,6 +486,7 @@ input[type="file"]:focus {
 
     .seed-card {
         padding: 14px;
+        max-width: 100%;
     }
 
     .seed-header {
