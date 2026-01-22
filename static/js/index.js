@@ -42,18 +42,16 @@ function showButtons() {
     if (formsVisible) {
         hideForms(() => {
             buttons.style.display = 'none';
-            setTimeout(() => {
-                buttons.style.opacity = 0;
-            }, 500);
+            buttons.style.opacity = 0;
         });
     } else {
-        buttons.style.display = 'block';
+        buttons.style.display = 'flex';
         setTimeout(() => {
             buttons.style.opacity = 1;
-        }, 500);
+        }, 50);
         setTimeout(() => {
             showLoginForm();
-        }, 50);
+        }, 600);
     }
 }
 
@@ -77,12 +75,12 @@ function showLoginForm() {
         inputs.forEach((input, index) => {
             setTimeout(() => {
                 input.style.opacity = 1;
-            }, index * 500);
+            }, index * 150);
         });
         setTimeout(() => {
             submitContainer.style.opacity = 1;
-        }, inputs.length * 250);
-    }, 500);
+        }, inputs.length * 150 + 100);
+    }, 100);
     formsVisible = true;
 }
 

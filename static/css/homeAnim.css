@@ -22,6 +22,10 @@ body {
     animation: unblurBackground 3s forwards;
 }
 
+.navbar.no-blur {
+    filter: none !important;
+}
+
 .fade-in {
     opacity: 0;
     animation: fadeInElements 3s forwards;
@@ -34,9 +38,9 @@ body {
         transform: translate(-50%, -50%) scale(1);
     }
     100% {
-        top: 10px; /* Adjust this value to the final position of the logo */
-        left: 10px; /* Adjust this value to the final position of the logo */
-        transform: translate(-43%, -45%) scale(0.1); /* Adjust scale to match the navbar logo size */
+        top: 33px;
+        left: 36px;
+        transform: translate(-50%, -50%) scale(0.225);
     }
 }
 
