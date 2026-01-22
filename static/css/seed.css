@@ -361,10 +361,12 @@ input[type="file"]:focus {
     #seeds-container {
         grid-template-columns: 1fr;
         gap: 15px;
+        max-width: 100%;
     }
 
     .seed-card {
         padding: 16px;
+        width: 100%;
         max-width: 100%;
     }
 
@@ -406,7 +408,7 @@ input[type="file"]:focus {
     }
 
     #seeds-container {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr;
         gap: 18px;
     }
 
@@ -449,7 +451,7 @@ input[type="file"]:focus {
     }
 
     #seeds-container {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr;
         gap: 12px;
     }
 
