@@ -58,8 +58,6 @@ function showButtons() {
 function showLoginForm() {
     const btnLogin = document.getElementById('connexion');
     const btnRegister = document.getElementById('creer');
-    btnRegister.style.backgroundColor = '#ff9900';
-    btnLogin.style.backgroundColor = '#ffb84d';
 
     const createForm = document.getElementById('create-form');
     createForm.style.display = 'none';
@@ -87,9 +85,6 @@ function showLoginForm() {
 function showCreateForm() {
     const btnLogin = document.getElementById('connexion');
     const btnRegister = document.getElementById('creer');
-
-    btnRegister.style.backgroundColor = '#ffb84d';
-    btnLogin.style.backgroundColor = '#ff9900';
 
     const loginForm = document.getElementById('login-form');
     loginForm.style.display = 'none';

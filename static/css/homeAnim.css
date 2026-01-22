@@ -39,7 +39,7 @@ body {
     }
     100% {
         top: 34.5px;
-        left: 46.5px;
+        left: 70px;
         transform: translate(-50%, -50%) scale(0.225);
     }
 }
