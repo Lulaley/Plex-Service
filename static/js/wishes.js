@@ -2,6 +2,10 @@ function showDetails(element) {
     // D'abord, masquer tous les autres détails et retirer la classe
     document.querySelectorAll('.wish-card.details-open').forEach(card => {
         card.classList.remove('details-open');
+        const wishInfo = card.querySelector('.wish-info');
+        if (wishInfo) {
+            wishInfo.style.borderRadius = '';
+        }
         const detail = card.querySelector('.wish-details');
         if (detail) {
             detail.classList.remove('show');
@@ -9,6 +13,7 @@ function showDetails(element) {
     });
     
     const details = element.querySelector('.wish-details');
+    const wishInfo = element.querySelector('.wish-info');
     const id = element.getAttribute('data-id');
     
     console.log('Adding details-open class to:', element);
@@ -20,6 +25,10 @@ function showDetails(element) {
         void element.offsetHeight;
         details.classList.add('show');
         element.classList.add('details-open');
+        // Forcer le border-radius à 0 via style inline
+        if (wishInfo) {
+            wishInfo.style.borderRadius = '0';
+        }
         // Forcer encore une fois le recalcul du style
         void element.offsetHeight;
         console.log('Element classes after:', element.className);
@@ -39,6 +48,10 @@ function showDetails(element) {
             void element.offsetHeight;
             details.classList.add('show');
             element.classList.add('details-open');
+            // Forcer le border-radius à 0 via style inline
+            if (wishInfo) {
+                wishInfo.style.borderRadius = '0';
+            }
             // Forcer encore une fois le recalcul du style
             void element.offsetHeight;
             console.log('Element classes after fetch:', element.className);
@@ -48,8 +61,13 @@ function showDetails(element) {
 
 function hideDetails(element) {
     const details = element.querySelector('.wish-details');
+    const wishInfo = element.querySelector('.wish-info');
     details.classList.remove('show');
     element.classList.remove('details-open');
+    // Réinitialiser le border-radius
+    if (wishInfo) {
+        wishInfo.style.borderRadius = '';
+    }
 }
 
 function validateWish(element) {
