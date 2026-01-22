@@ -184,6 +184,8 @@ input[type="text"]::placeholder {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .result-item p {
@@ -191,6 +193,10 @@ input[type="text"]::placeholder {
     font-size: 0.95em;
     margin: 0;
     line-height: 1.5;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    max-width: 100%;
 }
 
 .result-item p:first-child {
