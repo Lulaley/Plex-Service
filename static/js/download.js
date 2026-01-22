@@ -108,9 +108,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Afficher la carte d'informations
         downloadInfoCard.style.display = 'block';
+        
+        // Mettre à jour le nom du fichier dans la carte d'informations
+        var fileInput = document.getElementById('torrent-file');
+        if (fileInput.files.length > 0) {
+            document.getElementById('file-info').textContent = fileInput.files[0].name;
+        }
 
         var formData = new FormData();
-        var fileInput = document.getElementById('torrent-file');
         formData.append('torrent-file', fileInput.files[0]);
 
         fetch('/upload', {
