@@ -5,16 +5,34 @@ function toggleMenu() {
 }
 
 window.onload = function() {
-    document.querySelector('.center-logo').classList.add('moveLogo');
-    document.querySelector('.navbar').classList.add('unblurBackground', 'no-blur');
-    document.querySelector('.center-container').classList.add('unblurBackground');
-    document.querySelector('.navbar').classList.add('fadeInElements');
-    document.querySelector('.center-container').classList.add('fadeInElements');
+    const centerLogo = document.querySelector('.center-logo');
+    if (centerLogo) {
+        centerLogo.classList.add('moveLogo');
+    }
+    
+    const navbar = document.querySelector('.navbar');
+    if (navbar) {
+        navbar.classList.add('unblurBackground', 'no-blur');
+        navbar.classList.add('fadeInElements');
+    }
+    
+    const centerContainer = document.querySelector('.center-container');
+    if (centerContainer) {
+        centerContainer.classList.add('unblurBackground');
+        centerContainer.classList.add('fadeInElements');
+    }
 
     setTimeout(function() {
-        document.querySelector('.navbar').classList.remove('blur-background');
-        document.querySelector('.center-container').classList.remove('blur-background');
-        document.querySelector('.navbar').classList.add('no-blur');
-        document.querySelector('.center-logo').style.display = 'none'; // Hide the logo after animation
+        if (navbar) {
+            navbar.classList.remove('blur-background');
+            navbar.classList.add('no-blur');
+        }
+        if (centerContainer) {
+            centerContainer.classList.remove('blur-background');
+        }
+        if (centerLogo) {
+            centerLogo.style.display = 'none'; // Hide the logo after animation
+            centerLogo.style.opacity = '0';
+        }
     }, 3000); // Match the duration of the animation
 };

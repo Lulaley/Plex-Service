@@ -38,8 +38,8 @@ body {
         transform: translate(-50%, -50%) scale(1);
     }
     100% {
-        top: 33px;
-        left: 36px;
+        top: 34.5px;
+        left: 46.5px;
         transform: translate(-50%, -50%) scale(0.225);
     }
 }
