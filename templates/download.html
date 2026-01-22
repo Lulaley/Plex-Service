@@ -25,6 +25,7 @@
         <!-- Zone d'upload -->
         <div class="upload-card">
             <form id="torrent-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="upload-zone" id="upload-zone">
                     <svg class="upload-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>

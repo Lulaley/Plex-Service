@@ -40,6 +40,7 @@
             <div class="seed-option">
                 <h3>Option 2: Upload d'un fichier .torrent</h3>
                 <form id="torrent-upload-form">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                     <div class="input-group">
                         <input type="text" id="data-path-input" placeholder="Chemin des données (/path/to/data)" required>
                         <input type="file" id="torrent-file-input" accept=".torrent" required>

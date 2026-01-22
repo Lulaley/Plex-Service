@@ -120,6 +120,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var formData = new FormData();
         formData.append('torrent-file', fileInput.files[0]);
+        
+        // Ajouter le token CSRF
+        var csrfToken = document.querySelector('input[name="csrf_token"]').value;
+        formData.append('csrf_token', csrfToken);
 
         fetch('/upload', {
             method: 'POST',

@@ -4,6 +4,7 @@ from static.Controleur.ControleurSeed import (
     start_seed, stop_seed, get_all_seeds, get_seed_stats,
     get_all_media_paths, find_torrent_file, restore_seeds
 )
+from static.Controleur.ControleurSecurity import sanitize_filename, validate_path
 import threading
 import uuid
 
@@ -136,8 +137,22 @@ def upload_torrent_for_seed(app):
                     return jsonify({'success': False, 'message': 'Chemin des données manquant'}), 400
                 
                 if file and file.filename.endswith('.torrent'):
-                    filename = file.filename.replace(' ', '_')
-                    file_path = f"/var/www/public/Plex-Service/tmp/{filename}"
+                    # Sécuriser le nom de fichier
+                    filename = sanitize_filename(file.filename.replace(' ', '_'))
+                    
+                    # Vérifier l'extension après nettoyage
+                    if not filename.endswith('.torrent'):
+                        write_log(f"Nom de fichier suspect rejeté: {file.filename}", "ERROR")
+                        return jsonify({'success': False, 'message': 'Nom de fichier invalide'}), 400
+                    
+                    tmp_dir = "/var/www/public/Plex-Service/tmp/"
+                    file_path = f"{tmp_dir}{filename}"
+                    
+                    # Valider le chemin
+                    if not validate_path(file_path, [tmp_dir]):
+                        write_log(f"Tentative d'accès à un chemin non autorisé: {file_path}", "ERROR")
+                        return jsonify({'success': False, 'message': 'Chemin non autorisé'}), 403
+                    
                     file.save(file_path)
                     write_log(f"Fichier .torrent uploadé: {file_path}")
                     

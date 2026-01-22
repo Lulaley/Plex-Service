@@ -25,6 +25,7 @@
         <div id="login-form" class="form-card" style="display: none;">
             <h2>Connexion</h2>
             <form action="/index" method="post" autocomplete="on">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="input-group">
                     <input type="text" name="username" placeholder="Nom d'utilisateur" required autocomplete="username">
                 </div>
@@ -54,6 +55,7 @@
         <div id="create-form" class="form-card">
             <h2>Créer un compte</h2>
             <form action="/register" method="post" autocomplete="on">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                 <div class="input-group tooltip">
                     <input type="text" id="username" name="username" placeholder="Nom d'utilisateur" required autocomplete="username">
                 </div>

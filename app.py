@@ -6,6 +6,8 @@ chemin_actuel = os.path.dirname(__file__)
 chemin_routes = os.path.join(chemin_actuel, '../routes')
 sys.path.append(chemin_routes)
 from flask import Flask, render_template, session, redirect, url_for
+from flask_wtf.csrf import CSRFProtect
+from flask_talisman import Talisman
 
 # Importation des routes
 from routes.RouteLogin import login
@@ -24,6 +26,23 @@ from static.Controleur.ControleurConf import ControleurConf
 app = Flask(__name__)
 conf = ControleurConf()
 app.secret_key = conf.get_config('APP', 'secret_key')
+
+# Protection CSRF
+csrf = CSRFProtect(app)
+
+# Headers de sécurité HTTP
+csp = {
+    'default-src': "'self'",
+    'script-src': ["'self'", "'unsafe-inline'"],
+    'style-src': ["'self'", "'unsafe-inline'"],
+    'img-src': ["'self'", 'data:', 'https:'],
+    'font-src': ["'self'", 'data:'],
+}
+Talisman(app, 
+    force_https=False,  # À mettre True en production avec HTTPS
+    content_security_policy=csp,
+    content_security_policy_nonce_in=['script-src', 'style-src']
+)
 
 @app.route('/')
 def root():

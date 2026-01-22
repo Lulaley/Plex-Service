@@ -98,6 +98,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const formData = new FormData();
         formData.append('torrent-file', torrentFile);
         formData.append('data_path', dataPath);
+        
+        // Ajouter le token CSRF
+        const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+        formData.append('csrf_token', csrfToken);
 
         fetch('/upload_torrent_for_seed', {
             method: 'POST',
