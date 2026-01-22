@@ -78,6 +78,7 @@ def save_persisted_downloads():
                     'save_path': download_data.get('save_path', ''),
                     'torrent_path': download_data.get('torrent_file_path', ''),
                     'is_active': download_data.get('is_active', True),
+                    'started_at': download_data.get('started_at', time.time()),  # Ajouter le temps de démarrage
                     'stats': download_data.get('stats', {'progress': 0, 'download_rate': 0, 'upload_rate': 0, 'peers': 0, 'state': 'downloading'})
                 }
         
@@ -109,18 +110,25 @@ def get_all_downloads():
         # Par défaut, utiliser les stats depuis le fichier JSON (partagées entre workers)
         stats = download_info.get('stats', {'progress': 0, 'download_rate': 0, 'upload_rate': 0, 'peers': 0, 'state': 'downloading'})
         is_active = download_info.get('is_active', True)
+        started_at = download_info.get('started_at', time.time())
         
         # Si ce worker gère ce download, utiliser les stats en mémoire (plus récentes)
         with downloads_lock:
             if download_id in downloads:
                 stats = downloads[download_id].get('stats', stats)
                 is_active = downloads[download_id].get('is_active', is_active)
+                started_at = downloads[download_id].get('started_at', started_at)
+        
+        # Calculer le temps écoulé depuis le démarrage
+        elapsed_seconds = int(time.time() - started_at)
         
         downloads_list.append({
             'download_id': download_id,
             'name': download_info.get('name', 'Unknown'),
             'save_path': download_info.get('save_path', ''),
             'is_active': is_active,
+            'elapsed_seconds': elapsed_seconds,  # Ajouter le temps écoulé
+            'progress': stats.get('progress', 0),
             'stats': stats
         })
     
@@ -315,6 +323,7 @@ def download_torrent(torrent_file_path, save_path, handle):
     handle['save_path'] = save_path
     handle['torrent_file_path'] = torrent_file_path
     handle['downloaded_files'] = []
+    handle['started_at'] = time.time()  # Enregistrer le temps de démarrage
 
     with downloads_lock:
         downloads[handle['id']] = handle
