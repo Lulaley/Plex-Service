@@ -107,6 +107,9 @@ body {
     color: #333 !important;
     margin-bottom: 8px;
     font-weight: 500;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    max-width: 100%;
 }
 
 .upload-zone.downloading .upload-text {
@@ -212,7 +215,7 @@ body {
 .card-header h3 {
     margin: 0 0 25px 0;
     font-size: 1.3em;
-    color: #333;
+    color: #ff9900;
     font-weight: 600;
 }
 

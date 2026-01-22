@@ -86,7 +86,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const streamUrl = `/stream_download/${downloadInfo.download_id}`;
         console.log('Reconnexion au stream:', streamUrl);
-        connectToStream(streamUrl, downloadInfo.progress || 0);
+        
+        // Récupérer le temps écoulé depuis le démarrage du téléchargement
+        const elapsedSeconds = downloadInfo.elapsed_seconds || 0;
+        connectToStream(streamUrl, downloadInfo.progress || 0, elapsedSeconds);
     }
 
     torrentForm.addEventListener('submit', function (event) {
@@ -155,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function connectToStream(streamUrl, initialProgress = 0) {
+    function connectToStream(streamUrl, initialProgress = 0, elapsedSecondsOffset = 0) {
         eventSource = new EventSource(streamUrl);
         var progressBar = document.getElementById('progress-bar');
         var progressText = progressBar.querySelector('.progress-text');
@@ -164,7 +167,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var uploadSpeedInfo = document.getElementById('upload-speed-info');
         var elapsedTimeElem = document.getElementById('elapsed-time');
         var remainingTimeElem = document.getElementById('remaining-time');
-        var startTime = Date.now();
+        var startTime = Date.now() - (elapsedSecondsOffset * 1000); // Ajuster le temps de démarrage
         var lastProgress = initialProgress;
         var progressHistory = [];
         var lastProgressUpdate = Date.now();
