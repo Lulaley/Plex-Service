@@ -27,6 +27,8 @@
     padding: 12px 24px;
     max-width: 1400px;
     margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .navbar .menu button {
@@ -193,11 +195,16 @@
     .navbar .hamburger {
         display: block;
         margin-left: auto;
+        margin-right: 20px;
     }
     
     .navbar .menu {
         position: relative;
-        padding: 12px 20px;
+        padding: 12px 0;
+    }
+    
+    .navbar img {
+        margin-left: 20px;
     }
     
     .navbar .menu > .left-buttons,
@@ -217,6 +224,7 @@
         flex-direction: column;
         width: 100%;
         gap: 0;
+        padding: 0 20px;
     }
     
     .navbar .menu.active .left-buttons {
