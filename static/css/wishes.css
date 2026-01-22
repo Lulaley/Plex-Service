@@ -146,6 +146,7 @@ body {
 
 .wish-card.details-open .wish-info {
     border-radius: 0 !important;
+    transition: border-radius 0.3s ease !important;
 }
 
 .wish-info h3 {
