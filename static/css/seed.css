@@ -212,7 +212,9 @@ input[type="file"]:focus {
     font-size: 0.9em;
     margin: 8px 0;
     word-wrap: break-word;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    max-width: 100%;
 }
 
 .seed-info strong {
