@@ -178,8 +178,3 @@ def restore_seeds_on_startup():
         restore_seeds()
     except Exception as e:
         write_log(f"Erreur lors de la restauration des seeds: {str(e)}", "ERROR")
-
-# Blueprint pour le seeding
-seed_bp = Blueprint('seed', __name__)
-
-# Les routes seront migrées ici depuis RouteSeed.py
