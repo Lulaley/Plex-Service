@@ -27,6 +27,20 @@ app = Flask(__name__)
 conf = ControleurConf()
 app.secret_key = conf.get_config('APP', 'secret_key')
 
+# Cache pour assets statiques
+@app.after_request
+def add_cache_headers(response):
+    """Ajoute les headers de cache pour les fichiers statiques"""
+    if 'static' in request.path:
+        # Cache les assets statiques pendant 1 an
+        response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+    else:
+        # Pas de cache pour les pages dynamiques
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+    return response
+
 # Protection CSRF
 csrf = CSRFProtect(app)
 
@@ -90,7 +104,11 @@ restore_downloads_on_startup()
 def cleanup():
     """Fonction de nettoyage appelée lors de l'arrêt du service"""
     from static.Controleur.ControleurLog import write_log
+    from static.Controleur.ControleurLibtorrent import cleanup_session
     write_log("Arrêt du service Plex-Service - Nettoyage en cours...")
+    
+    # Nettoyer la session libtorrent
+    cleanup_session()
     
     # Arrêter tous les téléchargements en cours
     try:

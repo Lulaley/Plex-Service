@@ -1,6 +1,7 @@
 from .ControleurLog import write_log
 from .ControleurConf import ControleurConf
 from .ControleurTMDB import ControleurTMDB
+from .ControleurLibtorrent import configure_session_for_download
 import libtorrent as lt
 import time
 import re
@@ -221,12 +222,10 @@ def stop_download(handle):
 def download_torrent(torrent_file_path, save_path, handle):
     write_log(f"Début de la fonction download_torrent avec le chemin : {torrent_file_path}")
     conf = ControleurConf()
-    ses = lt.session()
-    settings = {
-        'download_rate_limit': -1,  # Pas de limite de vitesse de téléchargement
-        'upload_rate_limit': -1,    # Pas de limite de vitesse d'upload
-    }
-    ses.apply_settings(settings)
+    
+    # Utiliser la session globale unique au lieu d'en créer une nouvelle
+    ses = configure_session_for_download()
+    
     write_log(f"Chargement du fichier .torrent pour {torrent_file_path}")
     info = lt.torrent_info(torrent_file_path)
     write_log(f"info: {info}")

@@ -1,5 +1,6 @@
 from .ControleurLog import write_log
 from .ControleurConf import ControleurConf
+from .ControleurLibtorrent import configure_session_for_seed
 import libtorrent as lt
 import time
 import threading
@@ -123,12 +124,8 @@ def start_seed(seed_id, torrent_file_path, data_path):
     write_log(f"Démarrage du seed {seed_id} pour {torrent_file_path}")
     
     try:
-        ses = lt.session()
-        settings = {
-            'download_rate_limit': 0,  # Pas de téléchargement
-            'upload_rate_limit': -1,   # Upload illimité
-        }
-        ses.apply_settings(settings)
+        # Utiliser la session globale unique au lieu d'en créer une nouvelle
+        ses = configure_session_for_seed()
         
         info = lt.torrent_info(torrent_file_path)
         write_log(f"Torrent info chargé: {info.name()}")
