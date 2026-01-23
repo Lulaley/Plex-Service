@@ -5,7 +5,7 @@ import atexit
 chemin_actuel = os.path.dirname(__file__)
 chemin_routes = os.path.join(chemin_actuel, '../routes')
 sys.path.append(chemin_routes)
-from flask import Flask, render_template, session, redirect, url_for
+from flask import Flask, render_template, session, redirect, url_for, request
 from flask_wtf.csrf import CSRFProtect
 from flask_talisman import Talisman
 
