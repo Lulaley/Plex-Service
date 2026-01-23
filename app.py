@@ -67,7 +67,7 @@ app.register_blueprint(home_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(wishes_bp)
 app.register_blueprint(search_bp)
-app.register_blueprint(seed_bp)
+app.register_blueprint(seed_bp, url_prefix='')
 
 # Gestionnaires d'erreurs personnalisés
 @app.errorhandler(404)
