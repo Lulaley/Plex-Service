@@ -406,5 +406,5 @@ def restore_seeds():
             try:
                 fcntl.flock(lock_file.fileno(), fcntl.LOCK_UN)
                 lock_file.close()
-            except:
-                pass
+            except OSError as e:
+                write_log(f"Erreur lors de la fermeture du fichier de verrouillage: {e}", "WARNING")

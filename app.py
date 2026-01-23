@@ -4,16 +4,18 @@ import signal
 import atexit
 chemin_actuel = os.path.dirname(__file__)
 chemin_routes = os.path.join(chemin_actuel, '../routes')
+chemin_blueprints = os.path.join(chemin_actuel, 'blueprints')
 sys.path.append(chemin_routes)
+sys.path.append(chemin_blueprints)
 from flask import Flask, render_template, session, redirect, url_for, request
 from flask_wtf.csrf import CSRFProtect
 from flask_talisman import Talisman
 
-# Importation des routes
-from routes.RouteLogin import login
-from routes.RouteRegister import register
-from routes.RouteLogout import logout
-from routes.RouteHome import home
+# Importation des blueprints
+from blueprints.auth import auth_bp
+from blueprints.home import home_bp
+
+# Importation des routes legacy (à migrer progressivement)
 from routes.RouteDownload import download, upload, start_download, stop_download_route, get_downloads_route, stream_download_route, restore_downloads_on_startup
 from routes.RouteSeed import seed, get_media_list, start_seed_route, stop_seed_route, get_seeds_stats_route, upload_torrent_for_seed, restore_seeds_on_startup
 from routes.RouteUsers import users
@@ -22,6 +24,7 @@ from routes.RouteSearch import search_routes
 
 # Importation des controleurs
 from static.Controleur.ControleurConf import ControleurConf
+from static.Controleur.ControleurLog import write_log
 
 app = Flask(__name__)
 conf = ControleurConf()
@@ -58,26 +61,37 @@ Talisman(app,
     content_security_policy_nonce_in=[]  # Désactiver les nonces pour permettre onclick
 )
 
+# Enregistrer les blueprints
+app.register_blueprint(auth_bp)
+app.register_blueprint(home_bp)
+
+# Gestionnaires d'erreurs personnalisés
+@app.errorhandler(404)
+def page_not_found(e):
+    write_log(f"Erreur 404: Page non trouvée - {request.url}", 'WARNING')
+    return render_template('errors/404.html'), 404
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    write_log(f"Erreur 500: Erreur serveur - {str(e)}", 'ERROR')
+    return render_template('errors/500.html', error=str(e) if app.debug else None), 500
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    write_log(f"Exception non gérée: {str(e)}", 'ERROR')
+    # Retourner 500 pour toutes les exceptions non gérées
+    return render_template('errors/500.html', error=str(e) if app.debug else None), 500
+
 @app.route('/')
 def root():
-    return redirect(url_for('index'))
+    return redirect(url_for('auth.login'))
 
+# Route index (redirection legacy)
 @app.route('/index')
 def index():
-    return render_template('index.html')
+    return redirect(url_for('auth.login'))
 
-""" @app.route('/home')
-def home():
-    if 'username' in session:
-        return render_template('home.html', username=session['username'])
-    else:
-        return redirect(url_for('index')) """
-
-# Enregistrement des routes
-login(app)
-register(app)
-logout(app)
-home(app)
+# Enregistrement des routes legacy (à migrer progressivement vers blueprints)
 download(app)
 upload(app)
 start_download(app)

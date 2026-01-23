@@ -423,8 +423,8 @@ def restore_downloads_on_startup():
                 try:
                     os.remove(RESTORE_LOCK_FILE)
                     write_log("Verrou de restauration libéré")
-                except:
-                    pass
+                except OSError as e:
+                    write_log(f"Erreur lors de la suppression du verrou: {e}", "WARNING")
                 
     except FileExistsError:
         # Un autre worker est déjà en train de restaurer (le fichier existe déjà)
@@ -436,5 +436,5 @@ def restore_downloads_on_startup():
         if os.path.exists(RESTORE_LOCK_FILE):
             try:
                 os.remove(RESTORE_LOCK_FILE)
-            except:
-                pass
+            except OSError as e:
+                write_log(f"Erreur lors de la libération du verrou: {e}", "WARNING")
