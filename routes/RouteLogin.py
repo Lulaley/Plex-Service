@@ -29,7 +29,7 @@ def login(app):
                     app.permanent_session_lifetime = timedelta(days=7)  # Durée de la session
                 # Rediriger vers la page d'accueil pour vérifier les droits
                 session['from_index'] = True
-                return redirect(url_for('inner_home'))
+                return redirect(url_for('home.home'))
             else:
                 write_log(f"Échec de la connexion pour l'utilisateur: {username}", 'ERROR')
                 # Affichage d'un message d'erreur en cas d'échec

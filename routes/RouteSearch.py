@@ -7,7 +7,7 @@ def search_routes(app):
     def search_page():
         if 'username' not in session:
             write_log("Aucun utilisateur connecté, redirection vers l'index")
-            return redirect(url_for('index'))
+            return redirect(url_for('auth.login'))
         
         session['from_index'] = False
         return render_template('search.html')

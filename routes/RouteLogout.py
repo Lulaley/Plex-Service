@@ -8,4 +8,4 @@ def logout(app):
         write_log(f"Utilisateur déconnecté: {session['username']}")
         session.pop('username', None)
         # Rediriger vers la route racine
-        return redirect(url_for('index'))
+        return redirect(url_for('auth.login'))

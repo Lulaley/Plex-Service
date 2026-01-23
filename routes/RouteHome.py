@@ -41,7 +41,7 @@ def home(app):
                 session['rights_agreement'] = rights_agreement
                 if rights_agreement not in ['PlexService::SuperAdmin', 'PlexService::Admin', 'PlexService::User']:
                     write_log(f"Utilisateur {username} n'a pas le droit de se connecter", 'ERROR')
-                    return redirect(url_for('index'))
+                    return redirect(url_for('auth.login'))
             
             return render_template('home.html')
         else:

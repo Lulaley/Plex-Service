@@ -3,7 +3,7 @@
 <div class="navbar {% if session.get('from_index') %}blur-background fade-in{% endif %}">
     <div class="menu">
         <div class="left-buttons">
-            <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="closeMenuOnClick(); window.location.href='{{ url_for('inner_home')}}'">
+            <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="closeMenuOnClick(); window.location.href='{{ url_for('home.home')}}'">
             <button onclick="closeMenuOnClick(); window.location.href='{{ url_for('search_page') }}'">Recherche</button>
             <button onclick="closeMenuOnClick(); window.location.href='{{ url_for('manage_wishes') }}'">Demandes</button>
         </div>
@@ -16,7 +16,7 @@
             <button class="notification-bubble" id="user-button" onclick="closeMenuOnClick(); window.location.href='{{ url_for('manage_users') }}'">Utilisateurs</button>
             {% endif %}
             <button class="username">{{ session.username }}</button>
-            <button onclick="closeMenuOnClick(); window.location.href='{{ url_for('inner_logout') }}'">Déconnexion</button>
+            <button onclick="closeMenuOnClick(); window.location.href='{{ url_for('auth.logout') }}'">Déconnexion</button>
         </div>
         <div class="hamburger" onclick="toggleMenu()">☰</div>
     </div>

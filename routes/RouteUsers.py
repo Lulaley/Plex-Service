@@ -7,7 +7,7 @@ def users(app):
     def manage_users():
         if 'username' not in session:
             write_log("Aucun utilisateur connecté, redirection vers l'index")
-            return redirect(url_for('index'))
+            return redirect(url_for('auth.login'))
 
         username = session.get('username')
         rights_agreement = session.get('rights_agreement')
