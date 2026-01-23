@@ -14,12 +14,30 @@ def home():
     if session.get('from_index'):
         write_log(f"Vérification des droits pour l'utilisateur: {session['username']}")
         from static.Controleur.ControleurLdap import ControleurLdap
+        from static.Controleur.ControleurConf import ControleurConf
         ds = ControleurLdap()
         
         try:
-            rights = ds.get_user_rights(session['username'])
-            write_log(f"Droits récupérés: {rights}")
-            session['rights_agreement'] = rights
+            # Récupérer les droits depuis LDAP
+            conf = ControleurConf()
+            res = ds.search_user(session['username'])
+            if res:
+                user_dn = f"(uid={session['username']})"
+                search_base = conf.get_config('LDAP', 'base_dn')
+                user_entry = ds.search_entry(search_base, user_dn)
+                
+                if user_entry:
+                    attributes = user_entry[0][1]
+                    rights_agreement = attributes.get('rightsAgreement', [b''])[0].decode('utf-8')
+                    write_log(f"Droits récupérés: {rights_agreement}")
+                    session['rights_agreement'] = rights_agreement
+                else:
+                    write_log(f"Entrée utilisateur non trouvée", 'ERROR')
+                    session['rights_agreement'] = None
+            else:
+                write_log(f"Utilisateur non trouvé dans LDAP", 'ERROR')
+                session['rights_agreement'] = None
+            
             session['from_index'] = False
         except Exception as e:
             write_log(f"Erreur lors de la récupération des droits: {str(e)}", 'ERROR')
