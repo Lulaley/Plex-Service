@@ -21,7 +21,6 @@ from blueprints.search import search_bp
 # Importation des routes legacy (à migrer progressivement)
 from routes.RouteDownload import download, upload, start_download, stop_download_route, get_downloads_route, stream_download_route, restore_downloads_on_startup
 from routes.RouteSeed import seed, get_media_list, start_seed_route, stop_seed_route, get_seeds_stats_route, upload_torrent_for_seed, restore_seeds_on_startup
-from routes.RoutePosts import posts
 
 # Importation des controleurs
 from static.Controleur.ControleurConf import ControleurConf
@@ -108,7 +107,6 @@ start_seed_route(app)
 stop_seed_route(app)
 get_seeds_stats_route(app)
 upload_torrent_for_seed(app)
-posts(app)
 
 # Restaurer les seeds au démarrage
 restore_seeds_on_startup()
