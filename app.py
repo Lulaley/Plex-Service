@@ -33,7 +33,7 @@ csrf = CSRFProtect(app)
 # Headers de sécurité HTTP
 csp = {
     'default-src': "'self'",
-    'script-src': ["'self'", "'unsafe-inline'"],
+    'script-src': ["'self'", "'unsafe-inline'"],  # Nécessaire pour onclick inline
     'style-src': ["'self'", "'unsafe-inline'"],
     'img-src': ["'self'", 'data:', 'https:'],
     'font-src': ["'self'", 'data:'],
@@ -41,7 +41,7 @@ csp = {
 Talisman(app, 
     force_https=False,  # À mettre True en production avec HTTPS
     content_security_policy=csp,
-    content_security_policy_nonce_in=['script-src', 'style-src']
+    content_security_policy_nonce_in=[]  # Désactiver les nonces pour permettre onclick
 )
 
 @app.route('/')
