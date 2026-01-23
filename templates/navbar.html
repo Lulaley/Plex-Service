@@ -4,8 +4,8 @@
     <div class="menu">
         <div class="left-buttons">
             <img src="{{ url_for('static', filename='images/plex-fleche.png') }}" alt="Plex Logo" onclick="closeMenuOnClick(); window.location.href='{{ url_for('home.home')}}'">
-            <button onclick="closeMenuOnClick(); window.location.href='{{ url_for('search_page') }}'">Recherche</button>
-            <button onclick="closeMenuOnClick(); window.location.href='{{ url_for('manage_wishes') }}'">Demandes</button>
+            <button onclick="closeMenuOnClick(); window.location.href='{{ url_for('search.search_page') }}'">Recherche</button>
+            <button onclick="closeMenuOnClick(); window.location.href='{{ url_for('wishes.manage_wishes') }}'">Demandes</button>
         </div>
         <div class="right-buttons">
             {% if session.rights_agreement in ['PlexService::SuperAdmin', 'PlexService::Admin'] %}
@@ -13,7 +13,7 @@
             {% endif %}
             {% if session.rights_agreement == 'PlexService::SuperAdmin' %}
             <button onclick="closeMenuOnClick(); window.location.href='{{ url_for('inner_seed') }}'">Seed</button>
-            <button class="notification-bubble" id="user-button" onclick="closeMenuOnClick(); window.location.href='{{ url_for('manage_users') }}'">Utilisateurs</button>
+            <button class="notification-bubble" id="user-button" onclick="closeMenuOnClick(); window.location.href='{{ url_for('admin.manage_users') }}'">Utilisateurs</button>
             {% endif %}
             <button class="username">{{ session.username }}</button>
             <button onclick="closeMenuOnClick(); window.location.href='{{ url_for('auth.logout') }}'">Déconnexion</button>
