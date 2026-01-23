@@ -18,9 +18,7 @@ from blueprints.admin import admin_bp
 from blueprints.wishes import wishes_bp
 from blueprints.search import search_bp
 from blueprints.seed import seed_bp, restore_seeds_on_startup
-
-# Importation des routes legacy (à migrer progressivement)
-from routes.RouteDownload import download, upload, start_download, stop_download_route, get_downloads_route, stream_download_route, restore_downloads_on_startup
+from blueprints.download import download_bp, restore_downloads_on_startup
 
 # Importation des controleurs
 from static.Controleur.ControleurConf import ControleurConf
@@ -68,6 +66,7 @@ app.register_blueprint(admin_bp)
 app.register_blueprint(wishes_bp)
 app.register_blueprint(search_bp)
 app.register_blueprint(seed_bp, url_prefix='')
+app.register_blueprint(download_bp, url_prefix='')
 
 # Gestionnaires d'erreurs personnalisés
 @app.errorhandler(404)
@@ -94,14 +93,6 @@ def root():
 @app.route('/index')
 def index():
     return redirect(url_for('auth.login'))
-
-# Enregistrement des routes legacy (à migrer progressivement vers blueprints)
-download(app)
-upload(app)
-start_download(app)
-stop_download_route(app)
-stream_download_route(app)
-get_downloads_route(app)
 
 # Restaurer les seeds au démarrage
 restore_seeds_on_startup()

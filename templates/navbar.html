@@ -9,7 +9,7 @@
         </div>
         <div class="right-buttons">
             {% if session.rights_agreement in ['PlexService::SuperAdmin', 'PlexService::Admin'] %}
-            <button onclick="closeMenuOnClick(); window.location.href='{{ url_for('inner_download') }}'">Téléchargement</button>
+            <button onclick="closeMenuOnClick(); window.location.href='{{ url_for('download.download_page') }}'">Téléchargement</button>
             {% endif %}
             {% if session.rights_agreement == 'PlexService::SuperAdmin' %}
             <button onclick="closeMenuOnClick(); window.location.href='{{ url_for('seed.seed_page') }}'">Seed</button>
