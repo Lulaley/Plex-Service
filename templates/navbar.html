@@ -12,7 +12,7 @@
             <button onclick="closeMenuOnClick(); window.location.href='{{ url_for('inner_download') }}'">Téléchargement</button>
             {% endif %}
             {% if session.rights_agreement == 'PlexService::SuperAdmin' %}
-            <button onclick="closeMenuOnClick(); window.location.href='{{ url_for('inner_seed') }}'">Seed</button>
+            <button onclick="closeMenuOnClick(); window.location.href='{{ url_for('seed.seed_page') }}'">Seed</button>
             <button class="notification-bubble" id="user-button" onclick="closeMenuOnClick(); window.location.href='{{ url_for('admin.manage_users') }}'">Utilisateurs</button>
             {% endif %}
             <button class="username">{{ session.username }}</button>

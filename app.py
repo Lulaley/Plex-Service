@@ -17,10 +17,10 @@ from blueprints.home import home_bp
 from blueprints.admin import admin_bp
 from blueprints.wishes import wishes_bp
 from blueprints.search import search_bp
+from blueprints.seed import seed_bp, restore_seeds_on_startup
 
 # Importation des routes legacy (à migrer progressivement)
 from routes.RouteDownload import download, upload, start_download, stop_download_route, get_downloads_route, stream_download_route, restore_downloads_on_startup
-from routes.RouteSeed import seed, get_media_list, start_seed_route, stop_seed_route, get_seeds_stats_route, upload_torrent_for_seed, restore_seeds_on_startup
 
 # Importation des controleurs
 from static.Controleur.ControleurConf import ControleurConf
@@ -67,6 +67,7 @@ app.register_blueprint(home_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(wishes_bp)
 app.register_blueprint(search_bp)
+app.register_blueprint(seed_bp)
 
 # Gestionnaires d'erreurs personnalisés
 @app.errorhandler(404)
@@ -101,12 +102,6 @@ start_download(app)
 stop_download_route(app)
 stream_download_route(app)
 get_downloads_route(app)
-seed(app)
-get_media_list(app)
-start_seed_route(app)
-stop_seed_route(app)
-get_seeds_stats_route(app)
-upload_torrent_for_seed(app)
 
 # Restaurer les seeds au démarrage
 restore_seeds_on_startup()
