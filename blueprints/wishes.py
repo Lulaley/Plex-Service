@@ -35,7 +35,11 @@ def manage_wishes():
         write_log(f"Utilisateur {username} n'a pas les droits nécessaires pour accéder à cette page", 'ERROR')
         return redirect(url_for('auth.login'))
 
-    return list_wishes(username, rights_agreement)
+    # Récupérer paramètres de pagination
+    page = request.args.get('page', 1, type=int)
+    per_page = 10  # 10 wishes par page (avec images, on limite)
+    
+    return list_wishes(username, rights_agreement, page, per_page)
 
 @wishes_bp.route('/create_wish', methods=['POST'])
 def create_wish():
@@ -95,16 +99,25 @@ def validate_wish(wish_id):
 
     return jsonify({'success': success})
 
-def list_wishes(username, rights_agreement):
+def list_wishes(username, rights_agreement, page=1, per_page=10):
+    """Liste les wishes avec pagination"""
     wish_controller = ControleurWish()
     if rights_agreement in ['PlexService::Admin', 'PlexService::SuperAdmin']:
-        wishes = wish_controller.get_all_wishes()
+        all_wishes = wish_controller.get_all_wishes()
     else:
-        wishes = wish_controller.get_user_wishes(username)
+        all_wishes = wish_controller.get_user_wishes(username)
 
+    # Calculer pagination
+    total_wishes = len(all_wishes)
+    total_pages = (total_wishes + per_page - 1) // per_page
+    start_idx = (page - 1) * per_page
+    end_idx = start_idx + per_page
+    
+    paginated_wishes = all_wishes[start_idx:end_idx]
+    
     tmdb = ControleurTMDB()
     wish_details = []
-    for wish in wishes:
+    for wish in paginated_wishes:
         if wish['wishType'] == 'movie':
             details = tmdb.search_movie(wish['plexTitle'])
         elif wish['wishType'] == 'series':
@@ -118,4 +131,10 @@ def list_wishes(username, rights_agreement):
         wish_details.append(details)
     
     session['from_index'] = False
-    return render_template('wishes.html', wishes=wish_details)
+    write_log(f"Liste des demandes récupérée: page {page}/{total_pages}, {len(wish_details)} wishes")
+    
+    return render_template('wishes.html', 
+                         wishes=wish_details,
+                         current_page=page,
+                         total_pages=total_pages,
+                         total_wishes=total_wishes)

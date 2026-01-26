@@ -114,10 +114,31 @@ def validate_user():
     return jsonify({'message': 'Compte validé avec succès'}), 200
 
 def list_users():
+    """Liste tous les utilisateurs avec pagination"""
+    # Récupérer les paramètres de pagination
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 20, type=int)
+    
     ldap = ControleurLdap()
-    users = ldap.get_all_users()
+    all_users = ldap.get_all_users()
     ldap.disconnect()
-    return render_template('users.html', users=users)
+    
+    # Calculer pagination
+    total_users = len(all_users)
+    total_pages = (total_users + per_page - 1) // per_page  # Arrondi supérieur
+    start_idx = (page - 1) * per_page
+    end_idx = start_idx + per_page
+    
+    paginated_users = all_users[start_idx:end_idx]
+    
+    write_log(f"Liste des utilisateurs récupérée: page {page}/{total_pages}, {len(paginated_users)} users")
+    
+    return render_template('users.html', 
+                         users=paginated_users,
+                         current_page=page,
+                         total_pages=total_pages,
+                         total_users=total_users,
+                         per_page=per_page)
 
 def delete_user():
     data = request.json

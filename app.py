@@ -11,6 +11,9 @@ from flask import Flask, render_template, session, redirect, url_for, request
 from flask_wtf.csrf import CSRFProtect
 from flask_talisman import Talisman
 from flask_compress import Compress
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+import redis
 
 # Importation des blueprints
 from blueprints.auth import auth_bp
@@ -31,6 +34,38 @@ app.secret_key = conf.get_config('APP', 'secret_key')
 
 # Compression Gzip pour réduire la taille des réponses
 Compress(app)
+
+# Connexion Redis pour cache et rate limiting
+try:
+    redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+    redis_client.ping()
+    write_log("Connexion Redis réussie")
+except redis.ConnectionError:
+    write_log("Redis non disponible, rate limiting désactivé", "WARNING")
+    redis_client = None
+
+# Rate limiting - Protection brute-force
+if redis_client:
+    limiter = Limiter(
+        app=app,
+        key_func=get_remote_address,
+        storage_uri="redis://localhost:6379",
+        default_limits=["200 per day", "50 per hour"],
+        storage_options={"socket_connect_timeout": 30},
+        strategy="fixed-window"
+    )
+    write_log("Rate limiting activé")
+else:
+    # Limiter sans storage (en mémoire, moins fiable multi-workers)
+    limiter = Limiter(
+        app=app,
+        key_func=get_remote_address,
+        default_limits=["200 per day", "50 per hour"]
+    )
+    write_log("Rate limiting activé (mode mémoire)")
+
+# Limite stricte pour login (5 tentatives par minute)
+limiter.limit("5 per minute")(lambda: None)  # Configuré dans auth.py
 
 # Cache pour assets statiques
 @app.after_request
@@ -71,6 +106,10 @@ app.register_blueprint(wishes_bp)
 app.register_blueprint(search_bp)
 app.register_blueprint(seed_bp, url_prefix='')
 app.register_blueprint(download_bp, url_prefix='')
+
+# Initialiser le limiter dans auth blueprint
+from blueprints.auth import init_limiter
+init_limiter(limiter)
 
 # Gestionnaires d'erreurs personnalisés
 @app.errorhandler(404)

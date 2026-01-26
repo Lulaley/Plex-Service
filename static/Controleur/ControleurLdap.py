@@ -1,6 +1,7 @@
 import ldap
 from .ControleurConf import ControleurConf
 from .ControleurLog import write_log
+from .ControleurCache import cache
 
 class ControleurLdap:
     def __init__(self):
@@ -55,6 +56,12 @@ class ControleurLdap:
             return False
 
     def search_user(self, username):
+        # Essayer de récupérer depuis le cache (TTL 5 min)
+        cache_key = f"user:{username}"
+        cached_result = cache.get(cache_key)
+        if cached_result is not None:
+            return cached_result
+        
         try:
             self.bind_as_root()
             search_base = self.config.get_config('LDAP', 'base_dn')
@@ -62,6 +69,8 @@ class ControleurLdap:
             result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter, ['uid', 'RightsAgreement'])
             if result:
                 write_log("Utilisateur trouvé")
+                # Mettre en cache pour 5 minutes
+                cache.set(cache_key, result, ttl=300)
                 return result
             else:
                 write_log("Utilisateur non trouvé", 'ERROR')
@@ -137,6 +146,11 @@ class ControleurLdap:
             mod_attrs = [(ldap.MOD_REPLACE, attribute, value.encode('utf-8'))]
             self.conn.modify_s(dn, mod_attrs)
             write_log(f"Attribut {attribute} remplacé pour l'utilisateur {username}")
+            
+            # Invalider le cache pour cet utilisateur et la liste complète
+            cache.delete(f"user:{username}")
+            cache.delete("users:all")
+            
             return True
         except ldap.LDAPError as e:
             write_log(f"Erreur lors du remplacement de l'attribut LDAP: {e}", 'ERROR')
@@ -174,6 +188,11 @@ class ControleurLdap:
             # Tenter la suppression avec le vrai DN
             self.conn.delete_s(dn)
             write_log(f"Utilisateur {username} supprimé de la base LDAP")
+            
+            # Invalider le cache pour cet utilisateur et la liste complète
+            cache.delete(f"user:{username}")
+            cache.delete("users:all")
+            
             return True
         except ldap.NO_SUCH_OBJECT:
             write_log(f"L'utilisateur {username} n'existe pas dans LDAP (NO_SUCH_OBJECT)", 'WARNING')
@@ -183,6 +202,12 @@ class ControleurLdap:
             return False
 
     def get_all_users(self):
+        # Essayer de récupérer depuis le cache (TTL 2 min car change souvent)
+        cache_key = "users:all"
+        cached_users = cache.get(cache_key)
+        if cached_users is not None:
+            return cached_users
+        
         try:
             self.bind_as_root()
             base_dn = self.config.get_config('LDAP', 'base_dn')
@@ -193,6 +218,8 @@ class ControleurLdap:
                 user = {attr: entry[attr][0].decode('utf-8') for attr in entry}
                 users.append(user)
             write_log("Liste des utilisateurs récupérée")
+            # Mettre en cache pour 2 minutes
+            cache.set(cache_key, users, ttl=120)
             return users
         except ldap.LDAPError as e:
             write_log(f"Erreur lors de la récupération des utilisateurs LDAP: {e}", 'ERROR')

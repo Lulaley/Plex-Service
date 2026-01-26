@@ -3,12 +3,31 @@ from static.Controleur.ControleurLdap import ControleurLdap
 from static.Controleur.ControleurConf import ControleurConf
 from static.Controleur.ControleurLog import write_log
 from datetime import timedelta
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 # Blueprint pour l'authentification
 auth_bp = Blueprint('auth', __name__)
 
+# Le limiter sera injecté depuis app.py
+limiter = None
+
+def init_limiter(app_limiter):
+    """Initialise le limiter depuis app.py"""
+    global limiter
+    limiter = app_limiter
+
 @auth_bp.route('/index', methods=['GET', 'POST'])
 def login():
+    # Rate limiting pour login : max 5 tentatives par minute
+    if limiter and request.method == 'POST':
+        try:
+            limiter.check()
+        except Exception:
+            write_log(f"Rate limit dépassé pour IP: {get_remote_address()}", "WARNING")
+            flash('Trop de tentatives de connexion. Réessayez dans 1 minute.', 'error')
+            return render_template('index.html'), 429
+    
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
