@@ -22,13 +22,16 @@ def init_limiter(app_limiter):
 @auth_bp.route('/index', methods=['GET', 'POST'])
 def login():
     # Rate limiting pour login : max 5 tentatives par minute
+    # Désactive le blocage pour localhost
     if limiter and request.method == 'POST':
-        try:
-            limiter.check()
-        except Exception:
-            write_log(f"Rate limit dépassé pour IP: {get_remote_address()}", "WARNING")
-            flash('Trop de tentatives de connexion. Réessayez dans 1 minute.', 'error')
-            return render_template('index.html'), 429
+        ip = get_remote_address()
+        if ip != '127.0.0.1':
+            try:
+                limiter.check()
+            except Exception:
+                write_log(f"Rate limit dépassé pour IP: {ip}", "WARNING")
+                flash('Trop de tentatives de connexion. Réessayez dans 1 minute.', 'error')
+                return render_template('index.html'), 429
     
     if request.method == 'POST':
         username = request.form['username']
