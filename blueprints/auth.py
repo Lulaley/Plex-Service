@@ -48,6 +48,8 @@ def login():
             user_info = ds.search_user(username)
             rights = user_info.get('rights', 'PlexService::User') if user_info else 'PlexService::User'
             write_log(f"Connexion réussie pour l'utilisateur: {username} (droits: {rights})")
+            # Log debug pour vérifier le droit exact
+            write_log(f"DEBUG DROIT: username={username}, rights={rights}")
             user = User(username, rights)
             login_user(user, remember=remember_me)
             if remember_me:
