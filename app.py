@@ -48,16 +48,24 @@ login_manager.login_view = 'auth.login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    # Recharge le cache utilisateur si absent (après redémarrage)
+    # Recharge le cache utilisateur si absent (après redémarrage), mais ne bloque jamais le démarrage
     try:
         from static.Controleur.ControleurCache import cache
         user_info = cache.get(f"user:{user_id}")
+        rights = None
         if not user_info:
-            from static.Controleur.ControleurLdap import ControleurLdap
-            ds = ControleurLdap()
-            user_info = ds.search_user(user_id)
-            ds.disconnect()
-        rights = user_info.get('rights', 'PlexService::User') if user_info else 'PlexService::User'
+            try:
+                from static.Controleur.ControleurLdap import ControleurLdap
+                ds = ControleurLdap()
+                user_info = ds.search_user(user_id)
+                ds.disconnect()
+                rights = user_info.get('rights', 'PlexService::User') if user_info else 'PlexService::User'
+            except Exception as e:
+                from static.Controleur.ControleurLog import write_log
+                write_log(f"Erreur LDAP dans load_user: {e}", "ERROR")
+                rights = 'PlexService::User'
+        else:
+            rights = user_info.get('rights', 'PlexService::User')
         return User(user_id, rights)
     except Exception as e:
         from static.Controleur.ControleurLog import write_log
