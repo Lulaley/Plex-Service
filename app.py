@@ -71,7 +71,6 @@ if redis_client:
         app=app,
         key_func=get_remote_address,
         storage_uri="redis://localhost:6379",
-        default_limits=["200 per day", "50 per hour"],
         storage_options={"socket_connect_timeout": 30},
         strategy="fixed-window"
     )
@@ -80,8 +79,7 @@ else:
     # Limiter sans storage (en mémoire, moins fiable multi-workers)
     limiter = Limiter(
         app=app,
-        key_func=get_remote_address,
-        default_limits=["200 per day", "50 per hour"]
+        key_func=get_remote_address
     )
     write_log("Rate limiting activé (mode mémoire)")
 
