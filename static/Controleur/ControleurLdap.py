@@ -61,7 +61,7 @@ class ControleurLdap:
         cached_result = cache.get(cache_key)
         if cached_result is not None:
             return cached_result
-        
+
         try:
             self.bind_as_root()
             search_base = self.config.get_config('LDAP', 'base_dn')
@@ -69,9 +69,19 @@ class ControleurLdap:
             result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter, ['uid', 'RightsAgreement'])
             if result:
                 write_log("Utilisateur trouvé")
+                # Extraction des infos LDAP
+                user_dn, attrs = result[0]
+                uid = attrs.get('uid', [None])[0]
+                rights = attrs.get('RightsAgreement', [b'PlexService::User'])[0]
+                # Décodage bytes si nécessaire
+                if isinstance(uid, bytes):
+                    uid = uid.decode('utf-8')
+                if isinstance(rights, bytes):
+                    rights = rights.decode('utf-8')
+                user_info = {'uid': uid, 'rights': rights}
                 # Mettre en cache pour 5 minutes
-                cache.set(cache_key, result, ttl=300)
-                return result
+                cache.set(cache_key, user_info, ttl=300)
+                return user_info
             else:
                 write_log("Utilisateur non trouvé", 'ERROR')
                 return None
