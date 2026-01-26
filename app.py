@@ -42,9 +42,18 @@ login_manager.login_view = 'auth.login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    # Ici, il faudrait charger les droits depuis LDAP ou le cache si besoin
-    # Pour l'instant, on retourne un User avec droits inconnus
-    return User(user_id, rights="PlexService::User")
+    # Charger les droits depuis le cache ou LDAP
+    try:
+        from static.Controleur.ControleurLdap import ControleurLdap
+        ds = ControleurLdap()
+        user_info = ds.search_user(user_id)
+        rights = user_info.get('rights', 'PlexService::User') if user_info else 'PlexService::User'
+        ds.disconnect()
+        return User(user_id, rights)
+    except Exception as e:
+        from static.Controleur.ControleurLog import write_log
+        write_log(f"Erreur load_user: {e}", "ERROR")
+        return User(user_id, rights="PlexService::User")
 
 # Compression Gzip pour réduire la taille des réponses
 Compress(app)
