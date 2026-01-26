@@ -27,13 +27,12 @@ class ControleurCache:
         """Récupère une valeur du cache"""
         if not self.enabled:
             return None
-        
         try:
             value = self.redis_client.get(key)
             if value:
-                write_log(f"Cache HIT: {key}")
+                write_log(f"Cache HIT: {key}", "DEBUG")
                 return json.loads(value)
-            write_log(f"Cache MISS: {key}")
+            write_log(f"Cache MISS: {key}", "DEBUG")
             return None
         except Exception as e:
             write_log(f"Erreur lecture cache: {e}", "ERROR")
