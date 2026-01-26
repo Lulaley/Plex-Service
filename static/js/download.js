@@ -1,4 +1,28 @@
 document.addEventListener('DOMContentLoaded', function () {
+        // Afficher l'espace disque restant
+        function formatBytes(bytes) {
+            if (bytes < 1024) return bytes + ' o';
+            let k = 1024, sizes = ['o', 'Ko', 'Mo', 'Go', 'To'], i = Math.floor(Math.log(bytes) / Math.log(k));
+            return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
+        }
+
+        function updateDiskSpace() {
+            fetch('/api/disk_space')
+                .then(r => r.json())
+                .then(data => {
+                    const el = document.getElementById('disk-space-text');
+                    if (data.success) {
+                        el.textContent = `Espace libre sur ${data.path} : ${formatBytes(data.free)} / ${formatBytes(data.total)}`;
+                    } else {
+                        el.textContent = 'Erreur lors de la récupération de l\'espace disque';
+                    }
+                })
+                .catch(() => {
+                    const el = document.getElementById('disk-space-text');
+                    if (el) el.textContent = 'Erreur lors de la récupération de l\'espace disque';
+                });
+        }
+        updateDiskSpace();
     const torrentForm = document.getElementById('torrent-form');
     const torrentFileInput = document.getElementById('torrent-file');
     const downloadButton = document.getElementById('download-button');

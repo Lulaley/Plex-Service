@@ -1,8 +1,10 @@
 function validateUser(username) {
+    var csrfToken = document.querySelector('input[name="csrf_token"]').value;
     fetch('/users', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
         },
         body: JSON.stringify({ username: username, action: 'validate' })
     })
@@ -19,10 +21,12 @@ function validateUser(username) {
 }
 
 function deleteUser(username) {
+    var csrfToken = document.querySelector('input[name="csrf_token"]').value;
     fetch('/users', {
         method: 'DELETE',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
         },
         body: JSON.stringify({ username: username })
     })
@@ -39,10 +43,12 @@ function deleteUser(username) {
 }
 
 function makeAdmin(username) {
+    var csrfToken = document.querySelector('input[name="csrf_token"]').value;
     fetch('/users', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
         },
         body: JSON.stringify({ username: username, action: 'make_admin' })
     })

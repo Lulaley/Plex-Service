@@ -61,10 +61,13 @@ document.addEventListener('DOMContentLoaded', function () {
             payload.torrent_file_path = torrentFilePath;
         }
 
+        // Récupérer le token CSRF depuis le DOM
+        var csrfToken = document.querySelector('input[name="csrf_token"]').value;
         fetch('/start_seed', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
             },
             body: JSON.stringify(payload)
         })

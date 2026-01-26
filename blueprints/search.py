@@ -1,3 +1,4 @@
+from flask_login import login_required
 from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for
 from static.Controleur.ControleurTMDB import ControleurTMDB
 from static.Controleur.ControleurLog import write_log
@@ -6,6 +7,7 @@ from static.Controleur.ControleurLog import write_log
 search_bp = Blueprint('search', __name__)
 
 @search_bp.route('/search', methods=['GET'])
+@login_required
 def search_page():
     if 'username' not in session:
         write_log("Aucun utilisateur connecté, redirection vers l'index")

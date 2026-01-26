@@ -1,3 +1,5 @@
+from flask_login import login_user, logout_user, login_required, current_user
+from static.Controleur.ControleurUser import User
 from flask import Blueprint, render_template, request, flash, session, redirect, url_for
 from static.Controleur.ControleurLdap import ControleurLdap
 from static.Controleur.ControleurConf import ControleurConf
@@ -37,23 +39,22 @@ def login():
 
         conf = ControleurConf()
         base_dn = conf.get_config('LDAP', 'base_dn')
-        # Créer une instance de ControleurLdap et tenter de se connecter
         ds = ControleurLdap()
-        # Utilisation de authenticate_user pour vérifier les identifiants
         if ds.authenticate_user(username, password):
-            write_log(f"Connexion réussie pour l'utilisateur: {username}")
-            # Initialiser la variable de session
-            session['username'] = username
-            session.permanent = remember_me  # La session sera permanente si "remember_me" est coché
+            # Récupérer les droits de l'utilisateur depuis LDAP (ou logique existante)
+            user_info = ds.search_user(username)
+            rights = user_info.get('rights', 'PlexService::User') if user_info else 'PlexService::User'
+            write_log(f"Connexion réussie pour l'utilisateur: {username} (droits: {rights})")
+            user = User(username, rights)
+            login_user(user, remember=remember_me)
             if remember_me:
                 from flask import current_app
-                current_app.permanent_session_lifetime = timedelta(days=7)  # Durée de la session
-            # Rediriger vers la page d'accueil pour vérifier les droits
+                current_app.permanent_session_lifetime = timedelta(days=7)
             session['from_index'] = True
+            ds.disconnect()
             return redirect(url_for('home.home'))
         else:
             write_log(f"Échec de la connexion pour l'utilisateur: {username}", 'ERROR')
-            # Affichage d'un message d'erreur en cas d'échec
             flash("Échec de la connexion. Veuillez vérifier vos identifiants et réessayer.", 'error')
         ds.disconnect()
     else:

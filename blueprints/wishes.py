@@ -1,3 +1,5 @@
+from flask_login import login_required, current_user
+from static.Controleur.ControleurDroits import admin_required
 from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for
 from static.Controleur.ControleurWish import ControleurWish
 from static.Controleur.ControleurLog import write_log
@@ -22,6 +24,7 @@ def format_date(date_str):
     return date_obj.strftime('%d-%m-%Y')
 
 @wishes_bp.route('/demande', methods=['GET'])
+@login_required
 def manage_wishes():
     if 'username' not in session:
         write_log("Aucun utilisateur connecté, redirection vers l'index")
@@ -42,6 +45,7 @@ def manage_wishes():
     return list_wishes(username, rights_agreement, page, per_page)
 
 @wishes_bp.route('/create_wish', methods=['POST'])
+@login_required
 def create_wish():
     if 'username' not in session:
         return jsonify({'success': False, 'message': 'Utilisateur non connecté'})
@@ -57,6 +61,7 @@ def create_wish():
     return jsonify({'success': success})
 
 @wishes_bp.route('/wish_details/<wish_id>', methods=['GET'])
+@login_required
 def wish_details(wish_id):
     if 'username' not in session:
         return jsonify({'success': False, 'message': 'Utilisateur non connecté'})
@@ -81,6 +86,8 @@ def wish_details(wish_id):
     return jsonify(details)
 
 @wishes_bp.route('/validate_wish/<wish_id>', methods=['POST'])
+@login_required
+@admin_required
 def validate_wish(wish_id):
     if 'username' not in session:
         return jsonify({'success': False, 'message': 'Utilisateur non connecté'})

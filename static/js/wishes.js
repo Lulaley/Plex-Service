@@ -47,10 +47,13 @@ function validateWish(element) {
     }
 
     const id = element.getAttribute('data-id');
+    // Récupérer le token CSRF depuis le DOM
+    var csrfToken = document.querySelector('input[name="csrf_token"]').value;
     fetch(`/validate_wish/${id}`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
         }
     })
     .then(response => response.json())
