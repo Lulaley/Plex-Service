@@ -73,11 +73,13 @@ class ControleurLdap:
                 user_dn, attrs = result[0]
                 uid = attrs.get('uid', [None])[0]
                 rights = attrs.get('RightsAgreement', [b'PlexService::User'])[0]
+                write_log(f"DEBUG LDAP RightsAgreement brut: {rights}")
                 # Décodage bytes si nécessaire
                 if isinstance(uid, bytes):
                     uid = uid.decode('utf-8')
                 if isinstance(rights, bytes):
                     rights = rights.decode('utf-8')
+                write_log(f"DEBUG LDAP RightsAgreement décodé: {rights}")
                 user_info = {'uid': uid, 'rights': rights}
                 # Mettre en cache pour 5 minutes
                 cache.set(cache_key, user_info, ttl=300)
