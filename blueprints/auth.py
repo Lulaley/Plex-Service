@@ -52,6 +52,7 @@ def login():
             write_log(f"DEBUG DROIT: username={username}, rights={rights}")
             user = User(username, rights)
             login_user(user, remember=remember_me)
+            session['username'] = username
             if remember_me:
                 from flask import current_app
                 current_app.permanent_session_lifetime = timedelta(days=7)
