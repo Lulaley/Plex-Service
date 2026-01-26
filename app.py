@@ -1,17 +1,6 @@
 
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from static.Controleur.ControleurUser import User
-
-# Flask-Login setup
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'auth.login'
-
-@login_manager.user_loader
-def load_user(user_id):
-    # Ici, il faudrait charger les droits depuis LDAP ou le cache si besoin
-    # Pour l'instant, on retourne un User avec droits inconnus
-    return User(user_id, rights="PlexService::User")
 import os
 import sys
 import signal
@@ -45,6 +34,17 @@ from static.Controleur.ControleurLog import write_log
 app = Flask(__name__)
 conf = ControleurConf()
 app.secret_key = conf.get_config('APP', 'secret_key')
+
+# Flask-Login setup
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'auth.login'
+
+@login_manager.user_loader
+def load_user(user_id):
+    # Ici, il faudrait charger les droits depuis LDAP ou le cache si besoin
+    # Pour l'instant, on retourne un User avec droits inconnus
+    return User(user_id, rights="PlexService::User")
 
 # Compression Gzip pour réduire la taille des réponses
 Compress(app)
