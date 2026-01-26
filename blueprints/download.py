@@ -85,8 +85,9 @@ def upload_torrent():
 
 def background_download(torrent_file_path, save_path, handle, username):
     """Fonction qui tourne en arrière-plan pour gérer le téléchargement."""
+    download_id = handle.get('id')
     try:
-        write_log(f"Thread de téléchargement démarré pour {username} (download_id: {handle.get('id')})")
+        write_log(f"Thread de téléchargement démarré pour {username} (download_id: {download_id})")
         for status in download_torrent(torrent_file_path, save_path, handle):
             # Extraire le message de status
             if status.startswith('data: '):
@@ -97,13 +98,23 @@ def background_download(torrent_file_path, save_path, handle, username):
                 if message in ['done', 'cancelled', 'not enough space', 'error']:
                     handle['final_message'] = message
                     handle['is_downloading'] = False
+                    handle['finished_at'] = time.time()
                     break
         
-        write_log(f"Thread de téléchargement terminé pour {username} (download_id: {handle.get('id')})")
+        write_log(f"Thread de téléchargement terminé pour {username} (download_id: {download_id})")
+        
+        # Cleanup automatique après 10 minutes
+        time.sleep(600)
+        with downloads_lock:
+            if download_id in downloads:
+                write_log(f"Nettoyage automatique du download {download_id}")
+                del downloads[download_id]
+                
     except Exception as e:
         write_log(f"Erreur dans le thread de téléchargement: {str(e)}", "ERROR")
         handle['is_downloading'] = False
         handle['final_message'] = 'error'
+        handle['finished_at'] = time.time()
 
 @download_bp.route('/start_download')
 def start_download_route():
@@ -128,9 +139,11 @@ def start_download_route():
             'torrent_file_path': torrent_file_path,
             'downloaded_files': [],
             'username': username,
-            'name': 'Unknown'
+            'name': 'Unknown',
+            'finished_at': None
         }
-        downloads[download_id] = handle
+        with downloads_lock:
+            downloads[download_id] = handle
         
         # Lancer le téléchargement dans un thread séparé
         download_thread = threading.Thread(
@@ -184,7 +197,9 @@ def stop_download_route():
     write_log(f"Downloads actifs dans ce worker: {list(downloads.keys())}")
     
     # Vérifier d'abord dans le worker actuel
-    handle = downloads.get(download_id)
+    with downloads_lock:
+        handle = downloads.get(download_id)
+    
     if handle:
         username = handle.get('username', 'unknown')
         write_log(f"Annulation du téléchargement pour l'utilisateur: {username} (trouvé dans ce worker)")

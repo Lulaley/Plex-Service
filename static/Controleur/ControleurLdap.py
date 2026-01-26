@@ -10,6 +10,15 @@ class ControleurLdap:
         self.conn.start_tls_s()
         self.conn.set_option(ldap.OPT_PROTOCOL_VERSION, 3)
         write_log(f"Initialisation de la connexion LDAP avec le serveur: {self.server}")
+    
+    def __enter__(self):
+        """Support pour context manager (with statement)"""
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Ferme proprement la connexion LDAP à la sortie du context"""
+        self.disconnect()
+        return False  # Ne pas supprimer les exceptions
 
     def bind_as_root(self):
         try:
@@ -26,7 +35,7 @@ class ControleurLdap:
             search_base = self.config.get_config('LDAP', 'base_dn')
             search_filter = f"(uid={username})"
             write_log(f"Recherche de l'utilisateur {username} dans LDAP avec le filtre: {search_filter}")
-            result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter)
+            result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter, ['uid'])
 
             if not result:
                 write_log(f"Utilisateur non trouvé: {username}", 'ERROR')
@@ -50,7 +59,7 @@ class ControleurLdap:
             self.bind_as_root()
             search_base = self.config.get_config('LDAP', 'base_dn')
             search_filter = f"(uid={username})"
-            result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter)
+            result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter, ['uid', 'RightsAgreement'])
             if result:
                 write_log("Utilisateur trouvé")
                 return result
@@ -152,7 +161,7 @@ class ControleurLdap:
             
             # Chercher l'utilisateur pour obtenir son vrai DN
             search_filter = f"(uid={username})"
-            result = self.conn.search_s(base_dn, ldap.SCOPE_SUBTREE, search_filter)
+            result = self.conn.search_s(base_dn, ldap.SCOPE_SUBTREE, search_filter, ['uid'])
             
             if not result:
                 write_log(f"L'utilisateur {username} n'existe pas dans LDAP, suppression ignorée", 'WARNING')
@@ -178,7 +187,7 @@ class ControleurLdap:
             self.bind_as_root()
             base_dn = self.config.get_config('LDAP', 'base_dn')
             search_filter = "(&(objectClass=inetOrgPerson)(RightsAgreement=PlexService::*))"
-            result = self.conn.search_s(base_dn, ldap.SCOPE_SUBTREE, search_filter)
+            result = self.conn.search_s(base_dn, ldap.SCOPE_SUBTREE, search_filter, ['uid', 'cn', 'mail', 'RightsAgreement'])
             users = []
             for dn, entry in result:
                 user = {attr: entry[attr][0].decode('utf-8') for attr in entry}
@@ -191,7 +200,8 @@ class ControleurLdap:
 
     def disconnect(self):
         try:
-            self.conn.unbind()
-            write_log("Déconnexion LDAP réussie")
+            if hasattr(self, 'conn') and self.conn:
+                self.conn.unbind()
+                write_log("Déconnexion LDAP réussie")
         except ldap.LDAPError as e:
             write_log("Erreur lors de la déconnexion LDAP: " + str(e), 'ERROR')

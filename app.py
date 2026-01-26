@@ -10,6 +10,7 @@ sys.path.append(chemin_blueprints)
 from flask import Flask, render_template, session, redirect, url_for, request
 from flask_wtf.csrf import CSRFProtect
 from flask_talisman import Talisman
+from flask_compress import Compress
 
 # Importation des blueprints
 from blueprints.auth import auth_bp
@@ -27,6 +28,9 @@ from static.Controleur.ControleurLog import write_log
 app = Flask(__name__)
 conf = ControleurConf()
 app.secret_key = conf.get_config('APP', 'secret_key')
+
+# Compression Gzip pour réduire la taille des réponses
+Compress(app)
 
 # Cache pour assets statiques
 @app.after_request
