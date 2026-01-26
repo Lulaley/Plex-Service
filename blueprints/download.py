@@ -1,7 +1,22 @@
+download_bp = Blueprint('download', __name__)
+from flask import Blueprint, render_template, request, session, jsonify, redirect, url_for, flash, Response, stream_with_context
+download_bp = Blueprint('download', __name__)
+
 from flask_login import login_required
 from static.Controleur.ControleurDroits import superadmin_required
 import shutil
 from static.Controleur.ControleurConf import ControleurConf
+from static.Controleur.ControleurLog import write_log
+from static.Controleur.ControleurTorrent import download_torrent, stop_download, downloads, downloads_lock, get_all_downloads
+from static.Controleur.ControleurSecurity import sanitize_filename, validate_path
+import threading
+import uuid
+import os
+import time
+
+# Créer un verrou pour synchroniser l'accès à la session
+session_lock = threading.Lock()
+
 # Espace disque restant (API)
 @download_bp.route('/api/disk_space')
 @login_required
@@ -24,19 +39,6 @@ def api_disk_space():
         }
     except Exception as e:
         return {'success': False, 'error': str(e)}, 500
-from flask import Blueprint, render_template, request, session, jsonify, redirect, url_for, flash, Response, stream_with_context
-from static.Controleur.ControleurLog import write_log
-from static.Controleur.ControleurTorrent import download_torrent, stop_download, downloads, downloads_lock, get_all_downloads
-from static.Controleur.ControleurSecurity import sanitize_filename, validate_path
-import threading
-import uuid
-import os
-import time
-
-download_bp = Blueprint('download', __name__)
-
-# Créer un verrou pour synchroniser l'accès à la session
-session_lock = threading.Lock()
 
 # Stocker les handles de téléchargement dans une variable globale
 download_handles = {}
