@@ -23,20 +23,40 @@ session_lock = threading.Lock()
 @superadmin_required
 def api_disk_space():
     conf = ControleurConf()
-    # Récupérer le chemin de téléchargement depuis la conf
     try:
-        download_path = conf.get_config('DOWNLOAD', 'download_path')
-    except Exception:
-        download_path = '/tmp'
-    try:
-        total, used, free = shutil.disk_usage(download_path)
-        return {
-            'success': True,
-            'path': download_path,
-            'total': total,
-            'used': used,
-            'free': free
-        }
+        movies_path = conf.get_config('DLT', 'movies')
+        series_path = conf.get_config('DLT', 'series')
+        # Vérifier si les deux chemins sont sur le même disque
+        def same_disk(path1, path2):
+            import os
+            if os.name == 'nt':
+                return os.path.splitdrive(path1)[0].lower() == os.path.splitdrive(path2)[0].lower()
+            else:
+                return os.stat(path1).st_dev == os.stat(path2).st_dev
+        same = same_disk(movies_path, series_path)
+        movies_usage = shutil.disk_usage(movies_path)
+        series_usage = shutil.disk_usage(series_path)
+        if same:
+            # Si sur le même disque, n'afficher qu'une seule info
+            return {
+                'success': True,
+                'same_disk': True,
+                'free': movies_usage.free,
+                'path': movies_path
+            }
+        else:
+            return {
+                'success': True,
+                'same_disk': False,
+                'movies': {
+                    'path': movies_path,
+                    'free': movies_usage.free
+                },
+                'series': {
+                    'path': series_path,
+                    'free': series_usage.free
+                }
+            }
     except Exception as e:
         return {'success': False, 'error': str(e)}, 500
 
