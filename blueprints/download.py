@@ -37,12 +37,14 @@ def api_disk_space():
         movies_usage = shutil.disk_usage(movies_path)
         series_usage = shutil.disk_usage(series_path)
         if same:
-            # Si sur le même disque, n'afficher qu'une seule info
+            # Déterminer le dossier parent commun
+            import os
+            common_path = os.path.commonpath([movies_path, series_path])
             return {
                 'success': True,
                 'same_disk': True,
                 'free': movies_usage.free,
-                'path': movies_path
+                'path': common_path
             }
         else:
             return {
