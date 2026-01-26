@@ -44,6 +44,7 @@ def api_disk_space():
                 'success': True,
                 'same_disk': True,
                 'free': movies_usage.free,
+                'total': movies_usage.total,
                 'path': common_path
             }
         else:
