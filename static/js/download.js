@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
         }
         updateDiskSpace();
+        setInterval(updateDiskSpace, 30000); // rafraîchit toutes les 30 secondes
     const torrentForm = document.getElementById('torrent-form');
     const torrentFileInput = document.getElementById('torrent-file');
     const downloadButton = document.getElementById('download-button');
