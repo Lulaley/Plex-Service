@@ -275,10 +275,13 @@ document.addEventListener('DOMContentLoaded', function () {
             download_id: downloadIdInput.value
         };
 
+        // Récupérer le token CSRF depuis le formulaire
+        var csrfToken = document.querySelector('input[name="csrf_token"]').value;
         fetch('/stop_download', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
             },
             body: JSON.stringify(downloadState)
         })
