@@ -66,13 +66,13 @@ class ControleurLdap:
             self.bind_as_root()
             search_base = self.config.get_config('LDAP', 'base_dn')
             search_filter = f"(uid={username})"
-            result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter, ['uid', 'RightsAgreement'])
+            result = self.conn.search_s(search_base, ldap.SCOPE_SUBTREE, search_filter, ['uid', 'rightsAgreement'])
             if result:
                 write_log("Utilisateur trouvé")
                 # Extraction des infos LDAP
                 user_dn, attrs = result[0]
                 uid = attrs.get('uid', [None])[0]
-                rights = attrs.get('RightsAgreement', [b'PlexService::User'])[0]
+                rights = attrs.get('rightsAgreement', [b'PlexService::User'])[0]
                 write_log(f"DEBUG LDAP RightsAgreement brut: {rights}")
                 # Décodage bytes si nécessaire
                 if isinstance(uid, bytes):
