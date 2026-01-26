@@ -1,9 +1,4 @@
-# Gestion de l’erreur 403 Forbidden
 from flask import render_template
-
-@app.errorhandler(403)
-def forbidden(e):
-    return render_template('403.html'), 403
 
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from static.Controleur.ControleurUser import User
@@ -37,9 +32,15 @@ from blueprints.download import download_bp, restore_downloads_on_startup
 from static.Controleur.ControleurConf import ControleurConf
 from static.Controleur.ControleurLog import write_log
 
+
 app = Flask(__name__)
 conf = ControleurConf()
 app.secret_key = conf.get_config('APP', 'secret_key')
+
+# Gestion de l’erreur 403 Forbidden
+@app.errorhandler(403)
+def forbidden(e):
+    return render_template('403.html'), 403
 
 # Flask-Login setup
 login_manager = LoginManager()
