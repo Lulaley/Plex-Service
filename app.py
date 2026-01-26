@@ -93,7 +93,7 @@ csp = {
     'font-src': ["'self'", 'data:'],
 }
 Talisman(app, 
-    force_https=False,  # À mettre True en production avec HTTPS
+    force_https=True,  # À mettre True en production avec HTTPS
     content_security_policy=csp,
     content_security_policy_nonce_in=[]  # Désactiver les nonces pour permettre onclick
 )
@@ -155,10 +155,12 @@ def cleanup():
     
     # Arrêter tous les téléchargements en cours
     try:
-        from routes.RouteDownload import active_downloads
-        for download_id in list(active_downloads.keys()):
-            active_downloads[download_id]['cancelled'] = True
-        write_log(f"Arrêt de {len(active_downloads)} téléchargements en cours")
+        from static.Controleur.ControleurTorrent import downloads, downloads_lock
+        with downloads_lock:
+            for download_id in list(downloads.keys()):
+                if 'handle' in downloads[download_id]:
+                    downloads[download_id]['cancelled'] = True
+            write_log(f"Arrêt de {len(downloads)} téléchargements en cours")
     except Exception as e:
         write_log(f"Erreur lors de l'arrêt des téléchargements: {e}", "ERROR")
     
