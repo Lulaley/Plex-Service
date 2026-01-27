@@ -1,3 +1,8 @@
+body, html {
+    height: auto !important;
+    min-height: 100vh;
+    overflow-y: auto !important;
+}
 body {
     background-color: #313B45;
     color: white;
