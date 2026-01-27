@@ -307,10 +307,14 @@ function stopSeed(seedId) {
         return;
     }
 
+    // Récupérer le token CSRF depuis le DOM
+    var csrfToken = document.querySelector('input[name="csrf_token"]').value;
+
     fetch('/stop_seed', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
         },
         body: JSON.stringify({ seed_id: seedId })
     })
