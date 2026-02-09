@@ -32,11 +32,13 @@ def load_persisted_seeds():
 def save_persisted_seeds():
     """Sauvegarde les seeds actifs dans le fichier JSON avec leurs stats."""
     try:
-        # Créer une version sérialisable des seeds (sans les objets libtorrent)
-        serializable_seeds = {}
+        # Charger d'abord les seeds existants depuis le fichier (partagé entre workers)
+        existing_seeds = load_persisted_seeds()
+        
+        # Mettre à jour uniquement les seeds de ce worker
         with seeds_lock:
             for seed_id, seed_data in active_seeds.items():
-                serializable_seeds[seed_id] = {
+                existing_seeds[seed_id] = {
                     'id': seed_data['id'],
                     'torrent_file_path': seed_data['torrent_file_path'],
                     'data_path': seed_data['data_path'],
@@ -46,8 +48,9 @@ def save_persisted_seeds():
                     'state': seed_data.get('state', 'unknown')
                 }
         
+        # Sauvegarder tous les seeds (anciens + nouveaux)
         with open(SEEDS_PERSISTENCE_FILE, 'w') as f:
-            json.dump(serializable_seeds, f, indent=4)
+            json.dump(existing_seeds, f, indent=4)
         # Log retiré car appelé fréquemment
     except Exception as e:
         write_log(f"Erreur lors de la sauvegarde des seeds: {str(e)}", "ERROR")
@@ -275,7 +278,15 @@ def stop_seed(seed_id):
     try:
         with seeds_lock:
             if seed_id not in active_seeds:
-                write_log(f"Seed {seed_id} introuvable", "WARNING")
+                write_log(f"Seed {seed_id} introuvable dans ce worker", "WARNING")
+                # Même s'il n'est pas dans ce worker, le retirer du fichier JSON
+                existing_seeds = load_persisted_seeds()
+                if seed_id in existing_seeds:
+                    del existing_seeds[seed_id]
+                    with open(SEEDS_PERSISTENCE_FILE, 'w') as f:
+                        json.dump(existing_seeds, f, indent=4)
+                    write_log(f"Seed {seed_id} retiré du fichier de persistance")
+                    return True
                 return False
             
             seed_data = active_seeds[seed_id]
@@ -292,10 +303,16 @@ def stop_seed(seed_id):
             if 'session' in seed_data and seed_data['session']:
                 seed_data['session'].remove_torrent(seed_data['handle'])
             
-            # Supprimer du dictionnaire
+            # Supprimer du dictionnaire local
             del active_seeds[seed_id]
         
-        save_persisted_seeds()
+        # Supprimer du fichier JSON partagé
+        existing_seeds = load_persisted_seeds()
+        if seed_id in existing_seeds:
+            del existing_seeds[seed_id]
+            with open(SEEDS_PERSISTENCE_FILE, 'w') as f:
+                json.dump(existing_seeds, f, indent=4)
+        
         write_log(f"Seed {seed_id} arrêté avec succès")
         return True
     except Exception as e:
