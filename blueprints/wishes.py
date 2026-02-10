@@ -79,6 +79,7 @@ def create_wish():
 @wishes_bp.route('/wish_details/<wish_id>', methods=['GET'])
 @login_required
 def wish_details(wish_id):
+    """Récupère les détails d'une wish avec cache TMDB (TTL 24h)."""
     if 'username' not in session:
         return jsonify({'success': False, 'message': 'Utilisateur non connecté'})
 
@@ -88,11 +89,27 @@ def wish_details(wish_id):
     if not wish:
         return jsonify({'success': False, 'message': 'Demande non trouvée'})
 
-    tmdb = ControleurTMDB()
-    if wish['wishType'] == 'movie':
-        details = tmdb.search_movie(wish['plexTitle'])
-    elif wish['wishType'] == 'series':
-        details = tmdb.search_serie(wish['plexTitle'])
+    # Cache TMDB pour éviter appels répétés à l'API
+    from static.Controleur.ControleurCache import cache
+    cache_key = f"tmdb:{wish['wishType']}:{wish['plexTitle']}"
+    
+    # 1. Chercher dans cache Redis (TTL 24h)
+    details = cache.get(cache_key)
+    
+    if not details:
+        # 2. CACHE MISS : appel TMDB
+        tmdb = ControleurTMDB()
+        if wish['wishType'] == 'movie':
+            details = tmdb.search_movie(wish['plexTitle'])
+        elif wish['wishType'] == 'series':
+            details = tmdb.search_serie(wish['plexTitle'])
+        
+        # 3. Sauver dans cache pour 24h
+        if details:
+            cache.set(cache_key, details, timeout=86400)
+
+    if not details:
+        details = {}
 
     details['status'] = wish['status']
     details['wishId'] = wish['wishId']

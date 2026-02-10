@@ -6,6 +6,7 @@ import os
 import sys
 import signal
 import atexit
+from datetime import timedelta
 chemin_actuel = os.path.dirname(__file__)
 chemin_routes = os.path.join(chemin_actuel, '../routes')
 chemin_blueprints = os.path.join(chemin_actuel, 'blueprints')
@@ -27,6 +28,7 @@ from blueprints.wishes import wishes_bp
 from blueprints.search import search_bp
 from blueprints.seed import seed_bp, restore_seeds_on_startup
 from blueprints.download import download_bp, restore_downloads_on_startup
+from blueprints.health import health_bp
 
 # Importation des controleurs
 from static.Controleur.ControleurConf import ControleurConf
@@ -36,6 +38,13 @@ from static.Controleur.ControleurLog import write_log
 app = Flask(__name__)
 conf = ControleurConf()
 app.secret_key = conf.get_config('APP', 'secret_key')
+
+# Configuration des sessions
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=24)  # 24h par défaut
+app.config['SESSION_PERMANENT'] = True  # Marquer sessions comme permanentes
+app.config['SESSION_COOKIE_SECURE'] = True  # HTTPS uniquement (mettre False en dev local)
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # Pas accessible en JavaScript
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Protection CSRF supplémentaire
 
 # Gestion de l’erreur 403 Forbidden
 @app.errorhandler(403)
@@ -49,27 +58,38 @@ login_manager.login_view = 'auth.login'
 
 @login_manager.user_loader
 def load_user(user_id):
-    # Recharge le cache utilisateur si absent (après redémarrage), mais ne bloque jamais le démarrage
+    """Charge un utilisateur avec cache LDAP (TTL 5min)."""
     try:
         from static.Controleur.ControleurCache import cache
-        user_info = cache.get(f"user:{user_id}")
-        rights = None
-        if not user_info:
-            try:
-                from static.Controleur.ControleurLdap import ControleurLdap
-                ds = ControleurLdap()
-                user_info = ds.search_user(user_id)
-                ds.disconnect()
-                rights = user_info.get('rights', 'PlexService::User') if user_info else 'PlexService::User'
-            except Exception as e:
-                from static.Controleur.ControleurLog import write_log
-                write_log(f"Erreur LDAP dans load_user: {e}", "ERROR")
-                rights = 'PlexService::User'
-        else:
+        
+        # 1. Chercher dans cache Redis
+        cache_key = f"user:{user_id}"
+        user_info = cache.get(cache_key)
+        
+        if user_info:
+            # CACHE HIT : pas d'appel LDAP
             rights = user_info.get('rights', 'PlexService::User')
+            return User(user_id, rights)
+        
+        # 2. CACHE MISS : appel LDAP
+        try:
+            from static.Controleur.ControleurLdap import ControleurLdap
+            ds = ControleurLdap()
+            user_info = ds.search_user(user_id)
+            ds.disconnect()
+            
+            if user_info:
+                # 3. Sauver dans cache pour 5 minutes
+                cache.set(cache_key, user_info, timeout=300)
+                rights = user_info.get('rights', 'PlexService::User')
+            else:
+                rights = 'PlexService::User'
+        except Exception as e:
+            write_log(f"Erreur LDAP dans load_user: {e}", "ERROR")
+            rights = 'PlexService::User'
+        
         return User(user_id, rights)
     except Exception as e:
-        from static.Controleur.ControleurLog import write_log
         write_log(f"Erreur load_user: {e}", "ERROR")
         return User(user_id, rights="PlexService::User")
 
@@ -142,6 +162,7 @@ app.register_blueprint(wishes_bp)
 app.register_blueprint(search_bp)
 app.register_blueprint(seed_bp, url_prefix='')
 app.register_blueprint(download_bp, url_prefix='')
+app.register_blueprint(health_bp, url_prefix='')  # Healthcheck /health
 
 # Initialiser le limiter unique dans tous les blueprints qui en ont besoin
 from blueprints.auth import init_limiter as init_limiter_auth
@@ -154,22 +175,9 @@ init_limiter_download(limiter)
 init_limiter_seed(limiter)
 init_limiter_wishes(limiter)
 
-# Gestionnaires d'erreurs personnalisés
-@app.errorhandler(404)
-def page_not_found(e):
-    write_log(f"Erreur 404: Page non trouvée - {request.url}", 'WARNING')
-    return render_template('errors/404.html'), 404
-
-@app.errorhandler(500)
-def internal_server_error(e):
-    write_log(f"Erreur 500: Erreur serveur - {str(e)}", 'ERROR')
-    return render_template('errors/500.html', error=str(e) if app.debug else None), 500
-
-@app.errorhandler(Exception)
-def handle_exception(e):
-    write_log(f"Exception non gérée: {str(e)}", 'ERROR')
-    # Retourner 500 pour toutes les exceptions non gérées
-    return render_template('errors/500.html', error=str(e) if app.debug else None), 500
+# Enregistrer les handlers d'erreurs globaux
+from static.Controleur.ControleurErrors import register_error_handlers
+register_error_handlers(app)
 
 @app.route('/')
 def root():

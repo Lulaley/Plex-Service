@@ -162,45 +162,45 @@ def upload_torrent():
         
         if file.filename == '':
             return jsonify({'success': False, 'message': 'Aucun fichier sélectionné'}), 400
+        
+        if not data_path:
+            return jsonify({'success': False, 'message': 'Chemin des données manquant'}), 400
+        
+        if file and file.filename.endswith('.torrent'):
+            # Sécuriser le nom de fichier
+            filename = sanitize_filename(file.filename.replace(' ', '_'))
             
-            if not data_path:
-                return jsonify({'success': False, 'message': 'Chemin des données manquant'}), 400
+            # Vérifier l'extension après nettoyage
+            if not filename.endswith('.torrent'):
+                write_log(f"Nom de fichier suspect rejeté: {file.filename}", "ERROR")
+                return jsonify({'success': False, 'message': 'Nom de fichier invalide'}), 400
             
-            if file and file.filename.endswith('.torrent'):
-                # Sécuriser le nom de fichier
-                filename = sanitize_filename(file.filename.replace(' ', '_'))
-                
-                # Vérifier l'extension après nettoyage
-                if not filename.endswith('.torrent'):
-                    write_log(f"Nom de fichier suspect rejeté: {file.filename}", "ERROR")
-                    return jsonify({'success': False, 'message': 'Nom de fichier invalide'}), 400
-                
-                tmp_dir = "/var/www/public/Plex-Service/tmp/"
-                file_path = f"{tmp_dir}{filename}"
-                
-                # Valider le chemin
-                if not validate_path(file_path, [tmp_dir]):
-                    write_log(f"Tentative d'accès à un chemin non autorisé: {file_path}", "ERROR")
-                    return jsonify({'success': False, 'message': 'Chemin non autorisé'}), 403
-                
-                file.save(file_path)
-                write_log(f"Fichier .torrent uploadé: {file_path}")
-                
-                # Générer un ID unique pour le seed
-                seed_id = str(uuid.uuid4())
-                
-                # Démarrer le seed
-                if start_seed(seed_id, file_path, data_path):
-                    return jsonify({
-                        'success': True,
-                        'seed_id': seed_id,
-                        'torrent_file_path': file_path,
-                        'message': 'Seed démarré avec succès'
-                    })
-                else:
-                    return jsonify({'success': False, 'message': 'Erreur lors du démarrage du seed'}), 500
+            tmp_dir = "/var/www/public/Plex-Service/tmp/"
+            file_path = f"{tmp_dir}{filename}"
+            
+            # Valider le chemin
+            if not validate_path(file_path, [tmp_dir]):
+                write_log(f"Tentative d'accès à un chemin non autorisé: {file_path}", "ERROR")
+                return jsonify({'success': False, 'message': 'Chemin non autorisé'}), 403
+            
+            file.save(file_path)
+            write_log(f"Fichier .torrent uploadé: {file_path}")
+            
+            # Générer un ID unique pour le seed
+            seed_id = str(uuid.uuid4())
+            
+            # Démarrer le seed
+            if start_seed(seed_id, file_path, data_path):
+                return jsonify({
+                    'success': True,
+                    'seed_id': seed_id,
+                    'torrent_file_path': file_path,
+                    'message': 'Seed démarré avec succès'
+                })
             else:
-                return jsonify({'success': False, 'message': 'Format de fichier non supporté'}), 400
+                return jsonify({'success': False, 'message': 'Erreur lors du démarrage du seed'}), 500
+        else:
+            return jsonify({'success': False, 'message': 'Format de fichier non supporté'}), 400
         except Exception as e:
             write_log(f"Erreur lors de l'upload du torrent: {str(e)}", "ERROR")
             return jsonify({'success': False, 'message': str(e)}), 500
