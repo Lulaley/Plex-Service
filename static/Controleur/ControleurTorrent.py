@@ -2,6 +2,9 @@ from .ControleurLog import write_log
 from .ControleurConf import ControleurConf
 from .ControleurTMDB import ControleurTMDB
 from .ControleurLibtorrent import configure_session_for_download
+from .ControleurDatabase import (
+    use_sql_mode, save_download_to_db, load_downloads_from_db, sync_on_mode_change
+)
 import libtorrent as lt
 import time
 import re
@@ -58,7 +61,16 @@ def extract_title_prefix(filename):
     return filename
 
 def load_persisted_downloads():
-    """Charge les downloads persistés depuis le fichier JSON avec verrouillage."""
+    """Charge les downloads persistés depuis JSON ou SQL selon la config."""
+    # Synchroniser au premier appel si changement de mode
+    sync_on_mode_change()
+    
+    # Mode SQL activé
+    if use_sql_mode():
+        write_log("Chargement downloads depuis SQLite")
+        return load_downloads_from_db()
+    
+    # Mode JSON (par défaut)
     try:
         if os.path.exists(DOWNLOADS_PERSISTENCE_FILE):
             with open(DOWNLOADS_PERSISTENCE_FILE, 'r') as f:
@@ -68,11 +80,11 @@ def load_persisted_downloads():
                 finally:
                     fcntl.flock(f.fileno(), fcntl.LOCK_UN)
     except Exception as e:
-        write_log(f"Erreur lors du chargement des downloads persistés: {str(e)}", "ERROR")
+        write_log(f"Erreur lors du chargement des downloads JSON: {str(e)}", "ERROR")
     return {}
 
 def save_persisted_downloads():
-    """Sauvegarde les downloads actifs dans le fichier JSON avec leurs stats et verrouillage."""
+    """Sauvegarde les downloads actifs dans JSON ou SQL selon la config."""
     try:
         serializable_downloads = {}
         with downloads_lock:
@@ -87,6 +99,14 @@ def save_persisted_downloads():
                     'stats': download_data.get('stats', {'progress': 0, 'download_rate': 0, 'upload_rate': 0, 'peers': 0, 'state': 'downloading'})
                 }
         
+        # Mode SQL activé
+        if use_sql_mode():
+            write_log("Sauvegarde downloads dans SQLite")
+            for download_id, data in serializable_downloads.items():
+                save_download_to_db(download_id, data)
+            return
+        
+        # Mode JSON (par défaut)
         os.makedirs(os.path.dirname(DOWNLOADS_PERSISTENCE_FILE), exist_ok=True)
         with open(DOWNLOADS_PERSISTENCE_FILE, 'r+' if os.path.exists(DOWNLOADS_PERSISTENCE_FILE) else 'w') as f:
             fcntl.flock(f.fileno(), fcntl.LOCK_EX)  # Verrou exclusif (écriture)
