@@ -9,6 +9,14 @@ from datetime import datetime
 # Blueprint pour les demandes (wishes)
 wishes_bp = Blueprint('wishes', __name__)
 
+# Le limiter sera injecté depuis app.py
+limiter = None
+
+def init_limiter(app_limiter):
+    """Initialise le limiter depuis app.py"""
+    global limiter
+    limiter = app_limiter
+
 def extract_uid_from_dn(dn):
     # Assuming the DN is in the format "uid=<username>,..."
     parts = dn.split(',')
@@ -47,6 +55,14 @@ def manage_wishes():
 @wishes_bp.route('/create_wish', methods=['POST'])
 @login_required
 def create_wish():
+    # Rate limiting : max 10 créations de demandes par minute
+    if limiter:
+        try:
+            limiter.check()
+        except Exception:
+            write_log(f"Rate limit dépassé pour create_wish", "WARNING")
+            return jsonify({'success': False, 'message': 'Trop de requêtes. Réessayez dans 1 minute.'}), 429
+    
     if 'username' not in session:
         return jsonify({'success': False, 'message': 'Utilisateur non connecté'})
 
@@ -89,6 +105,14 @@ def wish_details(wish_id):
 @login_required
 @admin_required
 def validate_wish(wish_id):
+    # Rate limiting : max 30 validations par minute
+    if limiter:
+        try:
+            limiter.check()
+        except Exception:
+            write_log(f"Rate limit dépassé pour validate_wish", "WARNING")
+            return jsonify({'success': False, 'message': 'Trop de requêtes. Réessayez dans 1 minute.'}), 429
+    
     if 'username' not in session:
         return jsonify({'success': False, 'message': 'Utilisateur non connecté'})
 

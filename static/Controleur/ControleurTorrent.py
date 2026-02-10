@@ -58,17 +58,21 @@ def extract_title_prefix(filename):
     return filename
 
 def load_persisted_downloads():
-    """Charge les downloads persistés depuis le fichier JSON."""
+    """Charge les downloads persistés depuis le fichier JSON avec verrouillage."""
     try:
         if os.path.exists(DOWNLOADS_PERSISTENCE_FILE):
             with open(DOWNLOADS_PERSISTENCE_FILE, 'r') as f:
-                return json.load(f)
+                fcntl.flock(f.fileno(), fcntl.LOCK_SH)  # Verrou partagé (lecture)
+                try:
+                    return json.load(f)
+                finally:
+                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
     except Exception as e:
         write_log(f"Erreur lors du chargement des downloads persistés: {str(e)}", "ERROR")
     return {}
 
 def save_persisted_downloads():
-    """Sauvegarde les downloads actifs dans le fichier JSON avec leurs stats."""
+    """Sauvegarde les downloads actifs dans le fichier JSON avec leurs stats et verrouillage."""
     try:
         serializable_downloads = {}
         with downloads_lock:
@@ -79,26 +83,42 @@ def save_persisted_downloads():
                     'save_path': download_data.get('save_path', ''),
                     'torrent_path': download_data.get('torrent_file_path', ''),
                     'is_active': download_data.get('is_active', True),
-                    'started_at': download_data.get('started_at', time.time()),  # Ajouter le temps de démarrage
+                    'started_at': download_data.get('started_at', time.time()),
                     'stats': download_data.get('stats', {'progress': 0, 'download_rate': 0, 'upload_rate': 0, 'peers': 0, 'state': 'downloading'})
                 }
         
         os.makedirs(os.path.dirname(DOWNLOADS_PERSISTENCE_FILE), exist_ok=True)
-        with open(DOWNLOADS_PERSISTENCE_FILE, 'w') as f:
-            json.dump(serializable_downloads, f, indent=4)
+        with open(DOWNLOADS_PERSISTENCE_FILE, 'r+' if os.path.exists(DOWNLOADS_PERSISTENCE_FILE) else 'w') as f:
+            fcntl.flock(f.fileno(), fcntl.LOCK_EX)  # Verrou exclusif (écriture)
+            try:
+                f.seek(0)
+                f.truncate()
+                json.dump(serializable_downloads, f, indent=4)
+            finally:
+                fcntl.flock(f.fileno(), fcntl.LOCK_UN)
     except Exception as e:
         write_log(f"Erreur lors de la sauvegarde des downloads: {str(e)}", "ERROR")
 
 def remove_download_from_persistence(download_id):
-    """Retire un download spécifique du fichier de persistance."""
+    """Retire un download spécifique du fichier de persistance avec verrouillage."""
     try:
-        persisted = load_persisted_downloads()
-        if download_id in persisted:
-            del persisted[download_id]
-            os.makedirs(os.path.dirname(DOWNLOADS_PERSISTENCE_FILE), exist_ok=True)
-            with open(DOWNLOADS_PERSISTENCE_FILE, 'w') as f:
-                json.dump(persisted, f, indent=4)
-            write_log(f"Download {download_id} retiré de la persistance")
+        os.makedirs(os.path.dirname(DOWNLOADS_PERSISTENCE_FILE), exist_ok=True)
+        with open(DOWNLOADS_PERSISTENCE_FILE, 'r+' if os.path.exists(DOWNLOADS_PERSISTENCE_FILE) else 'w') as f:
+            fcntl.flock(f.fileno(), fcntl.LOCK_EX)  # Verrou exclusif
+            try:
+                if f.tell() == 0 and os.path.getsize(DOWNLOADS_PERSISTENCE_FILE) > 0:
+                    persisted = json.load(f)
+                else:
+                    persisted = {}
+                
+                if download_id in persisted:
+                    del persisted[download_id]
+                    f.seek(0)
+                    f.truncate()
+                    json.dump(persisted, f, indent=4)
+                    write_log(f"Download {download_id} retiré de la persistance")
+            finally:
+                fcntl.flock(f.fileno(), fcntl.LOCK_UN)
     except Exception as e:
         write_log(f"Erreur lors du retrait du download de la persistance: {str(e)}", "ERROR")
 

@@ -12,107 +12,124 @@ import uuid
 
 seed_bp = Blueprint('seed', __name__)
 
-# Créer un verrou pour synchroniser l'accès à la session
-session_lock = threading.Lock()
+# Le limiter sera injecté depuis app.py
+limiter = None
+
+def init_limiter(app_limiter):
+    """Initialise le limiter depuis app.py"""
+    global limiter
+    limiter = app_limiter
 
 @seed_bp.route('/seed')
 @login_required
 @superadmin_required
 def seed_page():
-    with session_lock:
-        if 'username' not in session:
-            write_log("Aucun utilisateur connecté, redirection vers l'index")
-            return redirect(url_for('auth.login'))
+    if 'username' not in session:
+        write_log("Aucun utilisateur connecté, redirection vers l'index")
+        return redirect(url_for('auth.login'))
 
-        username = session.get('username')
-        rights_agreement = session.get('rights_agreement')
+    username = session.get('username')
+    rights_agreement = session.get('rights_agreement')
 
-        if rights_agreement != 'PlexService::SuperAdmin':
-            write_log(f"Accès refusé pour l'utilisateur {username} avec droits {rights_agreement}, redirection vers /home", 'ERROR')
-            session['from_index'] = False
-            return redirect(url_for('home.home'))
-
-        write_log(f"Affichage de la page de seeding pour l'utilisateur: {username}")
+    if rights_agreement != 'PlexService::SuperAdmin':
+        write_log(f"Accès refusé pour l'utilisateur {username} avec droits {rights_agreement}, redirection vers /home", 'ERROR')
         session['from_index'] = False
-        
-        # Récupérer la liste des seeds actifs
-        active_seeds = get_all_seeds()
-        
-        return render_template('seed.html', active_seeds=active_seeds)
+        return redirect(url_for('home.home'))
+
+    write_log(f"Affichage de la page de seeding pour l'utilisateur: {username}")
+    session['from_index'] = False
+    
+    # Récupérer la liste des seeds actifs
+    active_seeds = get_all_seeds()
+    
+    return render_template('seed.html', active_seeds=active_seeds)
 
 @seed_bp.route('/get_media_list', methods=['GET'])
 @login_required
 @superadmin_required
 def get_media_list():
-    with session_lock:
-        username = session.get('username')
-        write_log(f"Récupération de la liste des médias pour {username}")
-        
-        try:
-            media_paths = get_all_media_paths()
-            return jsonify({'success': True, 'media_list': media_paths})
-        except Exception as e:
-            write_log(f"Erreur lors de la récupération de la liste des médias: {str(e)}", "ERROR")
-            return jsonify({'success': False, 'message': str(e)}), 500
+    username = session.get('username')
+    write_log(f"Récupération de la liste des médias pour {username}")
+    
+    try:
+        media_paths = get_all_media_paths()
+        return jsonify({'success': True, 'media_list': media_paths})
+    except Exception as e:
+        write_log(f"Erreur lors de la récupération de la liste des médias: {str(e)}", "ERROR")
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 @seed_bp.route('/start_seed', methods=['POST'])
 @login_required
 @superadmin_required
 def start_seed_route():
-    with session_lock:
-        username = session.get('username')
-        write_log(f"Requête de démarrage de seed pour {username}")
-        
+    # Rate limiting : max 20 démarrages de seed par minute
+    if limiter:
         try:
-            data = request.get_json()
-            data_path = data.get('data_path')
-            torrent_file_path = data.get('torrent_file_path')
-            
-            if not data_path:
-                return jsonify({'success': False, 'message': 'Chemin des données manquant'}), 400
-            
-            # Si pas de fichier torrent fourni, essayer de le trouver
+            limiter.check()
+        except Exception:
+            write_log(f"Rate limit dépassé pour start_seed", "WARNING")
+            return jsonify({'success': False, 'message': 'Trop de requêtes. Réessayez dans 1 minute.'}), 429
+    
+    username = session.get('username')
+    write_log(f"Requête de démarrage de seed pour {username}")
+    
+    try:
+        data = request.get_json()
+        data_path = data.get('data_path')
+        torrent_file_path = data.get('torrent_file_path')
+        
+        if not data_path:
+            return jsonify({'success': False, 'message': 'Chemin des données manquant'}), 400
+        
+        # Si pas de fichier torrent fourni, essayer de le trouver
+        if not torrent_file_path:
+            torrent_file_path = find_torrent_file(data_path)
             if not torrent_file_path:
-                torrent_file_path = find_torrent_file(data_path)
-                if not torrent_file_path:
-                    return jsonify({'success': False, 'message': 'Aucun fichier .torrent trouvé'}), 400
-            
-            # Générer un ID unique pour le seed
-            seed_id = str(uuid.uuid4())
-            
-            # Démarrer le seed
-            if start_seed(seed_id, torrent_file_path, data_path):
-                write_log(f"Seed {seed_id} démarré avec succès pour {username}")
-                return jsonify({'success': True, 'seed_id': seed_id, 'message': 'Seed démarré avec succès'})
-            else:
-                return jsonify({'success': False, 'message': 'Erreur lors du démarrage du seed'}), 500
-        except Exception as e:
-            write_log(f"Erreur lors du démarrage du seed pour {username}: {str(e)}", "ERROR")
-            return jsonify({'success': False, 'message': str(e)}), 500
+                return jsonify({'success': False, 'message': 'Aucun fichier .torrent trouvé'}), 400
+        
+        # Générer un ID unique pour le seed
+        seed_id = str(uuid.uuid4())
+        
+        # Démarrer le seed
+        if start_seed(seed_id, torrent_file_path, data_path):
+            write_log(f"Seed {seed_id} démarré avec succès pour {username}")
+            return jsonify({'success': True, 'seed_id': seed_id, 'message': 'Seed démarré avec succès'})
+        else:
+            return jsonify({'success': False, 'message': 'Erreur lors du démarrage du seed'}), 500
+    except Exception as e:
+        write_log(f"Erreur lors du démarrage du seed pour {username}: {str(e)}", "ERROR")
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 @seed_bp.route('/stop_seed', methods=['POST'])
 @login_required
 @superadmin_required
 def stop_seed_route():
-    with session_lock:
-        username = session.get('username')
-        write_log(f"Requête d'arrêt de seed pour {username}")
-        
+    # Rate limiting : max 30 arrêts de seed par minute
+    if limiter:
         try:
-            data = request.get_json()
-            seed_id = data.get('seed_id')
-            
-            if not seed_id:
-                return jsonify({'success': False, 'message': 'ID du seed manquant'}), 400
-            
-            if stop_seed(seed_id):
-                write_log(f"Seed {seed_id} arrêté avec succès pour {username}")
-                return jsonify({'success': True, 'message': 'Seed arrêté avec succès'})
-            else:
-                return jsonify({'success': False, 'message': 'Erreur lors de l\'arrêt du seed'}), 500
-        except Exception as e:
-            write_log(f"Erreur lors de l'arrêt du seed pour {username}: {str(e)}", "ERROR")
-            return jsonify({'success': False, 'message': str(e)}), 500
+            limiter.check()
+        except Exception:
+            write_log(f"Rate limit dépassé pour stop_seed", "WARNING")
+            return jsonify({'success': False, 'message': 'Trop de requêtes. Réessayez dans 1 minute.'}), 429
+    
+    username = session.get('username')
+    write_log(f"Requête d'arrêt de seed pour {username}")
+    
+    try:
+        data = request.get_json()
+        seed_id = data.get('seed_id')
+        
+        if not seed_id:
+            return jsonify({'success': False, 'message': 'ID du seed manquant'}), 400
+        
+        if stop_seed(seed_id):
+            write_log(f"Seed {seed_id} arrêté avec succès pour {username}")
+            return jsonify({'success': True, 'message': 'Seed arrêté avec succès'})
+        else:
+            return jsonify({'success': False, 'message': 'Erreur lors de l\'arrêt du seed'}), 500
+    except Exception as e:
+        write_log(f"Erreur lors de l'arrêt du seed pour {username}: {str(e)}", "ERROR")
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 @seed_bp.route('/get_seeds_stats', methods=['GET'])
 def get_seeds_stats():
@@ -125,19 +142,26 @@ def get_seeds_stats():
 
 @seed_bp.route('/upload_torrent_for_seed', methods=['POST'])
 def upload_torrent():
-    with session_lock:
-        username = session.get('username')
-        write_log(f"Upload de fichier .torrent pour seed par {username}")
-        
+    # Rate limiting : max 15 uploads torrents par minute
+    if limiter:
         try:
-            if 'torrent-file' not in request.files:
-                return jsonify({'success': False, 'message': 'Aucun fichier sélectionné'}), 400
-            
-            file = request.files['torrent-file']
-            data_path = request.form.get('data_path')
-            
-            if file.filename == '':
-                return jsonify({'success': False, 'message': 'Aucun fichier sélectionné'}), 400
+            limiter.check()
+        except Exception:
+            write_log(f"Rate limit dépassé pour upload_torrent_for_seed", "WARNING")
+            return jsonify({'success': False, 'message': 'Trop de requêtes. Réessayez dans 1 minute.'}), 429
+    
+    username = session.get('username')
+    write_log(f"Upload de fichier .torrent pour seed par {username}")
+    
+    try:
+        if 'torrent-file' not in request.files:
+            return jsonify({'success': False, 'message': 'Aucun fichier sélectionné'}), 400
+        
+        file = request.files['torrent-file']
+        data_path = request.form.get('data_path')
+        
+        if file.filename == '':
+            return jsonify({'success': False, 'message': 'Aucun fichier sélectionné'}), 400
             
             if not data_path:
                 return jsonify({'success': False, 'message': 'Chemin des données manquant'}), 400

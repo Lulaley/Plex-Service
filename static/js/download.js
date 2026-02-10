@@ -22,8 +22,21 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (el) el.textContent = 'Erreur lors de la récupération de l\'espace disque';
                 });
         }
+        
         updateDiskSpace();
-        setInterval(updateDiskSpace, 30000); // rafraîchit toutes les 30 secondes
+        
+        // Polling optimisé : 60s au lieu de 30s + arrêt si onglet invisible
+        let diskSpaceInterval = setInterval(updateDiskSpace, 60000);
+        
+        // Arrêter le polling quand l'onglet n'est pas visible
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                clearInterval(diskSpaceInterval);
+            } else {
+                updateDiskSpace(); // Rafraîchir immédiatement au retour
+                diskSpaceInterval = setInterval(updateDiskSpace, 60000);
+            }
+        });
     const torrentForm = document.getElementById('torrent-form');
     const torrentFileInput = document.getElementById('torrent-file');
     const downloadButton = document.getElementById('download-button');

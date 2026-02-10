@@ -282,7 +282,24 @@ document.addEventListener('DOMContentLoaded', function () {
     function startAutoUpdate() {
         updateInterval = setInterval(() => {
             loadActiveSeeds();
-        }, 3000); // Mettre à jour toutes les 3 secondes
+        }, 5000); // Mettre à jour toutes les 5 secondes (au lieu de 3s)
+        
+        // Arrêter le polling quand l'onglet n'est pas visible
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (updateInterval) {
+                    clearInterval(updateInterval);
+                    updateInterval = null;
+                }
+            } else {
+                if (!updateInterval) {
+                    loadActiveSeeds(); // Rafraîchir immédiatement
+                    updateInterval = setInterval(() => {
+                        loadActiveSeeds();
+                    }, 5000);
+                }
+            }
+        });
     }
 
     function formatBytes(bytes) {

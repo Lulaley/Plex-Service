@@ -18,40 +18,57 @@ SEEDS_PERSISTENCE_FILE = "/var/www/public/Plex-Service/tmp/active_seeds.json"
 SEEDS_RESTORE_LOCK_FILE = "/var/www/public/Plex-Service/tmp/seeds_restore.lock"
 
 def load_persisted_seeds():
-    """Charge les seeds persistés depuis le fichier JSON."""
+    """Charge les seeds persistés depuis le fichier JSON avec verrouillage."""
     try:
         if os.path.exists(SEEDS_PERSISTENCE_FILE):
             with open(SEEDS_PERSISTENCE_FILE, 'r') as f:
-                data = json.load(f)
-                # Log retiré car appelé trop fréquemment (polling frontend)
-                return data
+                fcntl.flock(f.fileno(), fcntl.LOCK_SH)  # Verrou partagé (lecture)
+                try:
+                    data = json.load(f)
+                    return data
+                finally:
+                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
     except Exception as e:
         write_log(f"Erreur lors du chargement des seeds persistés: {str(e)}", "ERROR")
     return {}
 
 def save_persisted_seeds():
-    """Sauvegarde les seeds actifs dans le fichier JSON avec leurs stats."""
+    """Sauvegarde les seeds actifs dans le fichier JSON avec leurs stats et verrouillage."""
     try:
-        # Charger d'abord les seeds existants depuis le fichier (partagé entre workers)
-        existing_seeds = load_persisted_seeds()
+        os.makedirs(os.path.dirname(SEEDS_PERSISTENCE_FILE), exist_ok=True)
         
-        # Mettre à jour uniquement les seeds de ce worker
-        with seeds_lock:
-            for seed_id, seed_data in active_seeds.items():
-                existing_seeds[seed_id] = {
-                    'id': seed_data['id'],
-                    'torrent_file_path': seed_data['torrent_file_path'],
-                    'data_path': seed_data['data_path'],
-                    'name': seed_data['name'],
-                    'is_active': seed_data['is_active'],
-                    'stats': seed_data.get('stats', {'uploaded': 0, 'upload_rate': 0, 'peers': 0, 'seeds': 0, 'progress': 0, 'state': 'unknown'}),
-                    'state': seed_data.get('state', 'unknown')
-                }
-        
-        # Sauvegarder tous les seeds (anciens + nouveaux)
-        with open(SEEDS_PERSISTENCE_FILE, 'w') as f:
-            json.dump(existing_seeds, f, indent=4)
-        # Log retiré car appelé fréquemment
+        with open(SEEDS_PERSISTENCE_FILE, 'r+' if os.path.exists(SEEDS_PERSISTENCE_FILE) else 'w') as f:
+            fcntl.flock(f.fileno(), fcntl.LOCK_EX)  # Verrou exclusif (écriture)
+            try:
+                # Charger les seeds existants depuis le fichier
+                if f.tell() == 0 and os.path.exists(SEEDS_PERSISTENCE_FILE) and os.path.getsize(SEEDS_PERSISTENCE_FILE) > 0:
+                    existing_seeds = json.load(f)
+                else:
+                    existing_seeds = {}
+                
+                # Mettre à jour uniquement les seeds de ce worker
+                with seeds_lock:
+                    for seed_id, seed_data in active_seeds.items():
+                        # Ne pas ré-ajouter un seed qui a été supprimé par un autre worker
+                        if seed_id in existing_seeds and not existing_seeds[seed_id].get('is_active', True):
+                            continue
+                        
+                        existing_seeds[seed_id] = {
+                            'id': seed_data['id'],
+                            'torrent_file_path': seed_data['torrent_file_path'],
+                            'data_path': seed_data['data_path'],
+                            'name': seed_data['name'],
+                            'is_active': seed_data['is_active'],
+                            'stats': seed_data.get('stats', {'uploaded': 0, 'upload_rate': 0, 'peers': 0, 'seeds': 0, 'progress': 0, 'state': 'unknown'}),
+                            'state': seed_data.get('state', 'unknown')
+                        }
+                
+                # Sauvegarder tous les seeds
+                f.seek(0)
+                f.truncate()
+                json.dump(existing_seeds, f, indent=4)
+            finally:
+                fcntl.flock(f.fileno(), fcntl.LOCK_UN)
     except Exception as e:
         write_log(f"Erreur lors de la sauvegarde des seeds: {str(e)}", "ERROR")
 
@@ -229,8 +246,29 @@ def monitor_seed(seed_id):
     """Monitore un seed et met à jour ses statistiques."""
     write_log(f"Démarrage du monitoring pour le seed {seed_id}")
     
+    check_counter = 0  # Compteur pour vérifier l'arrêt moins souvent
+    
     while True:
         try:
+            check_counter += 1
+            
+            # Vérifier si le seed a été arrêté par un autre worker (toutes les 10s au lieu de 2s)
+            if check_counter % 5 == 0:  # 5 * 2s = 10s
+                persisted = load_persisted_seeds()
+                if seed_id not in persisted or not persisted[seed_id].get('is_active', True):
+                    write_log(f"Seed {seed_id} arrêté par un autre worker, arrêt du monitoring")
+                    with seeds_lock:
+                        if seed_id in active_seeds:
+                            # Arrêter proprement le seed dans ce worker
+                            seed_data = active_seeds[seed_id]
+                            if 'session' in seed_data and seed_data['session']:
+                                try:
+                                    seed_data['session'].remove_torrent(seed_data['handle'])
+                                except:
+                                    pass
+                            del active_seeds[seed_id]
+                    break
+            
             with seeds_lock:
                 if seed_id not in active_seeds:
                     write_log(f"Seed {seed_id} n'existe plus, arrêt du monitoring")
@@ -280,13 +318,22 @@ def stop_seed(seed_id):
             if seed_id not in active_seeds:
                 write_log(f"Seed {seed_id} introuvable dans ce worker", "WARNING")
                 # Même s'il n'est pas dans ce worker, le retirer du fichier JSON
-                existing_seeds = load_persisted_seeds()
-                if seed_id in existing_seeds:
-                    del existing_seeds[seed_id]
-                    with open(SEEDS_PERSISTENCE_FILE, 'w') as f:
-                        json.dump(existing_seeds, f, indent=4)
-                    write_log(f"Seed {seed_id} retiré du fichier de persistance")
-                    return True
+                try:
+                    with open(SEEDS_PERSISTENCE_FILE, 'r+') as f:
+                        fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+                        try:
+                            existing_seeds = json.load(f)
+                            if seed_id in existing_seeds:
+                                del existing_seeds[seed_id]
+                                f.seek(0)
+                                f.truncate()
+                                json.dump(existing_seeds, f, indent=4)
+                                write_log(f"Seed {seed_id} retiré du fichier de persistance")
+                                return True
+                        finally:
+                            fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+                except Exception as e:
+                    write_log(f"Erreur lors de la suppression du seed du fichier: {str(e)}", "ERROR")
                 return False
             
             seed_data = active_seeds[seed_id]
@@ -306,12 +353,21 @@ def stop_seed(seed_id):
             # Supprimer du dictionnaire local
             del active_seeds[seed_id]
         
-        # Supprimer du fichier JSON partagé
-        existing_seeds = load_persisted_seeds()
-        if seed_id in existing_seeds:
-            del existing_seeds[seed_id]
-            with open(SEEDS_PERSISTENCE_FILE, 'w') as f:
-                json.dump(existing_seeds, f, indent=4)
+        # Supprimer du fichier JSON partagé avec verrouillage
+        try:
+            with open(SEEDS_PERSISTENCE_FILE, 'r+') as f:
+                fcntl.flock(f.fileno(), fcntl.LOCK_EX)
+                try:
+                    existing_seeds = json.load(f)
+                    if seed_id in existing_seeds:
+                        del existing_seeds[seed_id]
+                        f.seek(0)
+                        f.truncate()
+                        json.dump(existing_seeds, f, indent=4)
+                finally:
+                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+        except Exception as e:
+            write_log(f"Erreur lors de la suppression du seed du fichier JSON: {str(e)}", "ERROR")
         
         write_log(f"Seed {seed_id} arrêté avec succès")
         return True

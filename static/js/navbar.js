@@ -41,7 +41,18 @@ function checkNewUsers() {
         .catch(error => console.error('Erreur:', error));
 }
 
-// Vérifier les nouveaux utilisateurs toutes les 30 secondes
-setInterval(checkNewUsers, 30000);
-// Vérifier immédiatement au chargement de la page
+// Vérifier immédiatement au chargement
 checkNewUsers();
+
+// Polling optimisé : 60s au lieu de 30s + arrêt si onglet invisible
+let newUsersInterval = setInterval(checkNewUsers, 60000);
+
+// Arrêter le polling quand l'onglet n'est pas visible
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        clearInterval(newUsersInterval);
+    } else {
+        checkNewUsers(); // Rafraîchir immédiatement au retour
+        newUsersInterval = setInterval(checkNewUsers, 60000);
+    }
+});

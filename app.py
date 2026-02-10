@@ -103,9 +103,6 @@ else:
     )
     write_log("Rate limiting activé (mode mémoire)")
 
-# Limite stricte pour login (5 tentatives par minute)
-limiter.limit("5 per minute")(lambda: None)  # Configuré dans auth.py
-
 # Cache pour assets statiques
 @app.after_request
 def add_cache_headers(response):
@@ -146,9 +143,16 @@ app.register_blueprint(search_bp)
 app.register_blueprint(seed_bp, url_prefix='')
 app.register_blueprint(download_bp, url_prefix='')
 
-# Initialiser le limiter dans auth blueprint
-from blueprints.auth import init_limiter
-init_limiter(limiter)
+# Initialiser le limiter unique dans tous les blueprints qui en ont besoin
+from blueprints.auth import init_limiter as init_limiter_auth
+from blueprints.download import init_limiter as init_limiter_download
+from blueprints.seed import init_limiter as init_limiter_seed
+from blueprints.wishes import init_limiter as init_limiter_wishes
+
+init_limiter_auth(limiter)
+init_limiter_download(limiter)
+init_limiter_seed(limiter)
+init_limiter_wishes(limiter)
 
 # Gestionnaires d'erreurs personnalisés
 @app.errorhandler(404)

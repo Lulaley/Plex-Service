@@ -14,8 +14,13 @@ import uuid
 import os
 import time
 
-# Créer un verrou pour synchroniser l'accès à la session
-session_lock = threading.Lock()
+# Le limiter sera injecté depuis app.py
+limiter = None
+
+def init_limiter(app_limiter):
+    """Initialise le limiter depuis app.py"""
+    global limiter
+    limiter = app_limiter
 
 # Espace disque restant (API)
 @download_bp.route('/api/disk_space')
@@ -70,73 +75,79 @@ download_handles = {}
 @login_required
 @superadmin_required
 def download_page():
-    with session_lock:
-        if 'username' not in session:
-            write_log("Aucun utilisateur connecté, redirection vers l'index")
-            return redirect(url_for('auth.login'))
+    if 'username' not in session:
+        write_log("Aucun utilisateur connecté, redirection vers l'index")
+        return redirect(url_for('auth.login'))
 
-        username = session.get('username')
-        rights_agreement = session.get('rights_agreement')
+    username = session.get('username')
+    rights_agreement = session.get('rights_agreement')
 
-        if rights_agreement != 'PlexService::SuperAdmin':
-            write_log(f"Accès refusé pour l'utilisateur {username} avec droits {rights_agreement}, redirection vers /home", 'ERROR')
-            session['from_index'] = False
-            return redirect(url_for('home.home'))
-
-        write_log(f"Affichage de la page de téléchargement pour l'utilisateur: {username}")
+    if rights_agreement != 'PlexService::SuperAdmin':
+        write_log(f"Accès refusé pour l'utilisateur {username} avec droits {rights_agreement}, redirection vers /home", 'ERROR')
         session['from_index'] = False
-        return render_template('download.html')
+        return redirect(url_for('home.home'))
+
+    write_log(f"Affichage de la page de téléchargement pour l'utilisateur: {username}")
+    session['from_index'] = False
+    return render_template('download.html')
 
 @download_bp.route('/upload', methods=['POST'])
 @login_required
 @superadmin_required
 def upload_torrent():
-    with session_lock:
-        username = session.get('username')
-        write_log(f"Affichage de la page d'upload pour l'utilisateur: {username}")
+    # Rate limiting : max 15 uploads torrents par minute
+    if limiter:
+        try:
+            limiter.check()
+        except Exception:
+            write_log(f"Rate limit dépassé pour upload torrent", "WARNING")
+            return jsonify({'success': False, 'message': 'Trop de requêtes. Réessayez dans 1 minute.'}), 429
+    
+    username = session.get('username')
+    write_log(f"Affichage de la page d'upload pour l'utilisateur: {username}")
+    
+    if 'torrent-file' not in request.files:
+        write_log(f"Aucun fichier sélectionné par {username}")
+        return jsonify({'success': False, 'message': 'Aucun fichier sélectionné'}), 400
+    
+    file = request.files['torrent-file']
+    if file.filename == '':
+        write_log(f"Aucun fichier sélectionné par {username}")
+        return jsonify({'success': False, 'message': 'Aucun fichier sélectionné'}), 400
+    
+    if file and file.filename.endswith('.torrent'):
+        # Sécuriser le nom de fichier
+        filename = sanitize_filename(file.filename.replace(' ', '_'))
         
-        if 'torrent-file' not in request.files:
-            write_log(f"Aucun fichier sélectionné par {username}")
-            return jsonify({'success': False, 'message': 'Aucun fichier sélectionné'}), 400
+        # Vérifier que le fichier a toujours l'extension .torrent après nettoyage
+        if not filename.endswith('.torrent'):
+            write_log(f"Nom de fichier suspect rejeté: {file.filename}", "ERROR")
+            return jsonify({'success': False, 'message': 'Nom de fichier invalide'}), 400
         
-        file = request.files['torrent-file']
-        if file.filename == '':
-            write_log(f"Aucun fichier sélectionné par {username}")
-            return jsonify({'success': False, 'message': 'Aucun fichier sélectionné'}), 400
+        tmp_dir = "/var/www/public/Plex-Service/tmp/"
+        file_path = os.path.join(tmp_dir, filename)
         
-        if file and file.filename.endswith('.torrent'):
-            # Sécuriser le nom de fichier
-            filename = sanitize_filename(file.filename.replace(' ', '_'))
-            
-            # Vérifier que le fichier a toujours l'extension .torrent après nettoyage
-            if not filename.endswith('.torrent'):
-                write_log(f"Nom de fichier suspect rejeté: {file.filename}", "ERROR")
-                return jsonify({'success': False, 'message': 'Nom de fichier invalide'}), 400
-            
-            tmp_dir = "/var/www/public/Plex-Service/tmp/"
-            file_path = os.path.join(tmp_dir, filename)
-            
-            # Valider que le chemin final est bien dans tmp/
-            if not validate_path(file_path, [tmp_dir]):
-                write_log(f"Tentative d'accès à un chemin non autorisé: {file_path}", "ERROR")
-                return jsonify({'success': False, 'message': 'Chemin non autorisé'}), 403
-            
-            file.save(file_path)
-            write_log(f"Fichier .torrent déposé par {username} : {file_path}")
-            
-            # Générer un ID unique pour ce téléchargement
-            download_id = str(uuid.uuid4())
-            
-            return jsonify({
-                'success': True,
-                'message': 'Fichier téléchargé avec succès',
-                'redirect_url': url_for('download.start_download_route', torrent_file_path=file_path, download_id=download_id),
-                'download_id': download_id
-            })
+        # Valider que le chemin final est bien dans tmp/
+        if not validate_path(file_path, [tmp_dir]):
+            write_log(f"Tentative d'accès à un chemin non autorisé: {file_path}", "ERROR")
+            return jsonify({'success': False, 'message': 'Chemin non autorisé'}), 403
+        
+        file.save(file_path)
+        write_log(f"Fichier .torrent déposé par {username} : {file_path}")
+        
+        # Générer un ID unique pour ce téléchargement
+        download_id = str(uuid.uuid4())
+        
+        return jsonify({
+            'success': True,
+            'message': 'Fichier téléchargé avec succès',
+            'redirect_url': url_for('download.start_download_route', torrent_file_path=file_path, download_id=download_id),
+            'download_id': download_id
+        })
 
-        else:
-            write_log(f"Format de fichier non supporté par {username}")
-            return jsonify({'success': False, 'message': 'Format de fichier non supporté'}), 400
+    else:
+        write_log(f"Format de fichier non supporté par {username}")
+        return jsonify({'success': False, 'message': 'Format de fichier non supporté'}), 400
 
 def background_download(torrent_file_path, save_path, handle, username):
     """Fonction qui tourne en arrière-plan pour gérer le téléchargement."""
@@ -243,6 +254,14 @@ def start_download_route():
 
 @download_bp.route('/stop_download', methods=['POST'])
 def stop_download_route():
+    # Rate limiting : max 30 arrêts par minute
+    if limiter:
+        try:
+            limiter.check()
+        except Exception:
+            write_log(f"Rate limit dépassé pour stop_download", "WARNING")
+            return jsonify({'success': False, 'message': 'Trop de requêtes. Réessayez dans 1 minute.'}), 429
+    
     from static.Controleur.ControleurTorrent import load_persisted_downloads, save_persisted_downloads
     write_log("Requête d'annulation de téléchargement reçue")
     data = request.get_json()
