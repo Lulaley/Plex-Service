@@ -201,9 +201,9 @@ def upload_torrent():
                 return jsonify({'success': False, 'message': 'Erreur lors du démarrage du seed'}), 500
         else:
             return jsonify({'success': False, 'message': 'Format de fichier non supporté'}), 400
-        except Exception as e:
-            write_log(f"Erreur lors de l'upload du torrent: {str(e)}", "ERROR")
-            return jsonify({'success': False, 'message': str(e)}), 500
+    except Exception as e:
+        write_log(f"Erreur lors de l'upload du torrent: {str(e)}", "ERROR")
+        return jsonify({'success': False, 'message': str(e)}), 500
 
 def restore_seeds_on_startup():
     """Fonction pour restaurer les seeds au démarrage de l'application."""
