@@ -53,10 +53,12 @@ document.getElementById('search-input').addEventListener('input', function() {
 });
 
 function createWish(title, type) {
+    var csrfToken = document.querySelector('input[name="csrf_token"]').value;
     fetch('/create_wish', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
         },
         body: JSON.stringify({ title: title, type: type })
     })

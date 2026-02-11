@@ -95,10 +95,10 @@ def download_page():
 @login_required
 @superadmin_required
 def upload_torrent():
-    # Rate limiting : max 15 uploads torrents par minute
+    # Rate limiting : max 30 uploads torrents par minute (assoupli)
     if limiter:
         try:
-            limiter.check()
+            limiter.check("30 per minute")
         except Exception:
             write_log(f"Rate limit dépassé pour upload torrent", "WARNING")
             return jsonify({'success': False, 'message': 'Trop de requêtes. Réessayez dans 1 minute.'}), 429
@@ -153,7 +153,8 @@ def background_download(torrent_file_path, save_path, handle, username):
     """Fonction qui tourne en arrière-plan pour gérer le téléchargement."""
     download_id = handle.get('id')
     try:
-        write_log(f"Thread de téléchargement démarré pour {username} (download_id: {download_id})")
+        write_log(f"[BACKGROUND_DOWNLOAD] Thread démarré pour {username} (download_id: {download_id})")
+        write_log(f"[BACKGROUND_DOWNLOAD] Appel download_torrent avec: torrent_path={torrent_file_path}, save_path={save_path}")
         for status in download_torrent(torrent_file_path, save_path, handle):
             # Extraire le message de status
             if status.startswith('data: '):
@@ -177,7 +178,9 @@ def background_download(torrent_file_path, save_path, handle, username):
                 del downloads[download_id]
                 
     except Exception as e:
-        write_log(f"Erreur dans le thread de téléchargement: {str(e)}", "ERROR")
+        write_log(f"[BACKGROUND_DOWNLOAD] Erreur dans le thread de téléchargement: {str(e)}", "ERROR")
+        import traceback
+        write_log(f"[BACKGROUND_DOWNLOAD] Traceback: {traceback.format_exc()}", "ERROR")
         handle['is_downloading'] = False
         handle['final_message'] = 'error'
         handle['finished_at'] = time.time()
@@ -189,6 +192,8 @@ def start_download_route():
         torrent_file_path = request.args.get('torrent_file_path')
         save_path = request.args.get('save_path')
         download_id = request.args.get('download_id')  # Récupérer l'ID depuis l'URL
+        
+        write_log(f"[START_DOWNLOAD] Route appelée - username: {username}, download_id: {download_id}, torrent_path: {torrent_file_path}")
         
         if not download_id:
             download_id = str(uuid.uuid4())  # Générer un ID si manquant
@@ -254,10 +259,10 @@ def start_download_route():
 
 @download_bp.route('/stop_download', methods=['POST'])
 def stop_download_route():
-    # Rate limiting : max 30 arrêts par minute
+    # Rate limiting : max 50 arrêts par minute (assoupli)
     if limiter:
         try:
-            limiter.check()
+            limiter.check("50 per minute")
         except Exception:
             write_log(f"Rate limit dépassé pour stop_download", "WARNING")
             return jsonify({'success': False, 'message': 'Trop de requêtes. Réessayez dans 1 minute.'}), 429

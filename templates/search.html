@@ -25,6 +25,7 @@
             <div class="search-input-wrapper">
                 <span class="search-icon">🔍</span>
                 <input type="text" id="search-input" placeholder="Rechercher un film ou une série...">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
             </div>
         </div>
         

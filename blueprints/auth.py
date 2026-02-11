@@ -27,7 +27,7 @@ def login():
         ip = get_remote_address()
         if ip != '127.0.0.1':
             try:
-                limiter.check()
+                limiter.check("5 per minute")
             except Exception:
                 write_log(f"Rate limit dépassé pour IP: {ip}", "WARNING")
                 flash('Trop de tentatives de connexion. Réessayez dans 1 minute.', 'error')

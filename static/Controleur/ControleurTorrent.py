@@ -260,16 +260,23 @@ def stop_download(handle):
     return False
 
 def download_torrent(torrent_file_path, save_path, handle):
-    write_log(f"Début de la fonction download_torrent avec le chemin : {torrent_file_path}")
-    conf = ControleurConf()
-    
-    # Utiliser la session globale unique au lieu d'en créer une nouvelle
-    ses = configure_session_for_download()
-    
-    write_log(f"Chargement du fichier .torrent pour {torrent_file_path}")
-    info = lt.torrent_info(torrent_file_path)
-    write_log(f"info: {info}")
-    content_type = is_movie_or_series(info)
+    try:
+        write_log(f"[DOWNLOAD_TORRENT] Début avec chemin: {torrent_file_path}")
+        conf = ControleurConf()
+        
+        # Utiliser la session globale unique au lieu d'en créer une nouvelle
+        ses = configure_session_for_download()
+        
+        write_log(f"[DOWNLOAD_TORRENT] Chargement du fichier .torrent pour {torrent_file_path}")
+        info = lt.torrent_info(torrent_file_path)
+        write_log(f"[DOWNLOAD_TORRENT] Torrent info chargé: {info.name()}")
+        content_type = is_movie_or_series(info)
+    except Exception as e:
+        write_log(f"[DOWNLOAD_TORRENT] ERREUR CRITIQUE lors du chargement du torrent: {str(e)}", "ERROR")
+        import traceback
+        write_log(f"[DOWNLOAD_TORRENT] Traceback: {traceback.format_exc()}", "ERROR")
+        yield "data: error\n\n"
+        return
     
     # Vérifier l'espace disque disponible
     min_free_space_gb = 50
