@@ -80,7 +80,7 @@ def load_user(user_id):
             
             if user_info:
                 # 3. Sauver dans cache pour 5 minutes
-                cache.set(cache_key, user_info, timeout=300)
+                cache.set(cache_key, user_info, ttl=300)
                 rights = user_info.get('rights', 'PlexService::User')
             else:
                 rights = 'PlexService::User'
