@@ -75,8 +75,15 @@ def register_error_handlers(app):
     @app.errorhandler(404)
     def handle_404(e):
         """Handler pour les erreurs 404."""
-        write_log(f"Erreur 404: {e} - URL: {e.description if hasattr(e, 'description') else 'unknown'}", "WARNING")
-        return jsonify({'error': 'Page non trouvée'}), 404
+        from flask import request, render_template
+        write_log(f"Erreur 404: {e} - URL: {request.url if request else 'unknown'}", "WARNING")
+        
+        # Si requête JSON/AJAX → retourner JSON
+        if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return jsonify({'error': 'Page non trouvée'}), 404
+        
+        # Sinon → retourner page HTML (redirection vers login)
+        return render_template('index.html'), 404
     
     @app.errorhandler(403)
     def handle_403(e):

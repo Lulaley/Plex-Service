@@ -62,14 +62,6 @@ def get_media_list():
 @login_required
 @superadmin_required
 def start_seed_route():
-    # Rate limiting : max 20 démarrages de seed par minute
-    if limiter:
-        try:
-            limiter.check("20 per minute")
-        except Exception:
-            write_log(f"Rate limit dépassé pour start_seed", "WARNING")
-            return jsonify({'success': False, 'message': 'Trop de requêtes. Réessayez dans 1 minute.'}), 429
-    
     username = session.get('username')
     write_log(f"Requête de démarrage de seed pour {username}")
     
@@ -104,14 +96,6 @@ def start_seed_route():
 @login_required
 @superadmin_required
 def stop_seed_route():
-    # Rate limiting : max 30 arrêts de seed par minute
-    if limiter:
-        try:
-            limiter.check("30 per minute")
-        except Exception:
-            write_log(f"Rate limit dépassé pour stop_seed", "WARNING")
-            return jsonify({'success': False, 'message': 'Trop de requêtes. Réessayez dans 1 minute.'}), 429
-    
     username = session.get('username')
     write_log(f"Requête d'arrêt de seed pour {username}")
     
@@ -142,14 +126,6 @@ def get_seeds_stats():
 
 @seed_bp.route('/upload_torrent_for_seed', methods=['POST'])
 def upload_torrent():
-    # Rate limiting : max 30 uploads torrents par minute (assoupli)
-    if limiter:
-        try:
-            limiter.check("30 per minute")
-        except Exception:
-            write_log(f"Rate limit dépassé pour upload_torrent_for_seed", "WARNING")
-            return jsonify({'success': False, 'message': 'Trop de requêtes. Réessayez dans 1 minute.'}), 429
-    
     username = session.get('username')
     write_log(f"Upload de fichier .torrent pour seed par {username}")
     

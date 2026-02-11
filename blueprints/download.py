@@ -95,14 +95,6 @@ def download_page():
 @login_required
 @superadmin_required
 def upload_torrent():
-    # Rate limiting : max 30 uploads torrents par minute (assoupli)
-    if limiter:
-        try:
-            limiter.check("30 per minute")
-        except Exception:
-            write_log(f"Rate limit dépassé pour upload torrent", "WARNING")
-            return jsonify({'success': False, 'message': 'Trop de requêtes. Réessayez dans 1 minute.'}), 429
-    
     username = session.get('username')
     write_log(f"Affichage de la page d'upload pour l'utilisateur: {username}")
     
@@ -259,14 +251,6 @@ def start_download_route():
 
 @download_bp.route('/stop_download', methods=['POST'])
 def stop_download_route():
-    # Rate limiting : max 50 arrêts par minute (assoupli)
-    if limiter:
-        try:
-            limiter.check("50 per minute")
-        except Exception:
-            write_log(f"Rate limit dépassé pour stop_download", "WARNING")
-            return jsonify({'success': False, 'message': 'Trop de requêtes. Réessayez dans 1 minute.'}), 429
-    
     from static.Controleur.ControleurTorrent import load_persisted_downloads, save_persisted_downloads
     write_log("Requête d'annulation de téléchargement reçue")
     data = request.get_json()

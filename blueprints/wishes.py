@@ -55,14 +55,6 @@ def manage_wishes():
 @wishes_bp.route('/create_wish', methods=['POST'])
 @login_required
 def create_wish():
-    # Rate limiting : max 20 créations de demandes par minute (assoupli)
-    if limiter:
-        try:
-            limiter.check("20 per minute")
-        except Exception:
-            write_log(f"Rate limit dépassé pour create_wish", "WARNING")
-            return jsonify({'success': False, 'message': 'Trop de requêtes. Réessayez dans 1 minute.'}), 429
-    
     if 'username' not in session:
         return jsonify({'success': False, 'message': 'Utilisateur non connecté'})
 
@@ -122,14 +114,6 @@ def wish_details(wish_id):
 @login_required
 @admin_required
 def validate_wish(wish_id):
-    # Rate limiting : max 30 validations par minute
-    if limiter:
-        try:
-            limiter.check("30 per minute")
-        except Exception:
-            write_log(f"Rate limit dépassé pour validate_wish", "WARNING")
-            return jsonify({'success': False, 'message': 'Trop de requêtes. Réessayez dans 1 minute.'}), 429
-    
     if 'username' not in session:
         return jsonify({'success': False, 'message': 'Utilisateur non connecté'})
 
