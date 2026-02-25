@@ -1,17 +1,45 @@
+def deduplicate_seeds_in_db():
+    """Supprime les doublons dans la table seeds (garde le plus récent par data_path)."""
+    try:
+        with get_db() as db:
+            # Supprime tous les seeds qui ne sont pas le plus récent pour chaque data_path
+            db.execute("""
+                DELETE FROM seeds
+                WHERE id NOT IN (
+                    SELECT id FROM (
+                        SELECT id, data_path, MAX(updated_at) OVER (PARTITION BY data_path) as max_updated
+                        FROM seeds
+                    )
+                    WHERE updated_at = max_updated
+                )
+            """)
+        write_log("Déduplication des seeds terminée (un seul par data_path, le plus récent gardé)")
+        return True
+    except Exception as e:
+        write_log(f"Erreur déduplication seeds: {e}", "ERROR")
+        return False
 def get_all_seeds_from_sql():
     """Retourne la liste de tous les seeds (actifs ou non) depuis SQLite, formatée pour l'interface."""
     try:
         seeds_list = []
         with get_db() as db:
+            # On sélectionne la seed la plus récente (updated_at) pour chaque data_path
             cursor = db.execute("""
-                SELECT * FROM seeds
+                SELECT s.* FROM seeds s
+                INNER JOIN (
+                    SELECT data_path, MAX(updated_at) as max_updated
+                    FROM seeds
+                    GROUP BY data_path
+                ) latest
+                ON s.data_path = latest.data_path AND s.updated_at = latest.max_updated
             """)
             for row in cursor.fetchall():
                 stats = {
                     'uploaded': row['uploaded_size'],
                     'upload_rate': row['upload_rate'],
                     'peers': row['peers'],
-                    'state': row['status']
+                    'state': row['status'],
+                    'progress': 100
                 }
                 seeds_list.append({
                     'id': row['id'],
