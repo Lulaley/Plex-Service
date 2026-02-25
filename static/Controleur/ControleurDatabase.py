@@ -1,3 +1,30 @@
+def get_all_seeds_from_sql():
+    """Retourne la liste de tous les seeds (actifs ou non) depuis SQLite, formatée pour l'interface."""
+    try:
+        seeds_list = []
+        with get_db() as db:
+            cursor = db.execute("""
+                SELECT * FROM seeds
+            """)
+            for row in cursor.fetchall():
+                stats = {
+                    'uploaded': row['uploaded_size'],
+                    'upload_rate': row['upload_rate'],
+                    'peers': row['peers'],
+                    'state': row['status']
+                }
+                seeds_list.append({
+                    'id': row['id'],
+                    'name': row['torrent_name'],
+                    'data_path': row['data_path'],
+                    'is_active': row['status'] == 'seeding',
+                    'state': row['status'],
+                    'stats': stats
+                })
+        return seeds_list
+    except Exception as e:
+        write_log(f"Erreur get_all_seeds_from_sql: {e}", "ERROR")
+        return []
 """
 ControleurDatabase - Gestion de la base de données SQLite pour downloads/seeds
 Supporte la migration bidirectionnelle JSON ↔ SQLite

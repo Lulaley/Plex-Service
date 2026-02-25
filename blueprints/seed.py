@@ -6,6 +6,7 @@ from static.Controleur.ControleurSeed import (
     start_seed, stop_seed, get_all_seeds, get_seed_stats,
     get_all_media_paths, find_torrent_file, restore_seeds
 )
+from static.Controleur.ControleurDatabase import use_sql_mode, get_all_seeds_from_sql
 from static.Controleur.ControleurSecurity import sanitize_filename, validate_path
 import threading
 import uuid
@@ -39,8 +40,11 @@ def seed_page():
     write_log(f"Affichage de la page de seeding pour l'utilisateur: {username}")
     session['from_index'] = False
     
-    # Récupérer la liste des seeds actifs
-    active_seeds = get_all_seeds()
+    # Récupérer la liste des seeds (SQL ou JSON)
+    if use_sql_mode():
+        active_seeds = get_all_seeds_from_sql()
+    else:
+        active_seeds = get_all_seeds()
     
     return render_template('seed.html', active_seeds=active_seeds)
 
@@ -118,7 +122,10 @@ def stop_seed_route():
 @seed_bp.route('/get_seeds_stats', methods=['GET'])
 def get_seeds_stats():
     try:
-        seeds = get_all_seeds()
+        if use_sql_mode():
+            seeds = get_all_seeds_from_sql()
+        else:
+            seeds = get_all_seeds()
         return jsonify({'success': True, 'seeds': seeds})
     except Exception as e:
         write_log(f"Erreur lors de la récupération des stats: {str(e)}", "ERROR")
