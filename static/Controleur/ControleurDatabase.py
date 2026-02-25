@@ -1,3 +1,13 @@
+def delete_seed_from_db(seed_id):
+    """Supprime un seed de la table seeds dans SQLite."""
+    try:
+        with get_db() as db:
+            db.execute("DELETE FROM seeds WHERE id = ?", (seed_id,))
+        write_log(f"Seed {seed_id} supprimé de la BDD")
+        return True
+    except Exception as e:
+        write_log(f"Erreur suppression seed SQL: {e}", "ERROR")
+        return False
 def deduplicate_seeds_in_db():
     """Supprime les doublons dans la table seeds (garde le plus récent par data_path)."""
     try:

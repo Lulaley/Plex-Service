@@ -242,20 +242,23 @@ def stop_download(handle):
             handle['is_active'] = False
             write_log("Téléchargement annulé par l'utilisateur.")
             
-            # Supprimer les fichiers téléchargés (commenté pour le test)
+            # Supprimer les fichiers téléchargés (optionnel, décommenter si souhaité)
             for file_path in handle['downloaded_files']:
                 if os.path.exists(file_path):
                     # os.remove(file_path)
                     write_log(f"[TEST] Fichier téléchargé qui aurait été supprimé : {file_path}")
-            
-            # Supprimer le fichier .torrent (commenté pour le test)
+
+            # Supprimer le fichier .torrent
             if handle['torrent_file_path'] and os.path.exists(handle['torrent_file_path']):
-                # os.remove(handle['torrent_file_path'])
-                write_log(f"[TEST] Fichier .torrent qui aurait été supprimé : {handle['torrent_file_path']}")
-            
+                try:
+                    os.remove(handle['torrent_file_path'])
+                    write_log(f"Fichier .torrent supprimé : {handle['torrent_file_path']}")
+                except Exception as e:
+                    write_log(f"Erreur suppression .torrent : {e}", "WARNING")
+
             # Réinitialiser la liste des fichiers téléchargés
             handle['downloaded_files'] = []
-            
+
             return True
     return False
 

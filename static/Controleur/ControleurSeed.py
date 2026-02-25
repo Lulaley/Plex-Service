@@ -241,15 +241,36 @@ def start_seed(seed_id, torrent_file_path, data_path):
                     'progress': 0
                 }
             }
-        
+
+        # Ajout en BDD si mode SQL
+        try:
+            from static.Controleur.ControleurDatabase import use_sql_mode, save_seed_to_db
+            if use_sql_mode():
+                # On prépare les données pour la BDD
+                seed_data_db = {
+                    'id': seed_id,
+                    'name': info.name(),
+                    'torrent_file_path': torrent_file_path,
+                    'data_path': data_path,
+                    'is_active': True,
+                    'uploaded_size': 0,
+                    'upload_rate': 0,
+                    'peers': 0,
+                    'username': 'unknown',  # À adapter si besoin
+                }
+                save_seed_to_db(seed_id, seed_data_db)
+                write_log(f"Seed {seed_id} ajouté en BDD (mode SQL)")
+        except Exception as e:
+            write_log(f"Erreur lors de l'ajout du seed {seed_id} en BDD : {e}", "ERROR")
+
         save_persisted_seeds()
         write_log(f"Seed {seed_id} ajouté au dictionnaire et sauvegardé")
-        
+
         # Lancer le thread de monitoring
         monitor_thread = threading.Thread(target=monitor_seed, args=(seed_id,), daemon=True)
         monitor_thread.start()
         write_log(f"Thread de monitoring démarré pour le seed {seed_id}")
-        
+
         return True
     except Exception as e:
         write_log(f"Erreur lors du démarrage du seed {seed_id}: {str(e)}", "ERROR")
@@ -385,7 +406,33 @@ def stop_seed(seed_id):
                     fcntl.flock(f.fileno(), fcntl.LOCK_UN)
         except Exception as e:
             write_log(f"Erreur lors de la suppression du seed du fichier JSON: {str(e)}", "ERROR")
-        
+
+        # Supprimer le fichier .torrent associé
+        try:
+            torrent_file_path = None
+            # Chercher dans le JSON persistant (si encore présent)
+            persisted = load_persisted_seeds()
+            if seed_id in persisted:
+                torrent_file_path = persisted[seed_id].get('torrent_file_path')
+            # Sinon, essayer de retrouver dans les données locales
+            with seeds_lock:
+                if not torrent_file_path and seed_id in active_seeds:
+                    torrent_file_path = active_seeds[seed_id].get('torrent_file_path')
+            if torrent_file_path and os.path.exists(torrent_file_path):
+                os.remove(torrent_file_path)
+                write_log(f"Fichier .torrent supprimé : {torrent_file_path}")
+        except Exception as e:
+            write_log(f"Erreur lors de la suppression du fichier .torrent pour le seed {seed_id} : {e}", "WARNING")
+
+        # Supprimer aussi en BDD si mode SQL
+        try:
+            from static.Controleur.ControleurDatabase import use_sql_mode, delete_seed_from_db
+            if use_sql_mode():
+                delete_seed_from_db(seed_id)
+                write_log(f"Seed {seed_id} supprimé de la BDD (mode SQL)")
+        except Exception as e:
+            write_log(f"Erreur lors de la suppression du seed {seed_id} en BDD : {e}", "ERROR")
+
         write_log(f"Seed {seed_id} arrêté avec succès")
         return True
     except Exception as e:
