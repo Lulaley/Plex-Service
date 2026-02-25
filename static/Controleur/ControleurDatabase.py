@@ -468,6 +468,8 @@ def save_seed_to_db(seed_id, data):
     """Sauvegarde un seed dans SQLite"""
     try:
         with get_db() as db:
+            # Correction : toujours renseigner le chemin du .torrent
+            torrent_path = data.get('torrent_file_path') or data.get('torrent_path', '')
             db.execute("""
                 INSERT OR REPLACE INTO seeds 
                 (id, torrent_name, torrent_path, data_path, username, status,
@@ -476,7 +478,7 @@ def save_seed_to_db(seed_id, data):
             """, (
                 seed_id,
                 data.get('name', 'Unknown'),
-                data.get('torrent_path', ''),
+                torrent_path,
                 data.get('data_path', ''),
                 data.get('username', 'unknown'),
                 'seeding' if data.get('is_active', True) else 'stopped',
