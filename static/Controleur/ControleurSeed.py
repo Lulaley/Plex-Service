@@ -460,37 +460,39 @@ def restore_seeds():
         os.makedirs(os.path.dirname(SEEDS_RESTORE_LOCK_FILE), exist_ok=True)
         lock_file = open(SEEDS_RESTORE_LOCK_FILE, 'w')
         try:
+            # Seul le worker qui obtient le lock exclusif restaure les seeds
             fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            write_log("Ce worker Gunicorn restaure les seeds (lock acquis)")
+            if use_sql_mode():
+                write_log("Restauration des seeds depuis SQLite (mode SQL)")
+                seeds_db = load_seeds_from_db()
+                for seed_id, seed_info in seeds_db.items():
+                    try:
+                        write_log(f"Restauration du seed SQL {seed_id}")
+                        start_seed(
+                            seed_id,
+                            seed_info.get('torrent_path', ''),
+                            seed_info.get('data_path', '')
+                        )
+                    except Exception as e:
+                        write_log(f"Erreur lors de la restauration du seed SQL {seed_id}: {str(e)}", "ERROR")
+            else:
+                write_log("Restauration des seeds persistés (mode JSON)")
+                persisted_seeds = load_persisted_seeds()
+                for seed_id, seed_info in persisted_seeds.items():
+                    try:
+                        write_log(f"Restauration du seed {seed_id}")
+                        start_seed(
+                            seed_id,
+                            seed_info['torrent_file_path'],
+                            seed_info['data_path']
+                        )
+                    except Exception as e:
+                        write_log(f"Erreur lors de la restauration du seed {seed_id}: {str(e)}", "ERROR")
         except IOError:
+            # Les autres workers ne restaurent pas les seeds
             write_log("Un autre worker Gunicorn est déjà en train de restaurer les seeds, skip")
             return
-        write_log("Ce worker Gunicorn restaure les seeds (lock acquis)")
-        if use_sql_mode():
-            write_log("Restauration des seeds depuis SQLite (mode SQL)")
-            seeds_db = load_seeds_from_db()
-            for seed_id, seed_info in seeds_db.items():
-                try:
-                    write_log(f"Restauration du seed SQL {seed_id}")
-                    start_seed(
-                        seed_id,
-                        seed_info.get('torrent_path', ''),
-                        seed_info.get('data_path', '')
-                    )
-                except Exception as e:
-                    write_log(f"Erreur lors de la restauration du seed SQL {seed_id}: {str(e)}", "ERROR")
-        else:
-            write_log("Restauration des seeds persistés (mode JSON)")
-            persisted_seeds = load_persisted_seeds()
-            for seed_id, seed_info in persisted_seeds.items():
-                try:
-                    write_log(f"Restauration du seed {seed_id}")
-                    start_seed(
-                        seed_id,
-                        seed_info['torrent_file_path'],
-                        seed_info['data_path']
-                    )
-                except Exception as e:
-                    write_log(f"Erreur lors de la restauration du seed {seed_id}: {str(e)}", "ERROR")
     except Exception as e:
         write_log(f"Erreur globale lors de la restauration des seeds: {str(e)}", "ERROR")
     finally:
