@@ -289,6 +289,8 @@ def migrate_json_to_sql_seeds():
         migrated_count = 0
         with get_db() as db:
             for seed_id, data in seeds_data.items():
+                # Correction : toujours transmettre le chemin du .torrent depuis 'torrent_file_path' si présent, sinon 'torrent_path'
+                torrent_path = data.get('torrent_file_path') or data.get('torrent_path', '')
                 db.execute("""
                     INSERT OR REPLACE INTO seeds 
                     (id, torrent_name, torrent_path, data_path, username, status,
@@ -297,7 +299,7 @@ def migrate_json_to_sql_seeds():
                 """, (
                     seed_id,
                     data.get('name', 'Unknown'),
-                    data.get('torrent_path', ''),
+                    torrent_path,
                     data.get('data_path', ''),
                     data.get('username', 'unknown'),
                     'seeding' if data.get('is_active', True) else 'stopped',
