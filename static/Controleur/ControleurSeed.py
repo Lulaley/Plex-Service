@@ -1,3 +1,20 @@
+import signal
+
+# Handler de shutdown pour arrêter tous les seeds actifs proprement
+def shutdown_handler(signum, frame):
+    write_log(f"Signal {signum} reçu, arrêt propre de tous les seeds...")
+    with seeds_lock:
+        seeds_to_stop = list(active_seeds.keys())
+    for seed_id in seeds_to_stop:
+        try:
+            stop_seed(seed_id)
+        except Exception as e:
+            write_log(f"Erreur lors de l'arrêt du seed {seed_id} pendant shutdown: {e}", "ERROR")
+    write_log("Tous les seeds actifs ont été arrêtés proprement.")
+
+# Enregistrement du handler pour SIGTERM et SIGINT
+signal.signal(signal.SIGTERM, shutdown_handler)
+signal.signal(signal.SIGINT, shutdown_handler)
 from .ControleurLog import write_log
 from .ControleurConf import ControleurConf
 from .ControleurLibtorrent import configure_session_for_seed
