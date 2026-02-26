@@ -32,7 +32,6 @@ def start_periodic_stats_update_with_lock(interval=1):
     except Exception as e:
         write_log(f'[PERIODIC] Erreur lors de la gestion du lock périodique : {e}', 'WARNING')
 
-start_periodic_stats_update_with_lock(1)
 def sync_seeds_with_api():
     """Synchronise les seeds entre la BDD et l'API libtorrent_service : relance les seeds manquants côté API."""
     from static.Controleur.libtorrent_client import get_stats, add_seed
@@ -80,6 +79,9 @@ import threading
 import json
 import os
 import fcntl  # Pour le verrouillage de fichier
+
+# Lancer la mise à jour périodique APRÈS l'import de write_log
+start_periodic_stats_update_with_lock(1)
 
 # Dictionnaire global pour stocker les seeds actifs
 active_seeds = {}
