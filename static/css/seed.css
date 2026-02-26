@@ -1,3 +1,13 @@
+/* Forcer le wrapping du nom du seed dans le bouton Arrêter */
+.btn-stop .seed-btn-name {
+    display: block;
+    font-size: 0.85em;
+    margin-top: 4px;
+    word-break: break-all;
+    white-space: normal;
+    max-width: 140px;
+    overflow-wrap: anywhere;
+}
 body {
     background-color: #313B45;
     color: white;
