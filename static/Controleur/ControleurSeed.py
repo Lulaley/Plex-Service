@@ -18,7 +18,7 @@ signal.signal(signal.SIGINT, shutdown_handler)
 from .ControleurLog import write_log
 from .ControleurConf import ControleurConf
 from .ControleurLibtorrent import configure_session_for_seed
-import libtorrent as lt
+from static.Controleur.libtorrent_client import add_seed, remove_seed
 import time
 import threading
 import json
@@ -158,126 +158,18 @@ def get_all_media_paths():
 
 def start_seed(seed_id, torrent_file_path, data_path):
     """Démarre un seed pour un fichier torrent donné."""
-    write_log(f"Démarrage du seed {seed_id} pour {torrent_file_path}")
-    
+    write_log(f"[API] Démarrage du seed {seed_id} pour {torrent_file_path}")
     try:
-        # Utiliser la session globale unique au lieu d'en créer une nouvelle
-        ses = configure_session_for_seed()
-        
-        info = lt.torrent_info(torrent_file_path)
-        write_log(f"Torrent info chargé: {info.name()}")
-        
-        # Nettoyer le data_path (enlever les / finaux)
-        data_path = data_path.rstrip('/')
-        write_log(f"data_path nettoyé: {data_path}")
-        
-        # Déterminer le chemin de sauvegarde
-        # Le save_path doit être le dossier PARENT du contenu du torrent
-        torrent_name = info.name()
-        
-        if os.path.isfile(data_path):
-            # Si data_path est un fichier, le save_path est son dossier parent
-            save_path = os.path.dirname(data_path)
-        elif os.path.isdir(data_path):
-            # Si data_path est un dossier et que son nom correspond au torrent
-            if os.path.basename(data_path) == torrent_name:
-                # Le save_path est le dossier parent
-                save_path = os.path.dirname(data_path)
-                write_log(f"Le dossier correspond au nom du torrent, utilisation du parent")
-            else:
-                # Le save_path est data_path lui-même
-                save_path = data_path
-                write_log(f"Le dossier ne correspond pas au nom du torrent, utilisation de data_path")
+        result = add_seed(seed_id, torrent_file_path, data_path)
+        if result.get('success'):
+            write_log(f"[API] Seed {seed_id} ajouté via API")
+            # Ici, tu peux garder la logique BDD/JSON si besoin
+            return True
         else:
-            save_path = data_path
-        
-        write_log(f"Chemin de sauvegarde déterminé: {save_path}")
-        write_log(f"Nom du torrent: {torrent_name}")
-        write_log(f"Chemin complet attendu: {os.path.join(save_path, torrent_name)}")
-        
-        # Vérifier que les fichiers existent
-        expected_path = os.path.join(save_path, torrent_name)
-        if not os.path.exists(expected_path):
-            write_log(f"ATTENTION: Le chemin {expected_path} n'existe pas!", "WARNING")
-            write_log(f"data_path fourni: {data_path}", "WARNING")
-        else:
-            write_log(f"Le chemin {expected_path} existe bien!")
-        
-        # Préparer les paramètres du torrent
-        atp = {
-            'ti': info,
-            'save_path': save_path,
-            'flags': lt.torrent_flags.upload_mode | lt.torrent_flags.seed_mode  # Mode seed: pas de vérification si complet
-        }
-        
-        # Charger les resume_data si disponibles pour éviter le checking
-        resume_file = os.path.join('/var/www/public/Plex-Service/tmp/resume_data', f'{seed_id}.resume')
-        if os.path.exists(resume_file):
-            try:
-                with open(resume_file, 'rb') as f:
-                    atp['resume_data'] = f.read()
-                write_log(f"Resume data chargé pour {seed_id}, pas de checking nécessaire")
-            except Exception as e:
-                write_log(f"Erreur lors du chargement des resume_data: {str(e)}", "WARNING")
-        
-        h = ses.add_torrent(atp)
-        write_log(f"Torrent ajouté à la session, état initial: {h.status().state}")
-        
-        with seeds_lock:
-            active_seeds[seed_id] = {
-                'id': seed_id,
-                'handle': h,
-                'session': ses,
-                'torrent_file_path': torrent_file_path,
-                'data_path': data_path,
-                'name': info.name(),
-                'is_active': True,
-                'state': 'starting',
-                'stats': {
-                    'uploaded': 0,
-                    'upload_rate': 0,
-                    'peers': 0,
-                    'seeds': 0,
-                    'progress': 0
-                }
-            }
-
-        # Ajout en BDD si mode SQL
-        try:
-            from static.Controleur.ControleurDatabase import use_sql_mode, save_seed_to_db
-            if use_sql_mode():
-                # On prépare les données pour la BDD
-                seed_data_db = {
-                    'id': seed_id,
-                    'name': info.name(),
-                    'torrent_file_path': torrent_file_path,
-                    'data_path': data_path,
-                    'is_active': True,
-                    'uploaded_size': 0,
-                    'upload_rate': 0,
-                    'peers': 0,
-                    'username': 'unknown',  # À adapter si besoin
-                }
-                save_seed_to_db(seed_id, seed_data_db)
-                write_log(f"Seed {seed_id} ajouté en BDD (mode SQL)")
-        except Exception as e:
-            write_log(f"Erreur lors de l'ajout du seed {seed_id} en BDD : {e}", "ERROR")
-
-        save_persisted_seeds()
-        write_log(f"Seed {seed_id} ajouté au dictionnaire et sauvegardé")
-
-        # Lancer le thread de monitoring
-        monitor_thread = threading.Thread(target=monitor_seed, args=(seed_id,), daemon=True)
-        monitor_thread.start()
-        write_log(f"Thread de monitoring démarré pour le seed {seed_id}")
-
-        return True
+            write_log(f"[API] Erreur API add_seed: {result.get('error')}", "ERROR")
+            return False
     except Exception as e:
-        write_log(f"Erreur lors du démarrage du seed {seed_id}: {str(e)}", "ERROR")
-        # Nettoyer en cas d'erreur
-        with seeds_lock:
-            if seed_id in active_seeds:
-                del active_seeds[seed_id]
+        write_log(f"[API] Exception lors du démarrage du seed {seed_id}: {str(e)}", "ERROR")
         return False
 
 def monitor_seed(seed_id):
@@ -349,94 +241,18 @@ def monitor_seed(seed_id):
 
 def stop_seed(seed_id):
     """Arrête un seed."""
-    write_log(f"Arrêt du seed {seed_id}")
-    
+    write_log(f"[API] Arrêt du seed {seed_id}")
     try:
-        with seeds_lock:
-            if seed_id not in active_seeds:
-                write_log(f"Seed {seed_id} introuvable dans ce worker", "WARNING")
-                # Même s'il n'est pas dans ce worker, le retirer du fichier JSON
-                try:
-                    with open(SEEDS_PERSISTENCE_FILE, 'r+') as f:
-                        fcntl.flock(f.fileno(), fcntl.LOCK_EX)
-                        try:
-                            existing_seeds = json.load(f)
-                            if seed_id in existing_seeds:
-                                del existing_seeds[seed_id]
-                                f.seek(0)
-                                f.truncate()
-                                json.dump(existing_seeds, f, indent=4)
-                                write_log(f"Seed {seed_id} retiré du fichier de persistance")
-                                return True
-                        finally:
-                            fcntl.flock(f.fileno(), fcntl.LOCK_UN)
-                except Exception as e:
-                    write_log(f"Erreur lors de la suppression du seed du fichier: {str(e)}", "ERROR")
-                return False
-            
-            seed_data = active_seeds[seed_id]
-            seed_data['is_active'] = False
-            
-            # Sauvegarder les resume_data avant d'arrêter
-            if 'handle' in seed_data and seed_data['handle']:
-                try:
-                    save_resume_data(seed_id, seed_data['handle'])
-                except Exception as e:
-                    write_log(f"Erreur lors de la sauvegarde des resume_data: {str(e)}", "WARNING")
-            
-            # Arrêter la session libtorrent
-            if 'session' in seed_data and seed_data['session']:
-                seed_data['session'].remove_torrent(seed_data['handle'])
-            
-            # Supprimer du dictionnaire local
-            del active_seeds[seed_id]
-        
-        # Supprimer du fichier JSON partagé avec verrouillage
-        try:
-            with open(SEEDS_PERSISTENCE_FILE, 'r+') as f:
-                fcntl.flock(f.fileno(), fcntl.LOCK_EX)
-                try:
-                    existing_seeds = json.load(f)
-                    if seed_id in existing_seeds:
-                        del existing_seeds[seed_id]
-                        f.seek(0)
-                        f.truncate()
-                        json.dump(existing_seeds, f, indent=4)
-                finally:
-                    fcntl.flock(f.fileno(), fcntl.LOCK_UN)
-        except Exception as e:
-            write_log(f"Erreur lors de la suppression du seed du fichier JSON: {str(e)}", "ERROR")
-
-        # Supprimer le fichier .torrent associé
-        try:
-            torrent_file_path = None
-            # Chercher dans le JSON persistant (si encore présent)
-            persisted = load_persisted_seeds()
-            if seed_id in persisted:
-                torrent_file_path = persisted[seed_id].get('torrent_file_path')
-            # Sinon, essayer de retrouver dans les données locales
-            with seeds_lock:
-                if not torrent_file_path and seed_id in active_seeds:
-                    torrent_file_path = active_seeds[seed_id].get('torrent_file_path')
-            if torrent_file_path and os.path.exists(torrent_file_path):
-                os.remove(torrent_file_path)
-                write_log(f"Fichier .torrent supprimé : {torrent_file_path}")
-        except Exception as e:
-            write_log(f"Erreur lors de la suppression du fichier .torrent pour le seed {seed_id} : {e}", "WARNING")
-
-        # Supprimer aussi en BDD si mode SQL
-        try:
-            from static.Controleur.ControleurDatabase import use_sql_mode, delete_seed_from_db
-            if use_sql_mode():
-                delete_seed_from_db(seed_id)
-                write_log(f"Seed {seed_id} supprimé de la BDD (mode SQL)")
-        except Exception as e:
-            write_log(f"Erreur lors de la suppression du seed {seed_id} en BDD : {e}", "ERROR")
-
-        write_log(f"Seed {seed_id} arrêté avec succès")
-        return True
+        result = remove_seed(seed_id)
+        if result.get('success'):
+            write_log(f"[API] Seed {seed_id} supprimé via API")
+            # Ici, tu peux garder la logique BDD/JSON si besoin
+            return True
+        else:
+            write_log(f"[API] Erreur API remove_seed: {result.get('error')}", "ERROR")
+            return False
     except Exception as e:
-        write_log(f"Erreur lors de l'arrêt du seed {seed_id}: {str(e)}", "ERROR")
+        write_log(f"[API] Exception lors de l'arrêt du seed {seed_id}: {str(e)}", "ERROR")
         return False
 
 def save_resume_data(identifier, handle):
