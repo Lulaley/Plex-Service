@@ -31,8 +31,10 @@ def add_seed():
         handle = session.add_torrent(atp)
         with seeds_lock:
             seeds[seed_id] = handle
+        logging.info(f"[API] Seed ajouté: id={seed_id}, name={info.name()}, path={data_path}")
         return jsonify({'success': True})
     except Exception as e:
+        logging.error(f"[API] Erreur lors de l'ajout du seed {seed_id}: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
 @app.route('/remove_seed', methods=['POST'])
@@ -44,7 +46,9 @@ def remove_seed():
         if handle:
             session.remove_torrent(handle)
             del seeds[seed_id]
+            logging.info(f"[API] Seed supprimé: id={seed_id}")
             return jsonify({'success': True})
+    logging.warning(f"[API] Suppression seed: id={seed_id} introuvable")
     return jsonify({'success': False, 'error': 'Seed not found'})
 
 @app.route('/get_stats', methods=['GET'])
@@ -62,6 +66,7 @@ def get_stats():
                 'progress': s.progress * 100,
                 'state': str(s.state)
             }
+    logging.info(f"[API] Stats seeds: {stats}")
     return jsonify(stats)
 
 if __name__ == '__main__':
