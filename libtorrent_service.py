@@ -67,6 +67,7 @@ def get_stats():
                 'progress': s.progress * 100,
                 'state': str(s.state)
             }
+            logging.info(f"[API] Stats seed {seed_id}: {stats[seed_id]}")
     logging.info(f"[API] Stats seeds: {stats}")
     return jsonify(stats)
 
