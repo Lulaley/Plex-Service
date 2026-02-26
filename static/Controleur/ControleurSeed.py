@@ -285,34 +285,25 @@ def get_seed_stats(seed_id):
     return None
 
 def get_all_seeds():
-    """Retourne la liste de tous les seeds actifs depuis le fichier de persistance (partagé entre workers)."""
-    # Charger depuis le fichier JSON qui est partagé entre tous les workers Gunicorn
-    # Au lieu de se baser sur active_seeds qui est en mémoire locale du worker
-    persisted_seeds = load_persisted_seeds()
-    
+    """Retourne la liste de tous les seeds actifs depuis l'API libtorrent_service (source de vérité)."""
+    from static.Controleur.libtorrent_client import get_stats
+    from static.Controleur.ControleurDatabase import update_seed_stats_in_db
+    stats_api = get_stats()
     seeds_list = []
-    for seed_id, seed_info in persisted_seeds.items():
-        # Par défaut, utiliser les stats depuis le fichier JSON (partagées entre workers)
-        stats = seed_info.get('stats', {'uploaded': 0, 'upload_rate': 0, 'peers': 0, 'seeds': 0, 'progress': 0, 'state': 'unknown'})
-        state = seed_info.get('state', 'seeding')
-        is_active = seed_info.get('is_active', True)
-        
-        # Si ce worker gère ce seed, utiliser les stats en mémoire (plus récentes)
-        with seeds_lock:
-            if seed_id in active_seeds:
-                stats = active_seeds[seed_id]['stats']
-                state = active_seeds[seed_id].get('state', 'seeding')
-                is_active = active_seeds[seed_id]['is_active']
-        
+    for seed_id, info in stats_api.items():
+        # Met à jour la BDD avec les stats reçues
+        try:
+            update_seed_stats_in_db(seed_id, info)
+        except Exception as e:
+            write_log(f"Erreur update_seed_stats_in_db pour {seed_id}: {e}", "WARNING")
         seeds_list.append({
             'id': seed_id,
-            'name': seed_info.get('name', 'Unknown'),
-            'data_path': seed_info.get('data_path', ''),
-            'is_active': is_active,
-            'state': state,
-            'stats': stats
+            'name': info.get('name', 'Unknown'),
+            'data_path': '',  # Peut être complété depuis la BDD si besoin
+            'is_active': True,
+            'state': info.get('state', 'seeding'),
+            'stats': info
         })
-    
     return seeds_list
 
 def restore_seeds():
