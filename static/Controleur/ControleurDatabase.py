@@ -57,16 +57,7 @@ def get_all_seeds_from_sql():
     try:
         seeds_list = []
         with get_db() as db:
-            # On sélectionne la seed la plus récente (updated_at) pour chaque data_path
-            cursor = db.execute("""
-                SELECT s.* FROM seeds s
-                INNER JOIN (
-                    SELECT data_path, MAX(updated_at) as max_updated
-                    FROM seeds
-                    GROUP BY data_path
-                ) latest
-                ON s.data_path = latest.data_path AND s.updated_at = latest.max_updated
-            """)
+            cursor = db.execute("SELECT * FROM seeds")
             seen_names = set()
             for row in cursor.fetchall():
                 name = row['torrent_name']
