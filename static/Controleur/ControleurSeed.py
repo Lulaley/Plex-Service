@@ -62,8 +62,11 @@ active_seeds = {}
 seeds_lock = threading.Lock()
 
 # Synchronisation automatique au démarrage du site
+
 try:
     sync_seeds_with_api()
+    # Forcer une mise à jour immédiate des stats après la synchro
+    get_all_seeds()
 except Exception as e:
     write_log(f"[SYNC] Erreur lors de la synchronisation initiale avec l'API : {e}", "WARNING")
 
