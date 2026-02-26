@@ -121,12 +121,21 @@ def stop_seed_route():
 
 @seed_bp.route('/get_seeds_stats', methods=['GET'])
 def get_seeds_stats():
+    # --- Début cache mémoire 1s ---
+    import time
+    if not hasattr(get_seeds_stats, '_cache'):
+        get_seeds_stats._cache = {'ts': 0, 'data': None}
+    now = time.time()
+    if now - get_seeds_stats._cache['ts'] < 1 and get_seeds_stats._cache['data'] is not None:
+        return get_seeds_stats._cache['data']
     try:
         if use_sql_mode():
             seeds = get_all_seeds_from_sql()
         else:
             seeds = get_all_seeds()
-        return jsonify({'success': True, 'seeds': seeds})
+        resp = jsonify({'success': True, 'seeds': seeds})
+        get_seeds_stats._cache = {'ts': now, 'data': resp}
+        return resp
     except Exception as e:
         write_log(f"Erreur lors de la récupération des stats: {str(e)}", "ERROR")
         return jsonify({'success': False, 'message': str(e)}), 500
