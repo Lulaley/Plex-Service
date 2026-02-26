@@ -245,7 +245,8 @@ document.addEventListener('DOMContentLoaded', function () {
         card.innerHTML = `
             <div class="seed-header">
                 <h3 class="seed-name">${seed.name}</h3>
-                <button class="btn-stop" onclick="stopSeed('${seed.id}')">Arrêter<br><span class='seed-btn-name'>${seed.name}</span></button>
+                <button class="btn-stop" onclick="stopSeed('${seed.id}')">Arrêter</button>
+            </div>
             </div>
             <div class="seed-info">
                 <p><strong>Chemin:</strong> ${seed.data_path}</p>
