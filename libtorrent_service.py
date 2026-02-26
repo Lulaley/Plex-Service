@@ -1,3 +1,6 @@
+import logging
+logging.basicConfig(level=logging.INFO)
+
 from flask import Flask, request, jsonify
 import libtorrent as lt
 import threading
@@ -8,6 +11,7 @@ app = Flask(__name__)
 
 # Session libtorrent unique
 session = lt.session()
+logging.info("[libtorrent_service] Port d'écoute BitTorrent fixé à 52414 (TCP/UDP)")
 print("Libtorrent ecoute sur le port:", session.listen_port())
 seeds = {}  # id: handle
 seeds_lock = threading.Lock()
@@ -62,4 +66,4 @@ def get_stats():
     return jsonify(stats)
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5005, debug=False)
+    app.run(host='127.0.0.1', port=5005, debug=True)
