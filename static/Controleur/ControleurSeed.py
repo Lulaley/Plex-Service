@@ -1,5 +1,7 @@
 import threading
 import libtorrent as lt
+import fcntl
+
 def periodic_stats_update(interval=1):
     while True:
         try:
@@ -9,7 +11,28 @@ def periodic_stats_update(interval=1):
             write_log(f"[PERIODIC] Erreur update stats seeds: {e}", "WARNING")
         time.sleep(interval)
 
-threading.Thread(target=periodic_stats_update, args=(1,), daemon=True).start()
+def start_periodic_stats_update_with_lock(interval=1):
+    lockfile = '/tmp/plex_service_stats_update.lock'
+    try:
+        lock_fd = open(lockfile, 'w')
+        try:
+            fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            write_log('[PERIODIC] Ce worker lance la mise à jour périodique des stats.', 'INFO')
+            def periodic_stats_update():
+                while True:
+                    try:
+                        write_log("[PERIODIC] Tick: mise à jour des stats seeds", "DEBUG")
+                        get_all_seeds()
+                    except Exception as e:
+                        write_log(f"[PERIODIC] Erreur update stats seeds: {e}", "WARNING")
+                    time.sleep(interval)
+            threading.Thread(target=periodic_stats_update, daemon=True).start()
+        except BlockingIOError:
+            write_log('[PERIODIC] Un autre worker gère déjà la mise à jour périodique des stats.', 'DEBUG')
+    except Exception as e:
+        write_log(f'[PERIODIC] Erreur lors de la gestion du lock périodique : {e}', 'WARNING')
+
+start_periodic_stats_update_with_lock(1)
 def sync_seeds_with_api():
     """Synchronise les seeds entre la BDD et l'API libtorrent_service : relance les seeds manquants côté API."""
     from static.Controleur.libtorrent_client import get_stats, add_seed
