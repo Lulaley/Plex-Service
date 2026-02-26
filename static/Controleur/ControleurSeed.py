@@ -1,3 +1,19 @@
+def sync_seeds_with_api():
+    """Synchronise les seeds entre la BDD et l'API libtorrent_service : relance les seeds manquants côté API."""
+    from static.Controleur.libtorrent_client import get_stats, add_seed
+    from static.Controleur.ControleurDatabase import get_all_seeds_from_sql
+    stats_api = get_stats()
+    seeds_in_api = set(stats_api.keys())
+    seeds_in_db = get_all_seeds_from_sql()
+    for seed in seeds_in_db:
+        if seed['id'] not in seeds_in_api:
+            # Relance le seed via add_seed
+            try:
+                # Il faut le chemin du .torrent et du data_path
+                add_seed(seed['id'], seed.get('torrent_file_path', ''), seed.get('data_path', ''))
+                write_log(f"[SYNC] Relancé seed absent de l'API : {seed['id']}")
+            except Exception as e:
+                write_log(f"[SYNC] Erreur relance seed {seed['id']} : {e}", "WARNING")
 import signal
 
 # Handler de shutdown pour arrêter tous les seeds actifs proprement
@@ -28,6 +44,12 @@ import fcntl  # Pour le verrouillage de fichier
 # Dictionnaire global pour stocker les seeds actifs
 active_seeds = {}
 seeds_lock = threading.Lock()
+
+# Synchronisation automatique au démarrage du site
+try:
+    sync_seeds_with_api()
+except Exception as e:
+    write_log(f"[SYNC] Erreur lors de la synchronisation initiale avec l'API : {e}", "WARNING")
 
 # Fichier de persistance
 SEEDS_PERSISTENCE_FILE = "/var/www/public/Plex-Service/tmp/active_seeds.json"

@@ -1,3 +1,27 @@
+def update_seed_stats_in_db(seed_id, info):
+    """Met à jour les stats d'un seed dans SQLite à partir des infos API."""
+    try:
+        with get_db() as db:
+            db.execute("""
+                UPDATE seeds SET
+                    uploaded_size = ?,
+                    upload_rate = ?,
+                    peers = ?,
+                    status = ?,
+                    updated_at = ?
+                WHERE id = ?
+            """, (
+                info.get('uploaded', 0),
+                info.get('upload_rate', 0),
+                info.get('peers', 0),
+                info.get('state', 'seeding'),
+                datetime.now().isoformat(),
+                seed_id
+            ))
+        return True
+    except Exception as e:
+        write_log(f"Erreur update_seed_stats_in_db pour {seed_id}: {e}", "ERROR")
+        return False
 def delete_seed_from_db(seed_id):
     """Supprime un seed de la table seeds dans SQLite."""
     try:
