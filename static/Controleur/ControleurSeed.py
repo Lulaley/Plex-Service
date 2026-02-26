@@ -1,3 +1,14 @@
+# Thread périodique pour mettre à jour les stats des seeds dans la BDD
+import threading
+def periodic_stats_update(interval=10):
+    while True:
+        try:
+            get_all_seeds()  # Met à jour la BDD avec les stats de l'API
+        except Exception as e:
+            write_log(f"[PERIODIC] Erreur update stats seeds: {e}", "WARNING")
+        time.sleep(interval)
+
+threading.Thread(target=periodic_stats_update, args=(10,), daemon=True).start()
 def sync_seeds_with_api():
     """Synchronise les seeds entre la BDD et l'API libtorrent_service : relance les seeds manquants côté API."""
     from static.Controleur.libtorrent_client import get_stats, add_seed
