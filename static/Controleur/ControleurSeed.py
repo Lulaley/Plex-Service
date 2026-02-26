@@ -1,5 +1,5 @@
-# Thread périodique pour mettre à jour les stats des seeds dans la BDD
 import threading
+import libtorrent as lt
 def periodic_stats_update(interval=10):
     while True:
         try:
@@ -63,12 +63,24 @@ seeds_lock = threading.Lock()
 
 # Synchronisation automatique au démarrage du site
 
+import time
+
+# Synchronisation automatique au démarrage du site (1ère étape)
 try:
     sync_seeds_with_api()
-    # Forcer une mise à jour immédiate des stats après la synchro
-    get_all_seeds()
+    # Attendre que la lib ait ajouté les seeds
+    time.sleep(2)
 except Exception as e:
     write_log(f"[SYNC] Erreur lors de la synchronisation initiale avec l'API : {e}", "WARNING")
+
+# Appel à get_all_seeds() après sa définition
+def _force_update_stats_after_sync():
+    try:
+        get_all_seeds()
+    except Exception as e:
+        write_log(f"[SYNC] Erreur lors de la mise à jour des stats après synchro : {e}", "WARNING")
+
+threading.Timer(2.5, _force_update_stats_after_sync).start()
 
 # Fichier de persistance
 SEEDS_PERSISTENCE_FILE = "/var/www/public/Plex-Service/tmp/active_seeds.json"
