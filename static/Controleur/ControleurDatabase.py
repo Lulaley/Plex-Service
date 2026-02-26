@@ -67,7 +67,12 @@ def get_all_seeds_from_sql():
                 ) latest
                 ON s.data_path = latest.data_path AND s.updated_at = latest.max_updated
             """)
+            seen_names = set()
             for row in cursor.fetchall():
+                name = row['torrent_name']
+                if name in seen_names:
+                    continue  # Ignore les doublons de nom
+                seen_names.add(name)
                 stats = {
                     'uploaded': row['uploaded_size'],
                     'upload_rate': row['upload_rate'],
@@ -77,7 +82,7 @@ def get_all_seeds_from_sql():
                 }
                 seeds_list.append({
                     'id': row['id'],
-                    'name': row['torrent_name'],
+                    'name': name,
                     'data_path': row['data_path'],
                     'is_active': row['status'] == 'seeding',
                     'state': row['status'],
