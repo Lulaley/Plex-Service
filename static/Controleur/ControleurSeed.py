@@ -16,12 +16,17 @@ def sync_seeds_with_api():
     stats_api = get_stats()
     seeds_in_api = set(stats_api.keys())
     seeds_in_db = get_all_seeds_from_sql()
+    import os
     for seed in seeds_in_db:
         if seed['id'] not in seeds_in_api:
-            # Relance le seed via add_seed
+            data_path = seed.get('data_path', '')
+            torrent_file_path = seed.get('torrent_file_path', '')
+            # Vérifie l'existence du dossier/fichier avant de relancer
+            if not (os.path.exists(data_path) and os.path.exists(torrent_file_path)):
+                write_log(f"[SYNC] Fichier ou dossier manquant pour seed {seed['id']} : data_path='{data_path}', torrent_file_path='{torrent_file_path}'", "WARNING")
+                continue
             try:
-                # Il faut le chemin du .torrent et du data_path
-                add_seed(seed['id'], seed.get('torrent_file_path', ''), seed.get('data_path', ''))
+                add_seed(seed['id'], torrent_file_path, data_path)
                 write_log(f"[SYNC] Relancé seed absent de l'API : {seed['id']}")
             except Exception as e:
                 write_log(f"[SYNC] Erreur relance seed {seed['id']} : {e}", "WARNING")
