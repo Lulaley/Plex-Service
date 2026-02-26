@@ -11,6 +11,7 @@ app = Flask(__name__)
 
 # Session libtorrent unique
 session = lt.session()
+session.listen_on(52415, 52415)
 logging.info("[libtorrent_service] Libtorrent ecoute sur le port: %s", session.listen_port())
 seeds = {}  # id: handle
 seeds_lock = threading.Lock()
