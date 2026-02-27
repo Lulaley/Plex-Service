@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function updateSeedCard(card, seed) {
-        const uploadRate = seed.stats.upload_rate ? formatSpeed(seed.stats.upload_rate) : '0.00 kB/s';
+        const uploadRate = seed.stats.upload_rate ? formatSpeed(seed.stats.upload_rate / 1024) : '0.00 Ko/s';
         const uploaded = seed.stats.uploaded ? formatBytes(seed.stats.uploaded) : '0 B';
         const peers = seed.stats.peers || 0;
         const seedsCount = seed.stats.seeds || 0;
@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', function () {
         card.className = 'seed-card';
         card.id = `seed-${seed.id}`;
 
-        const uploadRate = seed.stats.upload_rate ? formatSpeed(seed.stats.upload_rate) : '0.00 kB/s';
+        const uploadRate = seed.stats.upload_rate ? formatSpeed(seed.stats.upload_rate / 1024) : '0.00 Ko/s';
         const uploaded = seed.stats.uploaded ? formatBytes(seed.stats.uploaded) : '0 B';
         const peers = seed.stats.peers || 0;
         const seedsCount = seed.stats.seeds || 0;
