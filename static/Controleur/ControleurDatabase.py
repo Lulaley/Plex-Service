@@ -430,6 +430,15 @@ def sync_on_mode_change():
 # ========== FONCTIONS D'ACCÈS SQL ==========
 
 def save_download_to_db(download_id, handle):
+    def delete_download_from_db(download_id):
+        """Supprime un téléchargement de la BDD SQLite."""
+        try:
+            with get_db() as db:
+                db.execute("DELETE FROM downloads WHERE id = ?", (download_id,))
+            return True
+        except Exception as e:
+            write_log(f"Erreur suppression download SQL: {e}", "ERROR")
+            return False
     """Sauvegarde un download dans SQLite"""
     try:
         with get_db() as db:

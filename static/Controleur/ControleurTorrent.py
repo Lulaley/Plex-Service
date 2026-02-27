@@ -467,6 +467,11 @@ def download_torrent(torrent_file_path, save_path, handle):
         handle['stats']['state'] = 'completed'
     save_persisted_downloads()
 
+    # Supprimer l'entrée de la BDD si en mode SQL
+    from .ControleurDatabase import use_sql_mode, delete_download_from_db
+    if use_sql_mode():
+        delete_download_from_db(handle['id'])
+
     # Retirer de la persistance une fois terminé
     remove_download_from_persistence(handle['id'])
 
