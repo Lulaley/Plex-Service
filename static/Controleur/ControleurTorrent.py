@@ -425,15 +425,15 @@ def download_torrent(torrent_file_path, save_path, handle):
         write_log(log_message)
         
         # Mettre à jour les stats
+        handle['is_active'] = True  # Toujours actif tant que pas fini
         handle['stats'] = {
             'progress': s.progress * 100,
             'download_rate': s.download_rate / 1000,
             'upload_rate': s.upload_rate / 1000,
             'peers': s.num_peers,
-            'state': str(s.state)
+            'state': 'downloading'  # Toujours downloading tant que pas fini
         }
         handle['name'] = info.name()
-        
         # Sauvegarder les stats dans le fichier
         save_persisted_downloads()
         
@@ -460,10 +460,16 @@ def download_torrent(torrent_file_path, save_path, handle):
     ses.remove_torrent(h)
     with downloads_lock:
         del downloads[handle['id']]
-    
+
+    # Marquer comme terminé et inactif
+    handle['is_active'] = False
+    if 'stats' in handle:
+        handle['stats']['state'] = 'completed'
+    save_persisted_downloads()
+
     # Retirer de la persistance une fois terminé
     remove_download_from_persistence(handle['id'])
-    
+
     # Supprimer les resume_data (plus nécessaires)
     resume_file = os.path.join('/var/www/public/Plex-Service/tmp/resume_data', f'{handle["id"]}.resume')
     if os.path.exists(resume_file):
@@ -472,14 +478,14 @@ def download_torrent(torrent_file_path, save_path, handle):
             write_log(f"Resume data supprimé pour {handle['id']}")
         except Exception as e:
             write_log(f"Erreur suppression resume_data: {str(e)}", "WARNING")
-    
+
     yield "data: done\n\n"
     sys.stdout.flush()  # Force l'envoi des données
-    
+
     if os.path.exists(torrent_file_path):
         os.remove(torrent_file_path)
         write_log(f"Fichier .torrent supprimé : {torrent_file_path}")
-    
+
     handle['is_downloading'] = False
     handle['handle'] = None
     handle['save_path'] = None
