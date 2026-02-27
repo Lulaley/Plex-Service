@@ -195,7 +195,7 @@ def start_download_route():
         # Créer le handle avant de lancer le thread
         handle = {
             'id': download_id,
-            'is_downloading': True,
+            'is_downloading': True,  # Toujours True à la création
             'is_active': True,
             'handle': None,
             'save_path': save_path,

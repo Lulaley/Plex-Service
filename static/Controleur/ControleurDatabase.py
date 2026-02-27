@@ -435,6 +435,12 @@ def save_download_to_db(download_id, handle):
         with get_db() as db:
             stats = handle.get('stats', {})
             
+            # Statut robuste : 'downloading' tant que progress < 100, 'completed' sinon
+            progress = stats.get('progress', 0)
+            if progress >= 100:
+                status = 'completed'
+            else:
+                status = 'downloading'
             db.execute("""
                 INSERT OR REPLACE INTO downloads 
                 (id, torrent_name, torrent_path, save_path, username, status,
@@ -447,8 +453,8 @@ def save_download_to_db(download_id, handle):
                 handle.get('torrent_file_path', ''),
                 handle.get('save_path', ''),
                 handle.get('username', 'unknown'),
-                'downloading' if handle.get('is_downloading', False) else 'completed',
-                stats.get('progress', 0),
+                status,
+                progress,
                 stats.get('total_size', 0),
                 stats.get('downloaded_size', 0),
                 stats.get('upload_rate', 0),
