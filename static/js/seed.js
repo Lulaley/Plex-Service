@@ -203,7 +203,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function updateSeedCard(card, seed) {
-        const uploadRate = seed.stats.upload_rate ? seed.stats.upload_rate.toFixed(2) : '0.00';
+        const uploadRate = seed.stats.upload_rate ? formatSpeed(seed.stats.upload_rate) : '0.00 kB/s';
         const uploaded = seed.stats.uploaded ? formatBytes(seed.stats.uploaded) : '0 B';
         const peers = seed.stats.peers || 0;
         const seedsCount = seed.stats.seeds || 0;
@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const statValues = card.querySelectorAll('.stat-value');
-        if (statValues[0]) statValues[0].textContent = `${uploadRate} kB/s`;
+        if (statValues[0]) statValues[0].textContent = uploadRate;
         if (statValues[1]) statValues[1].textContent = uploaded;
         if (statValues[2]) statValues[2].textContent = peers;
         if (statValues[3]) statValues[3].textContent = seedsCount;
@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', function () {
         card.className = 'seed-card';
         card.id = `seed-${seed.id}`;
 
-        const uploadRate = seed.stats.upload_rate ? seed.stats.upload_rate.toFixed(2) : '0.00';
+        const uploadRate = seed.stats.upload_rate ? formatSpeed(seed.stats.upload_rate) : '0.00 kB/s';
         const uploaded = seed.stats.uploaded ? formatBytes(seed.stats.uploaded) : '0 B';
         const peers = seed.stats.peers || 0;
         const seedsCount = seed.stats.seeds || 0;
@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="seed-stats">
                 <div class="stat-item">
                     <span class="stat-label">Vitesse d'upload</span>
-                    <span class="stat-value">${uploadRate} kB/s</span>
+                    <span class="stat-value">${uploadRate}</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Total uploadé</span>
@@ -268,6 +268,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Seeds</span>
+                        // Ajout de la fonction formatSpeed
+                        function formatSpeed(speedKB) {
+                            if (speedKB < 1024) {
+                                return speedKB.toFixed(2) + ' Ko/s';
+                            } else if (speedKB < 1024 * 1024) {
+                                return (speedKB / 1024).toFixed(2) + ' Mo/s';
+                            } else {
+                                return (speedKB / (1024 * 1024)).toFixed(2) + ' Go/s';
+                            }
+                        }
+                        }
                     <span class="stat-value">${seedsCount}</span>
                 </div>
                 <div class="stat-item">
@@ -304,9 +315,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function formatBytes(bytes) {
-        if (bytes === 0) return '0 B';
+        if (bytes === 0) return '0 Ko';
         const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+        const sizes = ['Ko', 'Mo', 'Go', 'To'];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
