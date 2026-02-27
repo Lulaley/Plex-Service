@@ -278,17 +278,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Seeds</span>
-                        // Ajout de la fonction formatSpeed
-                        function formatSpeed(speedKB) {
-                            if (speedKB < 1024) {
-                                return speedKB.toFixed(2) + ' Ko/s';
-                            } else if (speedKB < 1024 * 1024) {
-                                return (speedKB / 1024).toFixed(2) + ' Mo/s';
-                            } else {
-                                return (speedKB / (1024 * 1024)).toFixed(2) + ' Go/s';
-                            }
-                        }
-                        }
                     <span class="stat-value">${seedsCount}</span>
                 </div>
                 <div class="stat-item">
