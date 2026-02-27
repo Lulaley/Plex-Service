@@ -1,3 +1,13 @@
+// Ajout de la fonction formatSpeed en dehors du rendu HTML
+function formatSpeed(speedKB) {
+    if (speedKB < 1024) {
+        return speedKB.toFixed(2) + ' Ko/s';
+    } else if (speedKB < 1024 * 1024) {
+        return (speedKB / 1024).toFixed(2) + ' Mo/s';
+    } else {
+        return (speedKB / (1024 * 1024)).toFixed(2) + ' Go/s';
+    }
+}
 document.addEventListener('DOMContentLoaded', function () {
     const mediaSelect = document.getElementById('media-select');
     const startSeedFromMediaBtn = document.getElementById('start-seed-from-media');
