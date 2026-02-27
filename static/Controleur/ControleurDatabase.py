@@ -437,7 +437,8 @@ def save_download_to_db(download_id, handle):
             
             # Statut robuste : 'downloading' tant que progress < 100, 'completed' sinon
             progress = stats.get('progress', 0)
-            if progress >= 100:
+            is_downloading = stats.get('is_downloading', False)
+            if progress >= 100 and not is_downloading:
                 status = 'completed'
             else:
                 status = 'downloading'
