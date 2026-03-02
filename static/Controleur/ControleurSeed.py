@@ -242,7 +242,21 @@ def start_seed(seed_id, torrent_file_path, data_path):
         result = add_seed(seed_id, torrent_file_path, data_path)
         if result.get('success'):
             write_log(f"[API] Seed {seed_id} ajouté via API")
-            # Ici, tu peux garder la logique BDD/JSON si besoin
+            # Ajout en BDD
+            from static.Controleur.ControleurDatabase import save_seed_to_db
+            from datetime import datetime
+            seed_data = {
+                'name': os.path.basename(torrent_file_path),
+                'torrent_file_path': torrent_file_path,
+                'data_path': data_path,
+                'username': 'unknown',
+                'status': 'seeding',
+                'uploaded_size': 0,
+                'upload_rate': 0,
+                'peers': 0,
+                'updated_at': datetime.now().isoformat()
+            }
+            save_seed_to_db(seed_id, seed_data)
             return True
         else:
             write_log(f"[API] Erreur API add_seed: {result.get('error')}", "ERROR")
