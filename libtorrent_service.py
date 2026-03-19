@@ -22,6 +22,8 @@ def add_seed():
     torrent_path = data['torrent_path']
     data_path = data['data_path']
     seed_id = data['seed_id']
+    # Offset pour préserver le total uploadé entre redémarrages
+    uploaded_offset = data.get('uploaded_offset', 0)
     try:
         info = lt.torrent_info(torrent_path)
         atp = {
@@ -31,8 +33,8 @@ def add_seed():
         }
         handle = session.add_torrent(atp)
         with seeds_lock:
-            seeds[seed_id] = handle
-        logging.info(f"[API] Seed ajouté: id={seed_id}, name={info.name()}, path={data_path}")
+            seeds[seed_id] = {'handle': handle, 'uploaded_offset': uploaded_offset}
+        logging.info(f"[API] Seed ajouté: id={seed_id}, name={info.name()}, path={data_path}, offset={uploaded_offset}")
         return jsonify({'success': True})
     except Exception as e:
         logging.error(f"[API] Erreur lors de l'ajout du seed {seed_id}: {e}")
@@ -43,8 +45,9 @@ def remove_seed():
     data = request.json
     seed_id = data['seed_id']
     with seeds_lock:
-        handle = seeds.get(seed_id)
-        if handle:
+        seed_entry = seeds.get(seed_id)
+        if seed_entry:
+            handle = seed_entry['handle']
             session.remove_torrent(handle)
             del seeds[seed_id]
             logging.info(f"[API] Seed supprimé: id={seed_id}")
@@ -57,8 +60,10 @@ def get_stats():
     stats = {}
     invalid_ids = []
     with seeds_lock:
-        for seed_id, handle in seeds.items():
+        for seed_id, seed_entry in seeds.items():
             try:
+                handle = seed_entry['handle']
+                uploaded_offset = seed_entry.get('uploaded_offset', 0)
                 if not handle.is_valid():
                     logging.warning(f"[API] Handle invalide pour seed {seed_id}, ignoré")
                     invalid_ids.append(seed_id)
@@ -66,7 +71,7 @@ def get_stats():
                 s = handle.status()
                 stats[seed_id] = {
                     'name': handle.name(),
-                    'uploaded': s.total_upload,
+                    'uploaded': s.total_upload + uploaded_offset,  # Préserve le total entre redémarrages
                     'upload_rate': s.upload_rate,
                     'peers': s.num_peers,
                     'seeds': s.num_seeds,

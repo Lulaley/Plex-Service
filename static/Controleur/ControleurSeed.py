@@ -239,12 +239,21 @@ def start_seed(seed_id, torrent_file_path, data_path):
     """Démarre un seed pour un fichier torrent donné."""
     write_log(f"[API] Démarrage du seed {seed_id} pour {torrent_file_path}")
     try:
-        result = add_seed(seed_id, torrent_file_path, data_path)
+        # Lire l'offset uploadé en BDD pour préserver le total entre redémarrages
+        from static.Controleur.ControleurDatabase import save_seed_to_db, get_db
+        from datetime import datetime
+        uploaded_offset = 0
+        try:
+            with get_db() as db:
+                row = db.execute("SELECT uploaded_size FROM seeds WHERE id = ?", (seed_id,)).fetchone()
+                if row:
+                    uploaded_offset = row['uploaded_size'] or 0
+        except Exception as e:
+            write_log(f"[API] Impossible de lire l'offset uploadé pour {seed_id}: {e}", "WARNING")
+        result = add_seed(seed_id, torrent_file_path, data_path, uploaded_offset=uploaded_offset)
         if result.get('success'):
-            write_log(f"[API] Seed {seed_id} ajouté via API")
+            write_log(f"[API] Seed {seed_id} ajouté via API (offset={uploaded_offset})")
             # Ajout en BDD
-            from static.Controleur.ControleurDatabase import save_seed_to_db
-            from datetime import datetime
             seed_data = {
                 'name': os.path.basename(torrent_file_path),
                 'torrent_file_path': torrent_file_path,

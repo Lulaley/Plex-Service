@@ -2,11 +2,12 @@ import requests
 
 API_URL = 'http://127.0.0.1:5005'
 
-def add_seed(seed_id, torrent_path, data_path):
+def add_seed(seed_id, torrent_path, data_path, uploaded_offset=0):
     resp = requests.post(f'{API_URL}/add_seed', json={
         'seed_id': seed_id,
         'torrent_path': torrent_path,
-        'data_path': data_path
+        'data_path': data_path,
+        'uploaded_offset': uploaded_offset
     })
     return resp.json()
 
