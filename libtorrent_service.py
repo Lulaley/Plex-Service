@@ -55,19 +55,33 @@ def remove_seed():
 @app.route('/get_stats', methods=['GET'])
 def get_stats():
     stats = {}
+    invalid_ids = []
     with seeds_lock:
         for seed_id, handle in seeds.items():
-            s = handle.status()
-            stats[seed_id] = {
-                'name': handle.name(),
-                'uploaded': s.total_upload,
-                'upload_rate': s.upload_rate,
-                'peers': s.num_peers,
-                'seeds': s.num_seeds,
-                'progress': s.progress * 100,
-                'state': str(s.state)
-            }
-            logging.debug(f"[API] Stats seed {seed_id}: {stats[seed_id]}")
+            try:
+                if not handle.is_valid():
+                    logging.warning(f"[API] Handle invalide pour seed {seed_id}, ignoré")
+                    invalid_ids.append(seed_id)
+                    continue
+                s = handle.status()
+                stats[seed_id] = {
+                    'name': handle.name(),
+                    'uploaded': s.total_upload,
+                    'upload_rate': s.upload_rate,
+                    'peers': s.num_peers,
+                    'seeds': s.num_seeds,
+                    'progress': s.progress * 100,
+                    'state': str(s.state)
+                }
+                logging.debug(f"[API] Stats seed {seed_id}: {stats[seed_id]}")
+            except Exception as e:
+                logging.error(f"[API] Erreur stats seed {seed_id}: {e}")
+                invalid_ids.append(seed_id)
+        # Nettoyer les handles invalides
+        for seed_id in invalid_ids:
+            if seed_id in seeds:
+                del seeds[seed_id]
+                logging.info(f"[API] Handle invalide supprimé: {seed_id}")
     logging.debug(f"[API] Stats seeds: {stats}")
     return jsonify(stats)
 
