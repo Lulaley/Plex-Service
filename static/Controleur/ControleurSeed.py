@@ -348,7 +348,9 @@ def stop_seed(seed_id):
         result = remove_seed(seed_id)
         if result.get('success'):
             write_log(f"[API] Seed {seed_id} supprimé via API")
-            # Ici, tu peux garder la logique BDD/JSON si besoin
+            # Suppression en BDD
+            from static.Controleur.ControleurDatabase import delete_seed_from_db
+            delete_seed_from_db(seed_id)
             return True
         else:
             write_log(f"[API] Erreur API remove_seed: {result.get('error')}", "ERROR")
