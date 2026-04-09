@@ -11,7 +11,19 @@ app = Flask(__name__)
 
 # Session libtorrent unique
 session = lt.session()
-session.listen_on(52415, 52415)
+
+def _read_natpmpc_port(port_file='/run/natpmpc-port'):
+    try:
+        with open(port_file) as f:
+            port = int(f.read().strip())
+            if 1024 <= port <= 65535:
+                return port
+    except Exception:
+        pass
+    return 0  # 0 = libtorrent choisit automatiquement
+
+_port = _read_natpmpc_port()
+session.listen_on(_port, _port)
 logging.info("[libtorrent_service] Libtorrent ecoute sur le port: %s", session.listen_port())
 seeds = {}  # id: handle
 seeds_lock = threading.Lock()
