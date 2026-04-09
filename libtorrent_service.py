@@ -23,7 +23,7 @@ def _read_natpmpc_port(port_file='/run/natpmpc-port'):
     return 0  # 0 = libtorrent choisit automatiquement
 
 _port = _read_natpmpc_port()
-session.listen_on(_port, _port)
+session.listen_on(_port, _port, '10.2.0.2')
 logging.info("[libtorrent_service] Libtorrent ecoute sur le port: %s", session.listen_port())
 seeds = {}  # id: handle
 seeds_lock = threading.Lock()
