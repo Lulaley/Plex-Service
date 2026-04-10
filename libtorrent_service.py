@@ -41,26 +41,7 @@ session.add_dht_router('router.utorrent.com', 6881)
 session.add_dht_router('dht.transmissionbt.com', 6881)
 session.add_dht_router('dht.libtorrent.org', 25401)
 
-logging.info("[libtorrent_service] Session SEED configurée (VPN, port %s)", session.listen_port())
-
-# SESSION DOWNLOAD : liée à l'interface VPN (sécurisé)
-download_session = lt.session()
-download_session.listen_on(6882, 6890, '10.2.0.2')
-download_session.apply_settings({
-    'download_rate_limit': -1,
-    'upload_rate_limit': -1,
-    'enable_dht': True,
-    'enable_lsd': True,
-    'enable_upnp': False,
-    'enable_natpmp': False,
-    'announce_to_all_trackers': True,
-    'announce_to_all_tiers': True,
-})
-download_session.add_dht_router('router.bittorrent.com', 6881)
-download_session.add_dht_router('router.utorrent.com', 6881)
-download_session.add_dht_router('dht.transmissionbt.com', 6881)
-download_session.add_dht_router('dht.libtorrent.org', 25401)
-logging.info("[libtorrent_service] Session DOWNLOAD configurée (VPN, port %s)", download_session.listen_port())
+logging.info("[libtorrent_service] Session configurée (VPN, port %s)", session.listen_port())
 
 seeds = {}  # id: handle
 seeds_lock = threading.Lock()
@@ -158,7 +139,7 @@ def add_download():
             atp.resume_data = bytes.fromhex(resume_data)
             logging.info(f"[API] Resume data chargé pour download {download_id}")
 
-        handle = download_session.add_torrent(atp)
+        handle = session.add_torrent(atp)
         handle.resume()
 
         with downloads_lock:
@@ -186,7 +167,7 @@ def remove_download():
         if entry:
             handle = entry['handle']
             if handle.is_valid():
-                download_session.remove_torrent(handle)
+                session.remove_torrent(handle)
             downloads[download_id]['is_active'] = False
             del downloads[download_id]
             logging.info(f"[API] Download supprimé: id={download_id}")
