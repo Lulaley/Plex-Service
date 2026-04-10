@@ -22,71 +22,21 @@ def _read_natpmpc_port(port_file='/run/natpmpc-port'):
         pass
     return 0  # 0 = libtorrent choisit automatiquement
 
-# TEST: Temporairement désactiver le VPN pour diagnostiquer
-# ORIGINAL avec VPN:
-# _port = _read_natpmpc_port()
-# session.listen_on(_port, _port, '10.2.0.2')
-
-# TEST SANS VPN (écoute sur toutes les interfaces):
-logging.info("[libtorrent_service] MODE TEST: Écoute sur 0.0.0.0 (SANS VPN)")
-session.listen_on(6881, 6891, '0.0.0.0')  # Ports 6881-6891
+_port = _read_natpmpc_port()
+session.listen_on(_port, _port, '10.2.0.2')
 logging.info("[libtorrent_service] Libtorrent ecoute sur le port: %s", session.listen_port())
 
-# Configuration optimisée pour VPN SANS port forwarding
-# Mode ultra-agressif pour connexions SORTANTES uniquement
+# Configuration simple et efficace (comme avant)
 settings = {
-    # Connexions - MAXIMALES
-    'connections_limit': 2000,          # 2000 connexions max
-    'unchoke_slots_limit': 500,         # 500 slots upload
-    'active_downloads': 50,             # 50 téléchargements actifs
-    'active_seeds': 50,                 # 50 seeds actifs
-    'active_limit': 100,                # 100 torrents actifs au total
-    
-    # Vitesses illimitées
+    # Pas de limite de vitesse
     'download_rate_limit': -1,
     'upload_rate_limit': -1,
     
-    # DHT - CRUCIAL sans port forwarding
+    # DHT et découverte de peers
     'enable_dht': True,
     'enable_lsd': True,
-    'enable_upnp': False,               # Inutile avec VPN
-    'enable_natpmp': False,             # Inutile avec VPN
-    
-    # Protocoles
-    'enable_outgoing_utp': False,       # TCP uniquement (plus fiable)
-    'enable_incoming_utp': False,
-    'enable_outgoing_tcp': True,
-    'enable_incoming_tcp': True,
-    
-    # CONNEXIONS SORTANTES ULTRA-AGRESSIVES
-    'connection_speed': 2000,           # 2000 nouvelles connexions/sec !!!
-    'peer_connect_timeout': 3,          # Timeout 3 sec (très rapide)
-    'request_timeout': 3,               # Timeout requête 3 sec
-    'torrent_connect_boost': 100,       # Boost connexion au démarrage
-    'aio_threads': 16,                  # 16 threads I/O
-    
-    # Cache et performances
-    'cache_size': 8192,                 # Cache 128MB
-    'max_queued_disk_bytes': 50 * 1024 * 1024,  # 50MB en queue
-    
-    # Peers - MAXIMUM
-    'max_peerlist_size': 10000,         # 10000 peers dans la liste
-    'max_paused_peerlist_size': 5000,
-    'min_reconnect_time': 5,            # Reconnexion 5 secondes
-    'peer_turnover_interval': 30,       # Rotation toutes les 30 secondes
-    
-    # Trackers - annoncer partout
-    'announce_to_all_trackers': True,
-    'announce_to_all_tiers': True,
-    'tracker_backoff': 5,               # Backoff 5 secondes
-    'stop_tracker_timeout': 1,          # Timeout rapide
-    
-    # Algorithmes
-    'choking_algorithm': 0,
-    'seed_choking_algorithm': 0,
-    
-    # PEX (Peer Exchange) - ESSENTIEL sans port forwarding
-    # Les peers vous donnent l'adresse d'autres peers
+    'enable_upnp': False,
+    'enable_natpmp': False,
 }
 
 session.apply_settings(settings)
@@ -193,32 +143,19 @@ def add_download():
         info = lt.torrent_info(torrent_path)
         atp = {
             'ti': info,
-            'save_path': save_path,
-            # Flags pour optimiser le téléchargement
-            'flags': (
-                lt.torrent_flags.auto_managed |           # Gestion automatique
-                lt.torrent_flags.duplicate_is_error |     # Éviter les doublons
-                lt.torrent_flags.apply_ip_filter |        # Appliquer le filtre IP
-                lt.torrent_flags.update_subscribe         # S'abonner aux mises à jour
-            )
+            'save_path': save_path
+            # Pas de flags spéciaux - configuration par défaut comme avant
         }
         
         # Si des resume_data sont fournis, les utiliser
         if resume_data:
             atp['resume_data'] = bytes.fromhex(resume_data)
-            atp['flags'] |= lt.torrent_flags.override_resume_data  # Forcer l'utilisation
             logging.info(f"[API] Resume data chargé pour download {download_id}")
         
         handle = session.add_torrent(atp)
         
-        # Optimisations ULTRA-agressives pour le handle
-        handle.set_sequential_download(False)  # Téléchargement non séquentiel (plus rapide)
-        handle.force_reannounce()              # Forcer l'annonce immédiate aux trackers
-        handle.force_dht_announce()            # Forcer l'annonce DHT immédiate
-        handle.resume()                        # S'assurer que le torrent est actif
-        
-        # Définir la priorité maximale pour ce torrent
-        handle.set_priority(255)               # Priorité max (0-255)
+        # Simplement s'assurer que le torrent est actif
+        handle.resume()
         
         with downloads_lock:
             downloads[download_id] = {
