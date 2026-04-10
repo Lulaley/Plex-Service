@@ -39,6 +39,9 @@ session.apply_settings({
     'enable_natpmp': False,
     'announce_to_all_trackers': True,
     'announce_to_all_tiers': True,
+    'connections_limit': 1000,
+    'connection_speed': 500,
+    'unchoke_slots_limit': 20,
 })
 session.add_dht_router('router.bittorrent.com', 6881)
 session.add_dht_router('router.utorrent.com', 6881)
@@ -210,6 +213,34 @@ def get_download_stats():
         except Exception as e:
             logging.error(f"[API] Erreur stats download {download_id}: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/get_all_downloads_stats', methods=['GET'])
+def get_all_downloads_stats():
+    result = {}
+    with downloads_lock:
+        for did, entry in downloads.items():
+            try:
+                handle = entry['handle']
+                if not handle.is_valid():
+                    continue
+                s = handle.status()
+                result[did] = {
+                    'name': entry['name'],
+                    'progress': round(s.progress * 100, 2),
+                    'download_rate_kb': round(s.download_rate / 1024, 1),
+                    'upload_rate_kb': round(s.upload_rate / 1024, 1),
+                    'num_peers': s.num_peers,
+                    'num_seeds': s.num_seeds,
+                    'connect_candidates': s.connect_candidates,
+                    'num_connections': s.num_connections,
+                    'state': str(s.state),
+                    'is_seeding': handle.is_seed(),
+                    'seeders_in_swarm': s.num_complete,
+                    'leechers_in_swarm': s.num_incomplete,
+                }
+            except Exception as e:
+                result[did] = {'error': str(e)}
+    return jsonify(result)
 
 @app.route('/status', methods=['GET'])
 def status():
