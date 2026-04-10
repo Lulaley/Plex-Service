@@ -22,8 +22,14 @@ def _read_natpmpc_port(port_file='/run/natpmpc-port'):
         pass
     return 0  # 0 = libtorrent choisit automatiquement
 
-_port = _read_natpmpc_port()
-session.listen_on(_port, _port, '10.2.0.2')
+# TEST: Temporairement désactiver le VPN pour diagnostiquer
+# ORIGINAL avec VPN:
+# _port = _read_natpmpc_port()
+# session.listen_on(_port, _port, '10.2.0.2')
+
+# TEST SANS VPN (écoute sur toutes les interfaces):
+logging.info("[libtorrent_service] MODE TEST: Écoute sur 0.0.0.0 (SANS VPN)")
+session.listen_on(6881, 6891, '0.0.0.0')  # Ports 6881-6891
 logging.info("[libtorrent_service] Libtorrent ecoute sur le port: %s", session.listen_port())
 
 # Configuration optimisée pour VPN SANS port forwarding
