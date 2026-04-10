@@ -50,7 +50,6 @@ settings = {
     'enable_incoming_utp': True,
     
     # Optimisations
-    'mixed_mode_algorithm': lt.bandwidth_mixed_algo_t.prefer_tcp,
     'connection_speed': 500,            # Nouvelles connexions par seconde
     'peer_connect_timeout': 7,          # Timeout connexion peer (secondes)
     'request_timeout': 10,              # Timeout requête (secondes)
@@ -63,10 +62,8 @@ settings = {
     # Peers
     'max_peerlist_size': 3000,          # Taille max liste peers
     'max_paused_peerlist_size': 1000,   # Peers pour torrents en pause
-    'min_reconnect_time': 30,           # Temps min avant reconnexion
-    'peer_turnover': 0.05,              # Taux rotation peers (5%)
-    'peer_turnover_cutoff': 0.9,        # Seuil rotation (90%)
-    'peer_turnover_interval': 300,      # Intervalle rotation (5min)
+    'min_reconnect_time': 30,           # Temps min avant reconnexion (secondes)
+    'peer_turnover_interval': 300,      # Intervalle rotation peers (5min)
 }
 
 session.apply_settings(settings)
