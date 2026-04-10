@@ -25,6 +25,60 @@ def _read_natpmpc_port(port_file='/run/natpmpc-port'):
 _port = _read_natpmpc_port()
 session.listen_on(_port, _port, '10.2.0.2')
 logging.info("[libtorrent_service] Libtorrent ecoute sur le port: %s", session.listen_port())
+
+# Configuration optimisée pour des téléchargements rapides
+settings = {
+    # Connexions
+    'connections_limit': 500,           # Nombre max de connexions totales
+    'unchoke_slots_limit': 100,         # Slots d'upload simultanés
+    'active_downloads': 10,             # Téléchargements actifs simultanés
+    'active_seeds': 10,                 # Seeds actifs simultanés
+    'active_limit': 20,                 # Torrents actifs au total
+    
+    # Vitesses (illimité = -1, en bytes/sec)
+    'download_rate_limit': -1,          # Pas de limite download
+    'upload_rate_limit': -1,            # Pas de limite upload
+    
+    # DHT (pour trouver plus de peers)
+    'enable_dht': True,
+    'enable_lsd': True,                 # Local Service Discovery
+    'enable_upnp': False,               # Désactivé car on est derrière un VPN
+    'enable_natpmp': False,             # Désactivé car on est derrière un VPN
+    
+    # Extensions de protocole (PEX, etc.)
+    'enable_outgoing_utp': True,
+    'enable_incoming_utp': True,
+    
+    # Optimisations
+    'mixed_mode_algorithm': lt.bandwidth_mixed_algo_t.prefer_tcp,
+    'connection_speed': 500,            # Nouvelles connexions par seconde
+    'peer_connect_timeout': 7,          # Timeout connexion peer (secondes)
+    'request_timeout': 10,              # Timeout requête (secondes)
+    'aio_threads': 8,                   # Threads I/O asynchrones
+    
+    # Cache et performances
+    'cache_size': 2048,                 # Cache en blocs de 16KB (32MB total)
+    'max_queued_disk_bytes': 10 * 1024 * 1024,  # 10MB max en queue disque
+    
+    # Peers
+    'max_peerlist_size': 3000,          # Taille max liste peers
+    'max_paused_peerlist_size': 1000,   # Peers pour torrents en pause
+    'min_reconnect_time': 30,           # Temps min avant reconnexion
+    'peer_turnover': 0.05,              # Taux rotation peers (5%)
+    'peer_turnover_cutoff': 0.9,        # Seuil rotation (90%)
+    'peer_turnover_interval': 300,      # Intervalle rotation (5min)
+}
+
+session.apply_settings(settings)
+
+# Activer le DHT avec des routeurs bootstrap
+session.add_dht_router('router.bittorrent.com', 6881)
+session.add_dht_router('router.utorrent.com', 6881)
+session.add_dht_router('dht.transmissionbt.com', 6881)
+session.add_dht_router('dht.libtorrent.org', 25401)
+
+logging.info("[libtorrent_service] Configuration optimisée appliquée")
+logging.info("[libtorrent_service] DHT activé avec routeurs bootstrap")
 seeds = {}  # id: handle
 seeds_lock = threading.Lock()
 downloads = {}  # id: {handle, started_at, save_path, torrent_path, ...}
@@ -119,15 +173,26 @@ def add_download():
         info = lt.torrent_info(torrent_path)
         atp = {
             'ti': info,
-            'save_path': save_path
+            'save_path': save_path,
+            # Flags pour optimiser le téléchargement
+            'flags': (
+                lt.torrent_flags.auto_managed |           # Gestion automatique
+                lt.torrent_flags.duplicate_is_error |     # Éviter les doublons
+                lt.torrent_flags.apply_ip_filter          # Appliquer le filtre IP
+            )
         }
         
         # Si des resume_data sont fournis, les utiliser
         if resume_data:
             atp['resume_data'] = bytes.fromhex(resume_data)
+            atp['flags'] |= lt.torrent_flags.override_resume_data  # Forcer l'utilisation
             logging.info(f"[API] Resume data chargé pour download {download_id}")
         
         handle = session.add_torrent(atp)
+        
+        # Forcer la connexion rapide aux peers
+        handle.set_sequential_download(False)  # Téléchargement non séquentiel (plus rapide)
+        handle.resume()  # S'assurer que le torrent est actif
         
         with downloads_lock:
             downloads[download_id] = {
@@ -140,6 +205,7 @@ def add_download():
             }
         
         logging.info(f"[API] Download ajouté: id={download_id}, name={info.name()}, save_path={save_path}")
+        logging.info(f"[API] Trackers: {len(info.trackers())}, DHT nodes: {session.status().dht_nodes}")
         return jsonify({'success': True, 'name': info.name()})
         
     except Exception as e:
@@ -209,7 +275,15 @@ def get_download_stats():
                 'state': str(s.state),
                 'is_seeding': handle.is_seed(),
                 'save_path': download_entry['save_path'],
-                'started_at': download_entry['started_at']
+                'started_at': download_entry['started_at'],
+                # Infos diagnostiques supplémentaires
+                'num_connections': s.num_connections,
+                'num_complete': s.num_complete,      # Seeders dans le swarm
+                'num_incomplete': s.num_incomplete,  # Leechers dans le swarm
+                'list_peers': s.list_peers,          # Peers connus
+                'connect_candidates': s.connect_candidates,  # Candidats à la connexion
+                'all_time_download': s.all_time_download,
+                'all_time_upload': s.all_time_upload,
             }
             return jsonify({'success': True, 'stats': stats})
             
