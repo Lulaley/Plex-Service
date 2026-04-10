@@ -372,8 +372,7 @@ def diagnostic_download():
                 # Autres
                 'total_wanted': s.total_wanted,
                 'total_wanted_done': s.total_wanted_done,
-                'pieces': s.num_pieces,
-                'piece_length': s.piece_length,
+                'num_pieces': s.num_pieces,
             }
             
             return jsonify({'success': True, 'diagnostic': diagnostic})
