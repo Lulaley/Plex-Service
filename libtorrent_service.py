@@ -42,6 +42,8 @@ session.apply_settings({
     'connections_limit': 1000,
     'connection_speed': 500,
     'unchoke_slots_limit': 20,
+    'outgoing_interfaces': 'P2P-FR-152',
+    'listen_interfaces': '10.2.0.2:%d' % _port,
 })
 session.add_dht_router('router.bittorrent.com', 6881)
 session.add_dht_router('router.utorrent.com', 6881)
