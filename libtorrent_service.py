@@ -368,7 +368,6 @@ def diagnostic_download():
                 'is_seeding': handle.is_seed(),
                 'is_finished': handle.is_finished(),
                 'has_metadata': handle.has_metadata(),
-                'need_save_resume': handle.need_save_resume(),
                 
                 # Autres
                 'total_wanted': s.total_wanted,
