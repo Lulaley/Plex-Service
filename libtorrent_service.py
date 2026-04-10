@@ -25,16 +25,20 @@ def _read_natpmpc_port(port_file='/run/natpmpc-port'):
     return 0
 
 _port = _read_natpmpc_port()
+if _port == 0:
+    logging.warning("[libtorrent_service] Port natpmpc non trouvé dans /run/natpmpc-port, libtorrent choisira un port aléatoire")
 session.listen_on(_port, _port, '10.2.0.2')
-logging.info("[libtorrent_service] Session SEED écoute sur VPN port: %s", session.listen_port())
+logging.info("[libtorrent_service] Session écoute sur VPN port: %s (demandé: %s)", session.listen_port(), _port)
 
 session.apply_settings({
-    'download_rate_limit': -1,
-    'upload_rate_limit': -1,
+    'download_rate_limit': 0,
+    'upload_rate_limit': 0,
     'enable_dht': True,
     'enable_lsd': True,
     'enable_upnp': False,
     'enable_natpmp': False,
+    'announce_to_all_trackers': True,
+    'announce_to_all_tiers': True,
 })
 session.add_dht_router('router.bittorrent.com', 6881)
 session.add_dht_router('router.utorrent.com', 6881)
@@ -206,6 +210,32 @@ def get_download_stats():
         except Exception as e:
             logging.error(f"[API] Erreur stats download {download_id}: {e}")
             return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/status', methods=['GET'])
+def status():
+    """Diagnostic de la session : port d'écoute, VPN, DHT, connexions"""
+    try:
+        s = session.status()
+        port_file_content = None
+        try:
+            with open('/run/natpmpc-port') as f:
+                port_file_content = f.read().strip()
+        except Exception:
+            port_file_content = 'FICHIER ABSENT'
+
+        return jsonify({
+            'listen_port': session.listen_port(),
+            'natpmpc_port_file': port_file_content,
+            'port_match': str(session.listen_port()) == port_file_content,
+            'dht_nodes': s.dht_nodes,
+            'has_incoming_connections': s.has_incoming_connections,
+            'download_rate': s.download_rate,
+            'upload_rate': s.upload_rate,
+            'num_seeds_in_session': len(seeds),
+            'num_downloads_in_session': len(downloads),
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5005, debug=True)
