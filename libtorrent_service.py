@@ -202,7 +202,8 @@ def add_download():
             }
         
         logging.info(f"[API] Download ajouté: id={download_id}, name={info.name()}, save_path={save_path}")
-        logging.info(f"[API] Trackers: {len(info.trackers())}, DHT nodes: {session.status().dht_nodes}")
+        trackers_count = info.num_trackers() if hasattr(info, 'num_trackers') else len(list(info.trackers()))
+        logging.info(f"[API] Trackers: {trackers_count}, DHT nodes: {session.status().dht_nodes}")
         return jsonify({'success': True, 'name': info.name()})
         
     except Exception as e:
