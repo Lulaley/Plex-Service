@@ -9,7 +9,9 @@ import os
 
 app = Flask(__name__)
 
-# Session libtorrent unique
+# =============================================================
+# SESSION SEED : Liée au VPN (10.2.0.2) pour protéger l'identité lors du seeding
+# =============================================================
 session = lt.session()
 
 def _read_natpmpc_port(port_file='/run/natpmpc-port'):
@@ -20,35 +22,51 @@ def _read_natpmpc_port(port_file='/run/natpmpc-port'):
                 return port
     except Exception:
         pass
-    return 0  # 0 = libtorrent choisit automatiquement
+    return 0
 
 _port = _read_natpmpc_port()
 session.listen_on(_port, _port, '10.2.0.2')
-logging.info("[libtorrent_service] Libtorrent ecoute sur le port: %s", session.listen_port())
+logging.info("[libtorrent_service] Session SEED écoute sur VPN port: %s", session.listen_port())
 
-# Configuration simple et efficace (comme avant)
-settings = {
-    # Pas de limite de vitesse
+session.apply_settings({
     'download_rate_limit': -1,
     'upload_rate_limit': -1,
-    
-    # DHT et découverte de peers
     'enable_dht': True,
     'enable_lsd': True,
     'enable_upnp': False,
     'enable_natpmp': False,
-}
-
-session.apply_settings(settings)
-
-# Activer le DHT avec des routeurs bootstrap
+})
 session.add_dht_router('router.bittorrent.com', 6881)
 session.add_dht_router('router.utorrent.com', 6881)
 session.add_dht_router('dht.transmissionbt.com', 6881)
 session.add_dht_router('dht.libtorrent.org', 25401)
 
-logging.info("[libtorrent_service] Configuration optimisée appliquée")
-logging.info("[libtorrent_service] DHT activé avec routeurs bootstrap")
+# =============================================================
+# SESSION DOWNLOAD : Liée à toutes les interfaces (comme avant, rapide)
+# =============================================================
+download_session = lt.session()
+
+download_session.listen_on(6881, 6891, '0.0.0.0')
+logging.info("[libtorrent_service] Session DOWNLOAD écoute sur port: %s (toutes interfaces)", download_session.listen_port())
+
+download_session.apply_settings({
+    'download_rate_limit': -1,
+    'upload_rate_limit': -1,
+    'enable_dht': True,
+    'enable_lsd': True,
+    'enable_upnp': True,
+    'enable_natpmp': True,
+    'connections_limit': 500,
+    'connection_speed': 200,
+    'announce_to_all_trackers': True,
+    'announce_to_all_tiers': True,
+})
+download_session.add_dht_router('router.bittorrent.com', 6881)
+download_session.add_dht_router('router.utorrent.com', 6881)
+download_session.add_dht_router('dht.transmissionbt.com', 6881)
+download_session.add_dht_router('dht.libtorrent.org', 25401)
+
+logging.info("[libtorrent_service] Session DOWNLOAD configurée (interface directe, rapide)")
 seeds = {}  # id: handle
 seeds_lock = threading.Lock()
 downloads = {}  # id: {handle, started_at, save_path, torrent_path, ...}
@@ -152,7 +170,7 @@ def add_download():
             atp['resume_data'] = bytes.fromhex(resume_data)
             logging.info(f"[API] Resume data chargé pour download {download_id}")
         
-        handle = session.add_torrent(atp)
+        handle = download_session.add_torrent(atp)
         
         # Simplement s'assurer que le torrent est actif
         handle.resume()
@@ -169,7 +187,7 @@ def add_download():
         
         logging.info(f"[API] Download ajouté: id={download_id}, name={info.name()}, save_path={save_path}")
         trackers_count = info.num_trackers() if hasattr(info, 'num_trackers') else len(list(info.trackers()))
-        logging.info(f"[API] Trackers: {trackers_count}, DHT nodes: {session.status().dht_nodes}")
+        logging.info(f"[API] Trackers: {trackers_count}, DHT nodes: {download_session.status().dht_nodes}")
         return jsonify({'success': True, 'name': info.name()})
         
     except Exception as e:
@@ -198,7 +216,7 @@ def remove_download():
                 except Exception as e:
                     logging.error(f"[API] Erreur sauvegarde resume data pour {download_id}: {e}")
             
-            session.remove_torrent(handle)
+            download_session.remove_torrent(handle)
             downloads[download_id]['is_active'] = False
             del downloads[download_id]
             
