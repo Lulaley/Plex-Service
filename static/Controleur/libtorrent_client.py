@@ -99,3 +99,19 @@ def get_all_downloads():
         return resp.json()
     except Exception as e:
         return {'success': False, 'error': str(e)}
+
+def diagnostic_download(download_id):
+    """
+    Récupère un diagnostic détaillé d'un téléchargement
+    
+    Args:
+        download_id: ID du téléchargement
+    
+    Returns:
+        dict: {'success': bool, 'diagnostic': dict, 'error': str}
+    """
+    try:
+        resp = requests.get(f'{API_URL}/diagnostic_download', params={'download_id': download_id}, timeout=5)
+        return resp.json()
+    except Exception as e:
+        return {'success': False, 'error': str(e)}

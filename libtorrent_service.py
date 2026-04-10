@@ -26,14 +26,14 @@ _port = _read_natpmpc_port()
 session.listen_on(_port, _port, '10.2.0.2')
 logging.info("[libtorrent_service] Libtorrent ecoute sur le port: %s", session.listen_port())
 
-# Configuration optimisée pour des téléchargements rapides
+# Configuration optimisée pour des téléchargements rapides (VPN-friendly)
 settings = {
-    # Connexions
-    'connections_limit': 500,           # Nombre max de connexions totales
-    'unchoke_slots_limit': 100,         # Slots d'upload simultanés
-    'active_downloads': 10,             # Téléchargements actifs simultanés
-    'active_seeds': 10,                 # Seeds actifs simultanés
-    'active_limit': 20,                 # Torrents actifs au total
+    # Connexions - TRÈS agressif pour compenser le VPN
+    'connections_limit': 1000,          # Nombre max de connexions totales
+    'unchoke_slots_limit': 200,         # Slots d'upload simultanés
+    'active_downloads': 20,             # Téléchargements actifs simultanés
+    'active_seeds': 20,                 # Seeds actifs simultanés
+    'active_limit': 40,                 # Torrents actifs au total
     
     # Vitesses (illimité = -1, en bytes/sec)
     'download_rate_limit': -1,          # Pas de limite download
@@ -45,25 +45,36 @@ settings = {
     'enable_upnp': False,               # Désactivé car on est derrière un VPN
     'enable_natpmp': False,             # Désactivé car on est derrière un VPN
     
-    # Extensions de protocole (PEX, etc.)
-    'enable_outgoing_utp': True,
-    'enable_incoming_utp': True,
+    # FORCER TCP (désactiver uTP car problématique avec VPN)
+    'enable_outgoing_utp': False,       # Désactiver uTP sortant
+    'enable_incoming_utp': False,       # Désactiver uTP entrant
+    'enable_outgoing_tcp': True,        # Forcer TCP sortant
+    'enable_incoming_tcp': True,        # Forcer TCP entrant
     
-    # Optimisations
-    'connection_speed': 500,            # Nouvelles connexions par seconde
-    'peer_connect_timeout': 7,          # Timeout connexion peer (secondes)
-    'request_timeout': 10,              # Timeout requête (secondes)
+    # Optimisations agressives
+    'connection_speed': 1000,           # 1000 nouvelles connexions par seconde !
+    'peer_connect_timeout': 5,          # Timeout réduit (5 secondes)
+    'request_timeout': 5,               # Timeout requête réduit (5 secondes)
     'aio_threads': 8,                   # Threads I/O asynchrones
     
     # Cache et performances
-    'cache_size': 2048,                 # Cache en blocs de 16KB (32MB total)
-    'max_queued_disk_bytes': 10 * 1024 * 1024,  # 10MB max en queue disque
+    'cache_size': 4096,                 # Cache augmenté à 64MB
+    'max_queued_disk_bytes': 20 * 1024 * 1024,  # 20MB max en queue disque
     
-    # Peers
-    'max_peerlist_size': 3000,          # Taille max liste peers
-    'max_paused_peerlist_size': 1000,   # Peers pour torrents en pause
-    'min_reconnect_time': 30,           # Temps min avant reconnexion (secondes)
-    'peer_turnover_interval': 300,      # Intervalle rotation peers (5min)
+    # Peers - MAXIMISER
+    'max_peerlist_size': 5000,          # Augmenter la liste de peers
+    'max_paused_peerlist_size': 2000,   # Peers pour torrents en pause
+    'min_reconnect_time': 10,           # Reconnexion rapide (10 secondes)
+    'peer_turnover_interval': 60,       # Rotation peers toutes les minutes
+    
+    # Trackers - annoncer à TOUS
+    'announce_to_all_trackers': True,   # Annoncer à tous les trackers
+    'announce_to_all_tiers': True,      # Ne pas attendre les tiers
+    'tracker_backoff': 10,              # Backoff réduit (10 secondes)
+    
+    # Algorithmes
+    'choking_algorithm': 0,             # Fixed slots (0 = unchoke le plus possible)
+    'seed_choking_algorithm': 0,        # Pareil pour le seed
 }
 
 session.apply_settings(settings)
@@ -175,7 +186,8 @@ def add_download():
             'flags': (
                 lt.torrent_flags.auto_managed |           # Gestion automatique
                 lt.torrent_flags.duplicate_is_error |     # Éviter les doublons
-                lt.torrent_flags.apply_ip_filter          # Appliquer le filtre IP
+                lt.torrent_flags.apply_ip_filter |        # Appliquer le filtre IP
+                lt.torrent_flags.update_subscribe         # S'abonner aux mises à jour
             )
         }
         
@@ -187,9 +199,14 @@ def add_download():
         
         handle = session.add_torrent(atp)
         
-        # Forcer la connexion rapide aux peers
+        # Optimisations agressives pour le handle
         handle.set_sequential_download(False)  # Téléchargement non séquentiel (plus rapide)
-        handle.resume()  # S'assurer que le torrent est actif
+        handle.force_reannounce()              # Forcer l'annonce immédiate aux trackers
+        handle.force_dht_announce()            # Forcer l'annonce DHT immédiate
+        handle.resume()                        # S'assurer que le torrent est actif
+        
+        # Définir la priorité maximale pour ce torrent
+        handle.set_priority(255)               # Priorité max (0-255)
         
         with downloads_lock:
             downloads[download_id] = {
@@ -331,6 +348,93 @@ def get_all_downloads():
                 logging.info(f"[API] Handle invalide supprimé: {download_id}")
     
     return jsonify({'success': True, 'downloads': all_stats})
+
+@app.route('/diagnostic_download', methods=['GET'])
+def diagnostic_download():
+    """Diagnostic détaillé d'un téléchargement pour déboguer les problèmes de vitesse"""
+    download_id = request.args.get('download_id')
+    
+    if not download_id:
+        return jsonify({'success': False, 'error': 'download_id required'}), 400
+    
+    with downloads_lock:
+        download_entry = downloads.get(download_id)
+        if not download_entry:
+            return jsonify({'success': False, 'error': 'Download not found'}), 404
+        
+        try:
+            handle = download_entry['handle']
+            if not handle.is_valid():
+                return jsonify({'success': False, 'error': 'Invalid handle'}), 500
+            
+            s = handle.status()
+            
+            # Récupérer les infos des trackers
+            trackers_info = []
+            for tracker in handle.trackers():
+                trackers_info.append({
+                    'url': tracker.get('url', 'N/A'),
+                    'tier': tracker.get('tier', 0),
+                    'fail_limit': tracker.get('fail_limit', 0),
+                    'fails': tracker.get('fails', 0),
+                    'verified': tracker.get('verified', False),
+                    'updating': tracker.get('updating', False),
+                    'message': tracker.get('message', ''),
+                })
+            
+            # Session status
+            session_status = session.status()
+            
+            diagnostic = {
+                'download_id': download_id,
+                'name': download_entry['name'],
+                'state': str(s.state),
+                'progress': s.progress * 100,
+                
+                # Vitesses
+                'download_rate': s.download_rate,
+                'upload_rate': s.upload_rate,
+                'download_rate_kb': s.download_rate / 1024,
+                'upload_rate_kb': s.upload_rate / 1024,
+                
+                # Peers et connexions
+                'num_peers': s.num_peers,
+                'num_seeds': s.num_seeds,
+                'num_connections': s.num_connections,
+                'num_complete': s.num_complete,
+                'num_incomplete': s.num_incomplete,
+                'list_peers': s.list_peers,
+                'list_seeds': s.list_seeds,
+                'connect_candidates': s.connect_candidates,
+                
+                # Trackers
+                'trackers': trackers_info,
+                'num_trackers': len(trackers_info),
+                
+                # DHT
+                'dht_nodes': session_status.dht_nodes,
+                'has_incoming_connections': session_status.has_incoming_connections,
+                
+                # Flags
+                'is_seeding': handle.is_seed(),
+                'is_finished': handle.is_finished(),
+                'has_metadata': handle.has_metadata(),
+                'need_save_resume': handle.need_save_resume(),
+                
+                # Autres
+                'total_wanted': s.total_wanted,
+                'total_wanted_done': s.total_wanted_done,
+                'pieces': s.num_pieces,
+                'piece_length': s.piece_length,
+            }
+            
+            return jsonify({'success': True, 'diagnostic': diagnostic})
+            
+        except Exception as e:
+            import traceback
+            logging.error(f"[API] Erreur diagnostic download {download_id}: {e}")
+            logging.error(traceback.format_exc())
+            return jsonify({'success': False, 'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5005, debug=True)
