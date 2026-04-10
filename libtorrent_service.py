@@ -26,55 +26,61 @@ _port = _read_natpmpc_port()
 session.listen_on(_port, _port, '10.2.0.2')
 logging.info("[libtorrent_service] Libtorrent ecoute sur le port: %s", session.listen_port())
 
-# Configuration optimisée pour des téléchargements rapides (VPN-friendly)
+# Configuration optimisée pour VPN SANS port forwarding
+# Mode ultra-agressif pour connexions SORTANTES uniquement
 settings = {
-    # Connexions - TRÈS agressif pour compenser le VPN
-    'connections_limit': 1000,          # Nombre max de connexions totales
-    'unchoke_slots_limit': 200,         # Slots d'upload simultanés
-    'active_downloads': 20,             # Téléchargements actifs simultanés
-    'active_seeds': 20,                 # Seeds actifs simultanés
-    'active_limit': 40,                 # Torrents actifs au total
+    # Connexions - MAXIMALES
+    'connections_limit': 2000,          # 2000 connexions max
+    'unchoke_slots_limit': 500,         # 500 slots upload
+    'active_downloads': 50,             # 50 téléchargements actifs
+    'active_seeds': 50,                 # 50 seeds actifs
+    'active_limit': 100,                # 100 torrents actifs au total
     
-    # Vitesses (illimité = -1, en bytes/sec)
-    'download_rate_limit': -1,          # Pas de limite download
-    'upload_rate_limit': -1,            # Pas de limite upload
+    # Vitesses illimitées
+    'download_rate_limit': -1,
+    'upload_rate_limit': -1,
     
-    # DHT (pour trouver plus de peers)
+    # DHT - CRUCIAL sans port forwarding
     'enable_dht': True,
-    'enable_lsd': True,                 # Local Service Discovery
-    'enable_upnp': False,               # Désactivé car on est derrière un VPN
-    'enable_natpmp': False,             # Désactivé car on est derrière un VPN
+    'enable_lsd': True,
+    'enable_upnp': False,               # Inutile avec VPN
+    'enable_natpmp': False,             # Inutile avec VPN
     
-    # FORCER TCP (désactiver uTP car problématique avec VPN)
-    'enable_outgoing_utp': False,       # Désactiver uTP sortant
-    'enable_incoming_utp': False,       # Désactiver uTP entrant
-    'enable_outgoing_tcp': True,        # Forcer TCP sortant
-    'enable_incoming_tcp': True,        # Forcer TCP entrant
+    # Protocoles
+    'enable_outgoing_utp': False,       # TCP uniquement (plus fiable)
+    'enable_incoming_utp': False,
+    'enable_outgoing_tcp': True,
+    'enable_incoming_tcp': True,
     
-    # Optimisations agressives
-    'connection_speed': 1000,           # 1000 nouvelles connexions par seconde !
-    'peer_connect_timeout': 5,          # Timeout réduit (5 secondes)
-    'request_timeout': 5,               # Timeout requête réduit (5 secondes)
-    'aio_threads': 8,                   # Threads I/O asynchrones
+    # CONNEXIONS SORTANTES ULTRA-AGRESSIVES
+    'connection_speed': 2000,           # 2000 nouvelles connexions/sec !!!
+    'peer_connect_timeout': 3,          # Timeout 3 sec (très rapide)
+    'request_timeout': 3,               # Timeout requête 3 sec
+    'torrent_connect_boost': 100,       # Boost connexion au démarrage
+    'aio_threads': 16,                  # 16 threads I/O
     
     # Cache et performances
-    'cache_size': 4096,                 # Cache augmenté à 64MB
-    'max_queued_disk_bytes': 20 * 1024 * 1024,  # 20MB max en queue disque
+    'cache_size': 8192,                 # Cache 128MB
+    'max_queued_disk_bytes': 50 * 1024 * 1024,  # 50MB en queue
     
-    # Peers - MAXIMISER
-    'max_peerlist_size': 5000,          # Augmenter la liste de peers
-    'max_paused_peerlist_size': 2000,   # Peers pour torrents en pause
-    'min_reconnect_time': 10,           # Reconnexion rapide (10 secondes)
-    'peer_turnover_interval': 60,       # Rotation peers toutes les minutes
+    # Peers - MAXIMUM
+    'max_peerlist_size': 10000,         # 10000 peers dans la liste
+    'max_paused_peerlist_size': 5000,
+    'min_reconnect_time': 5,            # Reconnexion 5 secondes
+    'peer_turnover_interval': 30,       # Rotation toutes les 30 secondes
     
-    # Trackers - annoncer à TOUS
-    'announce_to_all_trackers': True,   # Annoncer à tous les trackers
-    'announce_to_all_tiers': True,      # Ne pas attendre les tiers
-    'tracker_backoff': 10,              # Backoff réduit (10 secondes)
+    # Trackers - annoncer partout
+    'announce_to_all_trackers': True,
+    'announce_to_all_tiers': True,
+    'tracker_backoff': 5,               # Backoff 5 secondes
+    'stop_tracker_timeout': 1,          # Timeout rapide
     
     # Algorithmes
-    'choking_algorithm': 0,             # Fixed slots (0 = unchoke le plus possible)
-    'seed_choking_algorithm': 0,        # Pareil pour le seed
+    'choking_algorithm': 0,
+    'seed_choking_algorithm': 0,
+    
+    # PEX (Peer Exchange) - ESSENTIEL sans port forwarding
+    # Les peers vous donnent l'adresse d'autres peers
 }
 
 session.apply_settings(settings)
@@ -199,7 +205,7 @@ def add_download():
         
         handle = session.add_torrent(atp)
         
-        # Optimisations agressives pour le handle
+        # Optimisations ULTRA-agressives pour le handle
         handle.set_sequential_download(False)  # Téléchargement non séquentiel (plus rapide)
         handle.force_reannounce()              # Forcer l'annonce immédiate aux trackers
         handle.force_dht_announce()            # Forcer l'annonce DHT immédiate
