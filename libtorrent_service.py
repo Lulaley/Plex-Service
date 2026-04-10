@@ -42,8 +42,30 @@ session.add_dht_router('dht.transmissionbt.com', 6881)
 session.add_dht_router('dht.libtorrent.org', 25401)
 
 logging.info("[libtorrent_service] Session SEED configurée (VPN, port %s)", session.listen_port())
+
+# SESSION DOWNLOAD : liée à l'interface VPN (sécurisé)
+download_session = lt.session()
+download_session.listen_on(6882, 6890, '10.2.0.2')
+download_session.apply_settings({
+    'download_rate_limit': -1,
+    'upload_rate_limit': -1,
+    'enable_dht': True,
+    'enable_lsd': True,
+    'enable_upnp': False,
+    'enable_natpmp': False,
+    'announce_to_all_trackers': True,
+    'announce_to_all_tiers': True,
+})
+download_session.add_dht_router('router.bittorrent.com', 6881)
+download_session.add_dht_router('router.utorrent.com', 6881)
+download_session.add_dht_router('dht.transmissionbt.com', 6881)
+download_session.add_dht_router('dht.libtorrent.org', 25401)
+logging.info("[libtorrent_service] Session DOWNLOAD configurée (VPN, port %s)", download_session.listen_port())
+
 seeds = {}  # id: handle
 seeds_lock = threading.Lock()
+downloads = {}  # id: {handle, started_at, save_path, torrent_path, name, is_active}
+downloads_lock = threading.Lock()
 
 @app.route('/add_seed', methods=['POST'])
 def add_seed():
@@ -118,6 +140,91 @@ def get_stats():
                 logging.info(f"[API] Handle invalide supprimé: {seed_id}")
     logging.debug(f"[API] Stats seeds: {stats}")
     return jsonify(stats)
+
+@app.route('/add_download', methods=['POST'])
+def add_download():
+    data = request.json
+    download_id = data['download_id']
+    torrent_path = data['torrent_path']
+    save_path = data['save_path']
+    resume_data = data.get('resume_data')
+
+    try:
+        info = lt.torrent_info(torrent_path)
+        atp = lt.add_torrent_params()
+        atp.ti = info
+        atp.save_path = save_path
+        if resume_data:
+            atp.resume_data = bytes.fromhex(resume_data)
+            logging.info(f"[API] Resume data chargé pour download {download_id}")
+
+        handle = download_session.add_torrent(atp)
+        handle.resume()
+
+        with downloads_lock:
+            downloads[download_id] = {
+                'handle': handle,
+                'started_at': time.time(),
+                'save_path': save_path,
+                'torrent_path': torrent_path,
+                'name': info.name(),
+                'is_active': True
+            }
+        logging.info(f"[API] Download ajouté: id={download_id}, name={info.name()}")
+        return jsonify({'success': True, 'name': info.name()})
+    except Exception as e:
+        logging.error(f"[API] Erreur ajout download {download_id}: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/remove_download', methods=['POST'])
+def remove_download():
+    data = request.json
+    download_id = data['download_id']
+
+    with downloads_lock:
+        entry = downloads.get(download_id)
+        if entry:
+            handle = entry['handle']
+            if handle.is_valid():
+                download_session.remove_torrent(handle)
+            downloads[download_id]['is_active'] = False
+            del downloads[download_id]
+            logging.info(f"[API] Download supprimé: id={download_id}")
+            return jsonify({'success': True})
+
+    return jsonify({'success': False, 'error': 'Download not found'}), 404
+
+@app.route('/get_download_stats', methods=['GET'])
+def get_download_stats():
+    download_id = request.args.get('download_id')
+    if not download_id:
+        return jsonify({'success': False, 'error': 'download_id required'}), 400
+
+    with downloads_lock:
+        entry = downloads.get(download_id)
+        if not entry:
+            return jsonify({'success': False, 'error': 'Download not found'}), 404
+        try:
+            handle = entry['handle']
+            if not handle.is_valid():
+                return jsonify({'success': False, 'error': 'Invalid handle'}), 500
+            s = handle.status()
+            stats = {
+                'name': entry['name'],
+                'progress': s.progress * 100,
+                'download_rate': s.download_rate,
+                'upload_rate': s.upload_rate,
+                'peers': s.num_peers,
+                'seeds': s.num_seeds,
+                'downloaded': s.total_download,
+                'uploaded': s.total_upload,
+                'state': str(s.state),
+                'is_seeding': handle.is_seed(),
+            }
+            return jsonify({'success': True, 'stats': stats})
+        except Exception as e:
+            logging.error(f"[API] Erreur stats download {download_id}: {e}")
+            return jsonify({'success': False, 'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5005, debug=True)

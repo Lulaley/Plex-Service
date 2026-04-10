@@ -1,11 +1,11 @@
 from .ControleurLog import write_log
 from .ControleurConf import ControleurConf
 from .ControleurTMDB import ControleurTMDB
-from .ControleurLibtorrent import configure_session_for_download
 from .ControleurDatabase import (
     use_sql_mode, save_download_to_db, load_downloads_from_db, sync_on_mode_change
 )
 import libtorrent as lt
+from .libtorrent_client import add_download, remove_download, get_download_stats
 import time
 import re
 import os
@@ -264,7 +264,7 @@ def stop_download(handle):
 
 def download_torrent(torrent_file_path, save_path, handle):
     """
-    Télécharge un torrent directement via libtorrent (exécuté en tant que root, sans VPN)
+    Télécharge un torrent via l'API libtorrent (VPN, sécurisé)
     """
     try:
         write_log(f"[DOWNLOAD_TORRENT] Début avec chemin: {torrent_file_path}")
@@ -351,28 +351,29 @@ def download_torrent(torrent_file_path, save_path, handle):
         save_path = ensure_directory_exists(save_path, name)
         write_log(f"Chemin de sauvegarde: {save_path}")
     
-    # Démarrer le téléchargement directement via libtorrent (root, sans VPN)
-    ses = configure_session_for_download()
-
-    atp = lt.add_torrent_params()
-    atp.ti = info
-    atp.save_path = save_path
-
-    # Charger les resume_data si disponibles
+    # Démarrer le téléchargement via l'API libtorrent (VPN)
     resume_file = os.path.join('/var/www/public/Plex-Service/tmp/resume_data', f'{handle["id"]}.resume')
+    resume_data_hex = None
     if os.path.exists(resume_file):
         try:
             with open(resume_file, 'rb') as f:
-                atp.resume_data = f.read()
+                resume_data_hex = f.read().hex()
             write_log(f"Resume data chargé pour {handle['id']}, reprise sans re-checking")
         except Exception as e:
             write_log(f"Erreur lors du chargement des resume_data: {str(e)}", "WARNING")
 
-    torrent_handle = ses.add_torrent(atp)
-    torrent_handle.resume()
+    response = add_download(
+        download_id=handle['id'],
+        torrent_path=torrent_file_path,
+        save_path=save_path,
+        resume_data=resume_data_hex
+    )
 
-    # Mettre à jour le handle
-    handle['handle'] = torrent_handle
+    if not response.get('success'):
+        write_log(f"[DOWNLOAD_TORRENT] Erreur API: {response.get('error', 'Unknown error')}", "ERROR")
+        yield "data: error\n\n"
+        return
+
     handle['is_downloading'] = True
     handle['save_path'] = save_path
     handle['torrent_file_path'] = torrent_file_path
@@ -384,14 +385,13 @@ def download_torrent(torrent_file_path, save_path, handle):
         downloads[handle['id']] = handle
 
     save_persisted_downloads()
-    write_log(f"Téléchargement de {info.name()} démarré directement (root, sans VPN)")
+    write_log(f"Téléchargement de {info.name()} démarré via API (VPN)")
 
-    # Boucle de monitoring
+    # Boucle de monitoring via l'API
     while True:
-        # Vérifier si le téléchargement a été annulé localement
         if not handle['is_downloading']:
             write_log("Téléchargement annulé localement.")
-            ses.remove_torrent(torrent_handle)
+            remove_download(handle['id'])
             with downloads_lock:
                 if handle['id'] in downloads:
                     del downloads[handle['id']]
@@ -399,13 +399,12 @@ def download_torrent(torrent_file_path, save_path, handle):
             yield "data: cancelled\n\n"
             return
 
-        # Vérifier si le téléchargement a été annulé via le fichier de persistance
         persisted = load_persisted_downloads()
         if handle['id'] in persisted and not persisted[handle['id']].get('is_active', True):
             write_log("Téléchargement annulé via le fichier de persistance (autre worker).")
             handle['is_downloading'] = False
             handle['is_active'] = False
-            ses.remove_torrent(torrent_handle)
+            remove_download(handle['id'])
             with downloads_lock:
                 if handle['id'] in downloads:
                     del downloads[handle['id']]
@@ -413,13 +412,17 @@ def download_torrent(torrent_file_path, save_path, handle):
             yield "data: cancelled\n\n"
             return
 
-        # Récupérer les stats directement depuis libtorrent
-        s = torrent_handle.status()
-        progress = s.progress * 100
-        download_rate = s.download_rate / 1000
-        upload_rate = s.upload_rate / 1000
-        peers = s.num_peers
-        is_seeding = s.is_seeding
+        stats_response = get_download_stats(handle['id'])
+        if not stats_response.get('success'):
+            write_log(f"[DOWNLOAD_TORRENT] Erreur stats: {stats_response.get('error', 'Unknown error')}", "ERROR")
+            break
+
+        stats = stats_response['stats']
+        progress = stats['progress']
+        download_rate = stats['download_rate'] / 1000
+        upload_rate = stats['upload_rate'] / 1000
+        peers = stats['peers']
+        is_seeding = stats['is_seeding']
 
         log_message = '%.2f%% complete (down: %.1f kB/s up: %.1f kB/s peers: %d)' % (
             progress, download_rate, upload_rate, peers)
@@ -433,7 +436,6 @@ def download_torrent(torrent_file_path, save_path, handle):
             'peers': peers,
             'state': 'seeding' if is_seeding else 'downloading'
         }
-
         save_persisted_downloads()
         yield f"data: {log_message}\n\n"
         sys.stdout.flush()
@@ -444,9 +446,9 @@ def download_torrent(torrent_file_path, save_path, handle):
 
         time.sleep(1)
 
-    # Téléchargement terminé - nettoyer
+    # Nettoyage
     write_log(f"Téléchargement de {info.name()} Fini")
-    ses.remove_torrent(torrent_handle)
+    remove_download(handle['id'])
 
     with downloads_lock:
         if handle['id'] in downloads:
@@ -467,7 +469,6 @@ def download_torrent(torrent_file_path, save_path, handle):
     if os.path.exists(resume_file):
         try:
             os.remove(resume_file)
-            write_log(f"Resume data supprimé pour {handle['id']}")
         except Exception as e:
             write_log(f"Erreur suppression resume_data: {str(e)}", "WARNING")
 
