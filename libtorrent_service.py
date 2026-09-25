@@ -96,6 +96,24 @@ def remove_seed():
     logging.warning(f"[API] Suppression seed: id={seed_id} introuvable")
     return jsonify({'success': False, 'error': 'Seed not found'})
 
+@app.route('/add_tracker_to_seeds', methods=['POST'])
+def add_tracker_to_seeds():
+    data = request.json
+    tracker_url = data['url']
+    tier = data.get('tier', 0)
+    updated = []
+    with seeds_lock:
+        for seed_id, seed_entry in seeds.items():
+            try:
+                handle = seed_entry['handle']
+                if handle.is_valid():
+                    handle.add_tracker({'url': tracker_url, 'tier': tier})
+                    updated.append(seed_id)
+            except Exception as e:
+                logging.error(f"[API] Erreur ajout tracker pour seed {seed_id}: {e}")
+    logging.info(f"[API] Tracker {tracker_url} ajouté à {len(updated)} seeds")
+    return jsonify({'success': True, 'updated': updated})
+
 @app.route('/get_stats', methods=['GET'])
 def get_stats():
     stats = {}
