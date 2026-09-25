@@ -271,4 +271,4 @@ def status():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5005, debug=True)
+    app.run(host='127.0.0.1', port=5005, debug=True, threaded=True, use_reloader=False)

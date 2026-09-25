@@ -3,23 +3,32 @@ import requests
 API_URL = 'http://127.0.0.1:5005'
 
 def add_seed(seed_id, torrent_path, data_path, uploaded_offset=0):
-    resp = requests.post(f'{API_URL}/add_seed', json={
-        'seed_id': seed_id,
-        'torrent_path': torrent_path,
-        'data_path': data_path,
-        'uploaded_offset': uploaded_offset
-    })
-    return resp.json()
+    try:
+        resp = requests.post(f'{API_URL}/add_seed', json={
+            'seed_id': seed_id,
+            'torrent_path': torrent_path,
+            'data_path': data_path,
+            'uploaded_offset': uploaded_offset
+        }, timeout=30)
+        return resp.json()
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
 
 def remove_seed(seed_id):
-    resp = requests.post(f'{API_URL}/remove_seed', json={
-        'seed_id': seed_id
-    })
-    return resp.json()
+    try:
+        resp = requests.post(f'{API_URL}/remove_seed', json={
+            'seed_id': seed_id
+        }, timeout=10)
+        return resp.json()
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
 
 def get_stats():
-    resp = requests.get(f'{API_URL}/get_stats')
-    return resp.json()
+    try:
+        resp = requests.get(f'{API_URL}/get_stats', timeout=10)
+        return resp.json()
+    except Exception as e:
+        return {}
 
 def add_download(download_id, torrent_path, save_path, resume_data=None):
     payload = {'download_id': download_id, 'torrent_path': torrent_path, 'save_path': save_path}

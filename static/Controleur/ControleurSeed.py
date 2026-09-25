@@ -80,9 +80,6 @@ import json
 import os
 import fcntl  # Pour le verrouillage de fichier
 
-# Lancer la mise à jour périodique APRÈS l'import de write_log
-start_periodic_stats_update_with_lock(1)
-
 # Dictionnaire global pour stocker les seeds actifs
 active_seeds = {}
 seeds_lock = threading.Lock()
@@ -460,3 +457,6 @@ def restore_seeds():
                 lock_file.close()
             except OSError as e:
                 write_log(f"Erreur lors de la fermeture du fichier de verrouillage: {e}", "WARNING")
+
+# Lancer la mise à jour périodique une fois toutes les fonctions du module définies (évite le NameError sur get_all_seeds)
+start_periodic_stats_update_with_lock(1)
