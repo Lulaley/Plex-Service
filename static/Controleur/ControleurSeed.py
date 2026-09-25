@@ -24,8 +24,9 @@ def start_periodic_stats_update_with_lock(interval=1):
                     try:
                         write_log("[PERIODIC] Tick: mise à jour des stats seeds", "DEBUG")
                         get_all_seeds()
-                        # Toutes les ~60s : réattache les seeds si l'API libtorrent a redémarré seule (ex: watchdog VPN)
-                        if tick % 60 == 0:
+                        # Toutes les ~5 min (jamais au tout premier tick, pour laisser le restore_seeds initial se terminer) :
+                        # réattache les seeds si l'API libtorrent a redémarré seule (ex: watchdog VPN)
+                        if tick > 0 and tick % 300 == 0:
                             sync_seeds_with_api()
                     except Exception as e:
                         write_log(f"[PERIODIC] Erreur update stats seeds: {e}", "WARNING")
@@ -446,13 +447,9 @@ def restore_seeds():
 # Lancer la mise à jour périodique une fois toutes les fonctions du module définies (évite le NameError sur get_all_seeds)
 start_periodic_stats_update_with_lock(1)
 
-# Synchronisation automatique au démarrage du site (une fois toutes les fonctions définies, évite le NameError sur start_seed)
-try:
-    sync_seeds_with_api()
-    # Attendre que la lib ait ajouté les seeds
-    time.sleep(2)
-except Exception as e:
-    write_log(f"[SYNC] Erreur lors de la synchronisation initiale avec l'API : {e}", "WARNING")
+# Note : la synchronisation initiale des seeds est déjà assurée par restore_seeds_on_startup()
+# (app.py), qui est protégée par verrou (un seul worker). Un appel non protégé ici dupliquerait
+# les start_seed sur les 4 workers Gunicorn en simultané.
 
 def _force_update_stats_after_sync():
     try:
