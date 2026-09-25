@@ -19,12 +19,17 @@ def start_periodic_stats_update_with_lock(interval=1):
             fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
             write_log('[PERIODIC] Ce worker lance la mise à jour périodique des stats.', 'INFO')
             def periodic_stats_update():
+                tick = 0
                 while True:
                     try:
                         write_log("[PERIODIC] Tick: mise à jour des stats seeds", "DEBUG")
                         get_all_seeds()
+                        # Toutes les ~60s : réattache les seeds si l'API libtorrent a redémarré seule (ex: watchdog VPN)
+                        if tick % 60 == 0:
+                            sync_seeds_with_api()
                     except Exception as e:
                         write_log(f"[PERIODIC] Erreur update stats seeds: {e}", "WARNING")
+                    tick += 1
                     time.sleep(interval)
             threading.Thread(target=periodic_stats_update, daemon=True).start()
         except BlockingIOError:
@@ -34,7 +39,7 @@ def start_periodic_stats_update_with_lock(interval=1):
 
 def sync_seeds_with_api():
     """Synchronise les seeds entre la BDD et l'API libtorrent_service : relance les seeds manquants côté API."""
-    from static.Controleur.libtorrent_client import get_stats, add_seed
+    from static.Controleur.libtorrent_client import get_stats
     from static.Controleur.ControleurDatabase import get_all_seeds_from_sql
     stats_api = get_stats()
     seeds_in_api = set(stats_api.keys())
@@ -49,7 +54,8 @@ def sync_seeds_with_api():
                 write_log(f"[SYNC] Fichier ou dossier manquant pour seed {seed['id']} : data_path='{data_path}', torrent_file_path='{torrent_file_path}'", "WARNING")
                 continue
             try:
-                add_seed(seed['id'], torrent_file_path, data_path)
+                # Passe par start_seed pour préserver l'offset uploadé enregistré en BDD
+                start_seed(seed['id'], torrent_file_path, data_path)
                 write_log(f"[SYNC] Relancé seed absent de l'API : {seed['id']}")
             except Exception as e:
                 write_log(f"[SYNC] Erreur relance seed {seed['id']} : {e}", "WARNING")
@@ -250,14 +256,14 @@ def start_seed(seed_id, torrent_file_path, data_path):
         result = add_seed(seed_id, torrent_file_path, data_path, uploaded_offset=uploaded_offset)
         if result.get('success'):
             write_log(f"[API] Seed {seed_id} ajouté via API (offset={uploaded_offset})")
-            # Ajout en BDD
+            # Ajout en BDD (préserve l'offset lu, ne pas écraser avec 0)
             seed_data = {
                 'name': os.path.basename(torrent_file_path),
                 'torrent_file_path': torrent_file_path,
                 'data_path': data_path,
                 'username': 'unknown',
                 'status': 'seeding',
-                'uploaded_size': 0,
+                'uploaded_size': uploaded_offset,
                 'upload_rate': 0,
                 'peers': 0,
                 'updated_at': datetime.now().isoformat()
