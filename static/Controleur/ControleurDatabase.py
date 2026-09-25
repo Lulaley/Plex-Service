@@ -75,6 +75,7 @@ def get_all_seeds_from_sql():
                     'id': row['id'],
                     'name': name,
                     'data_path': row['data_path'],
+                    'torrent_path': row['torrent_path'],
                     'is_active': row['status'] == 'seeding',
                     'state': row['status'],
                     'stats': stats

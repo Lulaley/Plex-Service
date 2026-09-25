@@ -43,7 +43,7 @@ def sync_seeds_with_api():
     for seed in seeds_in_db:
         if seed['id'] not in seeds_in_api:
             data_path = seed.get('data_path', '')
-            torrent_file_path = seed.get('torrent_file_path', '')
+            torrent_file_path = seed.get('torrent_path', '')
             # Vérifie l'existence du dossier/fichier avant de relancer
             if not (os.path.exists(data_path) and os.path.exists(torrent_file_path)):
                 write_log(f"[SYNC] Fichier ou dossier manquant pour seed {seed['id']} : data_path='{data_path}', torrent_file_path='{torrent_file_path}'", "WARNING")
