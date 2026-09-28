@@ -56,7 +56,10 @@ def login():
             session['rights_agreement'] = rights
             if remember_me:
                 from flask import current_app
+                session.permanent = True
                 current_app.permanent_session_lifetime = timedelta(days=7)
+            else:
+                session.permanent = False
             session['from_index'] = True
             ds.disconnect()
             return redirect(url_for('home.home'))
