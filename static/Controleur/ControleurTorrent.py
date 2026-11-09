@@ -388,6 +388,7 @@ def download_torrent(torrent_file_path, save_path, handle):
     write_log(f"Téléchargement de {info.name()} démarré via API (VPN)")
 
     # Boucle de monitoring via l'API
+    stats_fail_count = 0
     while True:
         if not handle['is_downloading']:
             write_log("Téléchargement annulé localement.")
@@ -414,9 +415,26 @@ def download_torrent(torrent_file_path, save_path, handle):
 
         stats_response = get_download_stats(handle['id'])
         if not stats_response.get('success'):
-            write_log(f"[DOWNLOAD_TORRENT] Erreur stats: {stats_response.get('error', 'Unknown error')}", "ERROR")
+            # Le download a pu disparaître de l'API suite à un redémarrage de libtorrent (VPN).
+            # On tente de le ré-ajouter avant d'abandonner, au lieu de laisser un doublon sans up/down.
+            stats_fail_count += 1
+            write_log(f"[DOWNLOAD_TORRENT] Erreur stats: {stats_response.get('error', 'Unknown error')} (tentative {stats_fail_count})", "WARNING")
+            if stats_fail_count <= 5:
+                time.sleep(2)
+                retry = add_download(
+                    download_id=handle['id'],
+                    torrent_path=torrent_file_path,
+                    save_path=save_path,
+                    resume_data=resume_data_hex
+                )
+                if retry.get('success'):
+                    write_log(f"[DOWNLOAD_TORRENT] Download {handle['id']} ré-ajouté après coupure de l'API")
+                    continue
+                continue
+            write_log(f"[DOWNLOAD_TORRENT] Abandon après {stats_fail_count} échecs de stats pour {handle['id']}", "ERROR")
             break
 
+        stats_fail_count = 0
         stats = stats_response['stats']
         progress = stats['progress']
         download_rate = stats['download_rate'] / 1000
